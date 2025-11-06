@@ -15,7 +15,7 @@ const emit = defineEmits<{
 
 const isJoining = ref(false)
 const joinCode = ref('')
-const customName = ref('')
+const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
 const showQrNameDialog = ref(false)
@@ -236,16 +236,13 @@ function cancelQrJoin() {
     
     <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
       <h1 class="text-4xl font-bold text-center mb-2 text-purple-600">
-        🎭 Impostor Game
+        🎭 El juego del impostor
       </h1>
-      <p class="text-center text-gray-600 mb-8">
-        Juego de palabras argentino
-      </p>
       
       <!-- Name input -->
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          Tu nombre (opcional)
+          Tu nombre
         </label>
         <div class="flex gap-2">
           <input 
@@ -254,6 +251,16 @@ function cancelQrJoin() {
             placeholder="Dejá vacío para nombre random"
             class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             maxlength="20"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-autocomplete="none"
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
+            inputmode="text"
+            name="no-autofill"
           />
           <button
             @click="generateName"
@@ -318,10 +325,6 @@ function cancelQrJoin() {
         >
           ← Volver
         </button>
-      </div>
-      
-      <div class="mt-8 text-center text-sm text-gray-500">
-        <p>Mobile-first • Vue 3 + Vite + Tailwind</p>
       </div>
     </div>
   </div>
