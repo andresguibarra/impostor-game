@@ -16,8 +16,8 @@ if (!isSupabaseConfigured) {
 // Create client with dummy values if not configured to prevent crashes
 // The client won't work but at least won't throw errors during initialization
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder-key',
+  supabaseUrl || 'https://your-project.supabase.co', 
+  supabaseAnonKey || 'your-anon-key-here',
   {
     auth: {
       autoRefreshToken: true,
@@ -30,6 +30,9 @@ export const supabase = createClient(
     },
   }
 )
+
+// Error message when Supabase is not configured
+export const SUPABASE_NOT_CONFIGURED_ERROR = 'La base de datos no está configurada. Por favor, configurá las credenciales de Supabase en las variables de entorno.'
 
 export interface Player {
   id: string

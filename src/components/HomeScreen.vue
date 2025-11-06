@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
 
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
@@ -21,7 +21,7 @@ async function createSession() {
   try {
     // Check if Supabase is configured
     if (!isSupabaseConfigured) {
-      throw new Error('La base de datos no está configurada. Por favor, configurá las credenciales de Supabase en las variables de entorno.')
+      throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
     
     const code = generateSessionCode()
@@ -67,7 +67,7 @@ async function joinSession() {
   try {
     // Check if Supabase is configured
     if (!isSupabaseConfigured) {
-      throw new Error('La base de datos no está configurada. Por favor, configurá las credenciales de Supabase en las variables de entorno.')
+      throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
     
     const code = joinCode.value.trim().toUpperCase()
@@ -136,7 +136,7 @@ function generateName() {
         </div>
         <div class="ml-3">
           <h3 class="text-sm font-medium">Configuración requerida</h3>
-          <p class="text-sm mt-1">La aplicación necesita credenciales de Supabase para funcionar. Consultá SUPABASE_SETUP.md para más información.</p>
+          <p class="text-sm mt-1">La aplicación necesita credenciales de Supabase para funcionar. Si sos el administrador, configurá las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>
         </div>
       </div>
     </div>
