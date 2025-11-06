@@ -157,16 +157,13 @@ function generateName() {
         <p class="text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-cyan-600 bg-clip-text text-transparent mb-2">
           ¡Encontrá al impostor! 🕵️
         </p>
-        <p class="text-sm text-gray-600 font-semibold">
-          🇦🇷 Juego de palabras argentino
-        </p>
       </div>
       
       <!-- Name input with fun styling -->
       <div class="mb-6 mt-8">
         <label class="block text-sm font-bold text-fuchsia-600 mb-2 flex items-center gap-2">
           <span>✨</span>
-          <span>Tu nombre (opcional)</span>
+          <span>Tu nombre</span>
         </label>
         <div class="flex gap-2">
           <input 
