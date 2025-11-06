@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
 
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
@@ -19,6 +19,11 @@ async function createSession() {
   error.value = ''
   
   try {
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured) {
+      throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
+    }
+    
     const code = generateSessionCode()
     const playerId = generatePlayerId()
     const playerName = customName.value.trim() || generateFunnyName()
@@ -60,6 +65,11 @@ async function joinSession() {
   error.value = ''
   
   try {
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured) {
+      throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
+    }
+    
     const code = joinCode.value.trim().toUpperCase()
     if (!code) {
       error.value = 'Por favor ingresá un código de sesión'
@@ -116,6 +126,21 @@ function generateName() {
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen p-4">
+    <!-- Configuration warning banner -->
+    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-lg">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium">Configuración requerida</h3>
+          <p class="text-sm mt-1">La aplicación necesita credenciales de Supabase para funcionar. Si sos el administrador, configurá las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>
+        </div>
+      </div>
+    </div>
+    
     <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
       <h1 class="text-4xl font-bold text-center mb-2 text-purple-600">
         🎭 Impostor Game
