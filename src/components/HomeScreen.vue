@@ -14,7 +14,6 @@ const joinCode = ref('')
 const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
-const showQrNameDialog = ref(false)
 const joinCodeInput = ref<HTMLInputElement | null>(null)
 const isDiceAnimating = ref(false)
 
@@ -24,7 +23,7 @@ onMounted(() => {
   if (qrCode && typeof qrCode === 'string') {
     joinCode.value = qrCode
     customName.value = generateFunnyName()
-    showQrNameDialog.value = true
+    isJoining.value = true
   }
 })
 
