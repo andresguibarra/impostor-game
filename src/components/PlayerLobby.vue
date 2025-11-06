@@ -147,7 +147,18 @@ async function loadSession() {
   }
 }
 
-function goBack() {
+async function goBack() {
+  // Delete player from database
+  try {
+    await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId.value)
+  } catch (err) {
+    console.error('Error deleting player:', err)
+  }
+  
+  // Clear localStorage
   localStorage.removeItem('gameCode')
   localStorage.removeItem('playerId')
   localStorage.removeItem('playerName')

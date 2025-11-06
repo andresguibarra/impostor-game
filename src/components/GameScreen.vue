@@ -17,6 +17,8 @@ const currentWord = ref<string>('')
 const isImpostor = ref<boolean>(false)
 const loading = ref(false)
 const wordRevealed = ref(false)
+const showCountdown = ref(false)
+const countdown = ref(3)
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -95,6 +97,23 @@ async function loadPlayers() {
   }
 }
 
+async function startCountdown() {
+  showCountdown.value = true
+  countdown.value = 3
+  
+  return new Promise<void>((resolve) => {
+    const interval = setInterval(() => {
+      countdown.value--
+      
+      if (countdown.value <= 0) {
+        clearInterval(interval)
+        showCountdown.value = false
+        resolve()
+      }
+    }, 1000)
+  })
+}
+
 async function loadGameState() {
   await loadPlayers()
   
@@ -105,6 +124,9 @@ async function loadGameState() {
     .single()
   
   if (!error && data) {
+    // Detect if it's a new round by comparing round numbers
+    const isNewRound = session.value && data.round_number > session.value.round_number
+    
     session.value = data
     
     if (data.current_word && data.impostors) {
@@ -112,6 +134,12 @@ async function loadGameState() {
       const impostorIds = data.impostors as string[]
       isImpostor.value = impostorIds.includes(playerId.value)
       currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
+      
+      // Hide word and show countdown if it's a new round
+      if (isNewRound) {
+        wordRevealed.value = false
+        await startCountdown()
+      }
     }
   }
 }
@@ -152,7 +180,26 @@ function revealWord() {
   wordRevealed.value = true
 }
 
-function goBack() {
+async function goBack() {
+  // Delete player from database
+  try {
+    await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId.value)
+    
+    // If host, delete the session
+    if (isHost.value) {
+      await supabase
+        .from('sessions')
+        .delete()
+        .eq('code', sessionCode.value)
+    }
+  } catch (err) {
+    console.error('Error leaving game:', err)
+  }
+  
+  // Clear localStorage
   localStorage.removeItem('gameCode')
   localStorage.removeItem('playerId')
   localStorage.removeItem('playerName')
@@ -162,89 +209,97 @@ function goBack() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden">
-    <!-- Animated background decorations -->
-    <div class="absolute top-10 right-10 text-6xl opacity-20 emoji-float">🎯</div>
-    <div class="absolute bottom-10 left-10 text-6xl opacity-20 emoji-float" style="animation-delay: 0.8s;">🕵️</div>
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
     
-    <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-md w-full card-animate relative z-10 border-4 border-purple-400">
+    <!-- Countdown Modal -->
+    <Transition name="countdown-fade">
+      <div v-if="showCountdown" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-lg">
+        <div class="text-center">
+          <div class="text-8xl md:text-9xl font-black mb-4 countdown-number">
+            {{ countdown }}
+          </div>
+          <p class="text-3xl md:text-4xl font-black text-white mb-2">
+            ¡NUEVA RONDA!
+          </p>
+          <p class="text-xl text-gray-300 font-bold">
+            Preparate para jugar... 🎮
+          </p>
+        </div>
+      </div>
+    </Transition>
+    
+    <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header with game info -->
       <div class="text-center mb-6">
-        <div class="text-6xl mb-3 bounce-subtle">🎯</div>
-        <h2 class="text-4xl font-black text-gradient-party mb-4" style="font-family: 'Comic Sans MS', cursive, sans-serif;">
+        <h2 class="text-4xl font-black impostor-title mb-4">
           ¡A JUGAR!
         </h2>
         <div class="flex justify-between items-center mb-3 gap-3">
-          <div class="flex-1 bg-gradient-to-r from-fuchsia-100 to-pink-100 rounded-xl p-3 border-2 border-fuchsia-300">
-            <span class="text-xs font-bold text-fuchsia-700">📍 SESIÓN</span>
-            <p class="text-lg font-black text-fuchsia-700">{{ sessionCode }}</p>
+          <div class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+            <span class="text-xs font-bold text-white/80">📍 SESIÓN</span>
+            <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
           </div>
-          <div class="flex-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-xl p-3 border-2 border-cyan-300">
-            <span class="text-xs font-bold text-cyan-700">🎮 RONDA</span>
-            <p class="text-lg font-black text-cyan-700">#{{ session?.round_number || 0 }}</p>
+          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+            <span class="text-xs font-bold text-white/80">🎮 RONDA</span>
+            <p class="text-lg font-black text-white">#{{ session?.round_number || 0 }}</p>
           </div>
-        </div>
-        <div class="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-3 border-2 border-amber-300">
-          <p class="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700">
-            {{ playerName }} 🎮
-          </p>
         </div>
       </div>
       
       <!-- Word reveal section -->
       <div class="mb-6">
-        <div v-if="!currentWord" class="text-center py-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-3 border-purple-300">
-          <p class="text-xl font-black text-gray-700 mb-2">
+        <div v-if="!currentWord" class="text-center py-12 bg-slate-800/60 backdrop-blur-md rounded-2xl border-2 border-purple-500/50">
+          <p class="text-xl font-black text-gray-300 mb-2">
             {{ isHost ? '👆 Iniciá la ronda' : '⏳ Esperando...' }}
           </p>
-          <p class="text-3xl bounce-subtle">🎪</p>
+          <p class="text-3xl animate-pulse">🎪</p>
         </div>
         
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
-            <p class="text-lg font-black text-gray-700 mb-4 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl p-4 border-2 border-amber-300">
+            <p class="text-lg font-black text-gray-300 mb-4 bg-gradient-to-br from-amber-600/80 to-yellow-600/80 backdrop-blur-md rounded-xl p-4 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
               <span class="text-2xl mr-2">👀</span>
-              ¡Tocá para ver tu palabra!
+              <span class="text-white">¡Tocá para ver tu palabra!</span>
             </p>
             <button
               @click="revealWord"
-              class="w-full py-16 bg-gradient-to-br from-fuchsia-500 via-purple-500 to-pink-500 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-600 hover:via-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-2xl pulse-glow"
+              class="w-full py-16 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50"
             >
-              <div class="text-6xl mb-2 bounce-subtle">👁️</div>
+              <div class="text-6xl mb-2 animate-bounce">👁️</div>
               ¡REVELAR!
             </button>
           </div>
           
-          <div v-else class="text-center fade-in">
+          <div v-else class="text-center slide-in-up">
             <div 
               :class="[
                 'p-8 rounded-3xl mb-4 shadow-2xl border-4',
                 isImpostor 
-                  ? 'bg-gradient-to-br from-red-500 via-orange-500 to-red-600 text-white border-red-400 pulse-glow' 
-                  : 'bg-gradient-to-br from-blue-500 via-cyan-500 to-green-500 text-white border-blue-400'
+                  ? 'bg-gradient-to-br from-red-600 via-orange-600 to-red-700 text-white border-red-400 shadow-[0_0_40px_rgba(239,68,68,0.6)]' 
+                  : 'bg-gradient-to-br from-blue-600 via-cyan-600 to-green-600 text-white border-blue-400 shadow-[0_0_40px_rgba(37,99,235,0.6)]'
               ]"
             >
-              <div class="text-5xl mb-3 bounce-subtle">
+              <div class="text-5xl mb-3 animate-pulse">
                 {{ isImpostor ? '🎭' : '📝' }}
               </div>
               <p class="text-base font-bold mb-2 opacity-90">
-                {{ isImpostor ? '¡SOS EL IMPOSTOR!' : 'TU PALABRA:' }}
+                {{ isImpostor ? '' : 'TU PALABRA:' }}
               </p>
-              <p class="text-5xl font-black tracking-wide">
+              <p class="text-4xl md:text-5xl font-black tracking-wide [text-shadow:0_0_20px_rgba(255,255,255,0.5)]">
                 {{ currentWord }}
               </p>
             </div>
             
-            <div class="text-sm font-semibold text-gray-700 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-5 border-2 border-gray-300 space-y-3">
+            <div class="text-sm font-semibold text-gray-300 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-slate-600/50 space-y-3">
               <p v-if="isImpostor" class="flex items-start gap-2">
                 <span class="text-2xl">🎭</span>
                 <span>¡Adiviná la palabra sin que te descubran!</span>
               </p>
               <p v-else class="flex items-start gap-2">
                 <span class="text-2xl">🕵️</span>
-                <span>Hay <span class="font-black text-red-600 text-lg">{{ session?.impostor_count }}</span> impostor(es) entre nosotros</span>
+                <span>Hay <span class="font-black text-red-400 text-lg">{{ session?.impostor_count }}</span> impostor(es) entre nosotros</span>
               </p>
-              <p class="flex items-start gap-2">
+              <p v-if="!isImpostor" class="flex items-start gap-2">
                 <span class="text-2xl">💬</span>
                 <span>Hablá con los demás para descubrir al impostor</span>
               </p>
@@ -255,24 +310,24 @@ function goBack() {
       
       <!-- Players list with styled cards -->
       <div class="mb-6">
-        <h3 class="text-xl font-black text-gray-800 mb-3 flex items-center gap-2">
+        <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
           <span class="text-2xl">👥</span>
           JUGADORES ({{ players.length }}):
         </h3>
-        <div class="space-y-2 max-h-48 overflow-y-auto">
+        <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
           <div
             v-for="(player, index) in players"
             :key="player.id"
-            class="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl border-2 border-indigo-300 shadow-md"
+            class="flex items-center justify-between p-3 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-lime-500/40 shadow-md hover:border-lime-400/60 transition-all slide-in-up"
             :style="{ animationDelay: `${index * 0.05}s` }"
           >
-            <span class="font-black text-gray-800 flex items-center gap-2">
+            <span class="font-black text-white flex items-center gap-2">
               <span class="text-xl">🎮</span>
               {{ player.name }}
             </span>
             <span
               v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white px-3 py-1 rounded-full font-black shadow-lg"
+              class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
             >
               VOS
             </span>
@@ -281,12 +336,13 @@ function goBack() {
       </div>
       
       <!-- Actions with vibrant buttons -->
+            <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
         <button
           v-if="isHost"
           @click="newRound"
           :disabled="!canStartNewRound"
-          class="w-full bg-gradient-to-r from-lime-400 to-green-500 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-500 hover:to-green-600 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-party"
+          class="w-full bg-gradient-to-r from-lime-500 to-green-600 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(132,204,22,0.5)] border-2 border-lime-400/50"
         >
           <span class="text-2xl mr-2">{{ loading ? '⏳' : '🔄' }}</span>
           {{ loading ? 'GENERANDO...' : '¡NUEVA RONDA!' }}
@@ -294,7 +350,7 @@ function goBack() {
         
         <button
           @click="goBack"
-          class="w-full bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 py-4 rounded-2xl font-black hover:from-gray-400 hover:to-gray-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+          class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 rounded-2xl font-black hover:from-gray-700 hover:to-gray-800 transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-gray-500/50"
         >
           <span class="text-xl mr-2">←</span>
           SALIR DEL JUEGO
@@ -303,3 +359,113 @@ function goBack() {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Neon card with rainbow border like the reference */
+.neon-card-impostor {
+  background: rgba(15, 15, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 2rem;
+  border: 4px solid transparent;
+  background-image: 
+    linear-gradient(rgba(15, 15, 30, 0.95), rgba(15, 15, 30, 0.95)),
+    linear-gradient(135deg, 
+      #00ff87 0%, 
+      #60efff 25%, 
+      #a855f7 50%, 
+      #ec4899 75%, 
+      #ef4444 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  animation: neonPulse 3s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 135, 0.4), 0 0 80px rgba(168, 85, 247, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(96, 239, 255, 0.5), 0 0 100px rgba(236, 72, 153, 0.4); }
+}
+
+/* Impostor title with orange gradient */
+.impostor-title {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 25%, #ffa500 50%, #ff8c00 75%, #ff6b00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6));
+  text-shadow: 0 0 30px rgba(255, 140, 0, 0.8);
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6)); }
+  50% { filter: drop-shadow(0 4px 20px rgba(255, 140, 0, 0.9)); }
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(132, 204, 22, 0.6);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(132, 204, 22, 0.8);
+}
+
+/* Slide in animations */
+.slide-in-up {
+  animation: slideInUp 0.3s ease-out backwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Countdown styles */
+.countdown-number {
+  background: linear-gradient(135deg, #00ff87 0%, #60efff 25%, #a855f7 50%, #ec4899 75%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: countdownPulse 1s ease-in-out infinite, countdownGlow 1s ease-in-out infinite;
+  filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.8));
+}
+
+@keyframes countdownPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes countdownGlow {
+  0%, 100% { filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.8)); }
+  50% { filter: drop-shadow(0 0 60px rgba(96, 239, 255, 0.9)); }
+}
+
+.countdown-fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.countdown-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.countdown-fade-enter-from,
+.countdown-fade-leave-to {
+  opacity: 0;
+}
+</style>

@@ -149,7 +149,24 @@ async function startGame() {
   }
 }
 
-function goBack() {
+async function goBack() {
+  // Delete player from database and delete the session if host
+  try {
+    await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId.value)
+    
+    // Delete session if host
+    await supabase
+      .from('sessions')
+      .delete()
+      .eq('code', sessionCode.value)
+  } catch (err) {
+    console.error('Error deleting session:', err)
+  }
+  
+  // Clear localStorage
   localStorage.removeItem('gameCode')
   localStorage.removeItem('playerId')
   localStorage.removeItem('playerName')
