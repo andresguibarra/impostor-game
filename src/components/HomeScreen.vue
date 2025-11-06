@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
+
+const props = defineProps<{
+  qrJoinCode?: string
+}>()
 
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
@@ -13,6 +17,15 @@ const joinCode = ref('')
 const customName = ref('')
 const error = ref('')
 const loading = ref(false)
+const showQrNameDialog = ref(false)
+
+// Watch for QR join code from URL parameter
+watch(() => props.qrJoinCode, (newCode) => {
+  if (newCode) {
+    joinCode.value = newCode
+    showQrNameDialog.value = true
+  }
+}, { immediate: true })
 
 async function createSession() {
   loading.value = true
@@ -122,10 +135,85 @@ function toggleJoinMode() {
 function generateName() {
   customName.value = generateFunnyName()
 }
+
+async function joinViaQr() {
+  await joinSession()
+}
+
+function cancelQrJoin() {
+  showQrNameDialog.value = false
+  joinCode.value = ''
+  customName.value = ''
+  error.value = ''
+}
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen p-4">
+    <!-- QR Code Join Name Dialog -->
+    <div 
+      v-if="showQrNameDialog" 
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      @click.self="cancelQrJoin"
+    >
+      <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+        <h2 class="text-3xl font-bold text-center mb-2 text-purple-600">
+          📱 Unirse via QR
+        </h2>
+        <p class="text-center text-gray-600 mb-6">
+          Código de sesión: <span class="font-bold text-purple-600">{{ joinCode }}</span>
+        </p>
+        
+        <!-- Name input -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tu nombre (opcional)
+          </label>
+          <div class="flex gap-2">
+            <input 
+              v-model="customName"
+              type="text"
+              placeholder="Dejá vacío para nombre random"
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              maxlength="20"
+              @keyup.enter="joinViaQr"
+            />
+            <button
+              @click="generateName"
+              class="px-4 py-3 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition"
+              title="Generar nombre random"
+            >
+              🎲
+            </button>
+          </div>
+        </div>
+        
+        <!-- Error message -->
+        <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+          {{ error }}
+        </div>
+        
+        <!-- Actions -->
+        <div class="space-y-3">
+          <button
+            @click="joinViaQr"
+            :disabled="loading"
+            class="w-full bg-purple-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ loading ? 'Uniéndose...' : '✅ Unirse a la Sala' }}
+          </button>
+          
+          <button
+            @click="cancelQrJoin"
+            :disabled="loading"
+            class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
+          >
+            ✕ Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Configuration warning banner -->
     <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-lg">
       <div class="flex items-start">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import HomeScreen from './components/HomeScreen.vue'
 import HostLobby from './components/HostLobby.vue'
 import PlayerLobby from './components/PlayerLobby.vue'
@@ -12,6 +12,16 @@ const sessionCode = ref<string>('')
 const playerId = ref<string>('')
 const playerName = ref<string>('')
 const isHost = ref<boolean>(false)
+const qrJoinCode = ref<string>('')
+
+onMounted(() => {
+  // Check if there's a join code in the URL (QR code scan)
+  const urlParams = new URLSearchParams(window.location.search)
+  const joinCode = urlParams.get('join')
+  if (joinCode) {
+    qrJoinCode.value = joinCode.toUpperCase()
+  }
+})
 
 function handleCreateSession(code: string, id: string, name: string) {
   sessionCode.value = code
@@ -46,6 +56,7 @@ function handleBackToHome() {
   <div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500">
     <HomeScreen 
       v-if="currentScreen === 'home'"
+      :qr-join-code="qrJoinCode"
       @create-session="handleCreateSession"
       @join-session="handleJoinSession"
     />
