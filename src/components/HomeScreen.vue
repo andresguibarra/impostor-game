@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
+import NeonButton from './NeonButton.vue'
 
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
@@ -191,24 +192,26 @@ function generateName() {
         <span class="text-xl mr-2">⚠️</span>{{ error }}
       </div>
       
-      <!-- Buttons with exact styling from reference image -->
+      <!-- Buttons with Neon components -->
       <div v-if="!isJoining" class="space-y-4">
-        <button
-          @click="createSession"
+        <NeonButton
+          variant="primary"
+          icon="🎮"
           :disabled="loading"
-          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-game-create"
+          @click="createSession"
+          class="w-full"
         >
-          <span class="text-3xl mr-3">🎮</span>
           {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
-        </button>
+        </NeonButton>
         
-        <button
+        <NeonButton
+          variant="secondary"
+          icon="🚀"
           @click="toggleJoinMode"
-          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all btn-game-join"
+          class="w-full"
         >
-          <span class="text-3xl mr-3">🚀</span>
           UNIRSE A SESIÓN
-        </button>
+        </NeonButton>
       </div>
       
       <!-- Join mode -->
@@ -228,22 +231,25 @@ function generateName() {
           />
         </div>
         
-        <button
-          @click="joinSession"
+        <NeonButton
+          variant="success"
+          icon="✅"
           :disabled="loading || !joinCode.trim()"
-          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-game-confirm"
+          @click="joinSession"
+          class="w-full"
         >
-          <span class="text-3xl mr-3">✅</span>
           {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
-        </button>
+        </NeonButton>
         
-        <button
+        <NeonButton
+          variant="back"
+          icon="←"
+          size="md"
           @click="toggleJoinMode"
-          class="w-full py-4 px-6 text-lg font-black rounded-2xl transition-all btn-game-back"
+          class="w-full"
         >
-          <span class="text-xl mr-2">←</span>
           VOLVER
-        </button>
+        </NeonButton>
       </div>
     </div>
   </div>
@@ -339,165 +345,6 @@ function generateName() {
     top: -18%;
     width: min(220px, 60vw);
   }
-}
-
-/* Game buttons with neon/cyberpunk style matching the card */
-.btn-game-create {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.95) 100%);
-  backdrop-filter: blur(10px);
-  border: 3px solid;
-  border-color: rgba(251, 191, 36, 0.8);
-  color: white;
-  text-shadow: 
-    0 0 10px rgba(251, 191, 36, 0.8),
-    0 0 20px rgba(245, 158, 11, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.5);
-  box-shadow: 
-    0 0 20px rgba(245, 158, 11, 0.5),
-    0 4px 15px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-game-create:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: rgba(251, 191, 36, 1);
-  box-shadow: 
-    0 0 30px rgba(245, 158, 11, 0.7),
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-.btn-game-create:active:not(:disabled) {
-  transform: translateY(0px);
-  box-shadow: 
-    0 0 15px rgba(245, 158, 11, 0.4),
-    0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.btn-game-join {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.9) 0%, rgba(8, 145, 178, 0.95) 100%);
-  backdrop-filter: blur(10px);
-  border: 3px solid;
-  border-color: rgba(103, 232, 249, 0.8);
-  color: white;
-  text-shadow: 
-    0 0 10px rgba(103, 232, 249, 0.8),
-    0 0 20px rgba(6, 182, 212, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.5);
-  box-shadow: 
-    0 0 20px rgba(6, 182, 212, 0.5),
-    0 4px 15px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-game-join:hover {
-  transform: translateY(-2px);
-  border-color: rgba(103, 232, 249, 1);
-  box-shadow: 
-    0 0 30px rgba(6, 182, 212, 0.7),
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-.btn-game-join:active {
-  transform: translateY(0px);
-  box-shadow: 
-    0 0 15px rgba(6, 182, 212, 0.4),
-    0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.btn-game-confirm {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(21, 128, 61, 0.95) 100%);
-  backdrop-filter: blur(10px);
-  border: 3px solid;
-  border-color: rgba(134, 239, 172, 0.8);
-  color: white;
-  text-shadow: 
-    0 0 10px rgba(134, 239, 172, 0.8),
-    0 0 20px rgba(34, 197, 94, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.5);
-  box-shadow: 
-    0 0 20px rgba(34, 197, 94, 0.5),
-    0 4px 15px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-game-confirm:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: rgba(134, 239, 172, 1);
-  box-shadow: 
-    0 0 30px rgba(34, 197, 94, 0.7),
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-.btn-game-confirm:active:not(:disabled) {
-  transform: translateY(0px);
-  box-shadow: 
-    0 0 15px rgba(34, 197, 94, 0.4),
-    0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.btn-game-back {
-  background: linear-gradient(135deg, rgba(71, 85, 105, 0.7) 0%, rgba(51, 65, 85, 0.8) 100%);
-  backdrop-filter: blur(10px);
-  border: 2px solid;
-  border-color: rgba(148, 163, 184, 0.5);
-  color: #e2e8f0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 
-    0 0 10px rgba(71, 85, 105, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.btn-game-back:hover {
-  transform: translateY(-1px);
-  border-color: rgba(148, 163, 184, 0.7);
-  box-shadow: 
-    0 0 15px rgba(71, 85, 105, 0.4),
-    0 5px 15px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.15);
-}
-
-.btn-game-back:active {
-  transform: translateY(0px);
-  box-shadow: 
-    0 0 8px rgba(71, 85, 105, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Button hover effect */
-.btn-impostor {
-  position: relative;
-  overflow: hidden;
-  transform-style: preserve-3d;
-}
-
-.btn-impostor::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn-impostor:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.btn-impostor:active {
-  transform: scale(0.95);
 }
 
 /* Slide in animations */
