@@ -10,7 +10,7 @@ const emit = defineEmits<{
 
 const isJoining = ref(false)
 const joinCode = ref('')
-const customName = ref('')
+const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
 
@@ -175,6 +175,16 @@ function generateName() {
             placeholder="Dejá vacío para nombre random"
             class="flex-1 px-4 py-3 border-3 border-fuchsia-300 rounded-xl focus:ring-4 focus:ring-fuchsia-400 focus:border-fuchsia-500 font-semibold text-gray-800 transition-all bg-gradient-to-r from-white to-fuchsia-50"
             maxlength="20"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-autocomplete="none"
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
+            inputmode="text"
+            name="no-autofill"
           />
           <button
             @click="generateName"
@@ -244,11 +254,6 @@ function generateName() {
           <span class="text-xl mr-2">←</span>
           VOLVER
         </button>
-      </div>
-      
-      <div class="mt-8 text-center text-xs text-gray-500 font-semibold">
-        <p>🎉 Diversión garantizada 🎊</p>
-        <p class="text-xs opacity-60 mt-1">Mobile-first • Vue 3 + Vite + Tailwind</p>
       </div>
     </div>
   </div>
