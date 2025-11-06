@@ -16,7 +16,7 @@ if (!isSupabaseConfigured) {
 // Create client with dummy values if not configured to prevent crashes
 // The client won't work but at least won't throw errors during initialization
 export const supabase = createClient(
-  supabaseUrl || 'https://your-project.supabase.co', 
+  supabaseUrl || 'https://your-project.supabase.co',
   supabaseAnonKey || 'your-anon-key-here',
   {
     auth: {
