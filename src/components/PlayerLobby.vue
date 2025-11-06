@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
+import SessionCodeCard from './SessionCodeCard.vue'
 
 const props = defineProps<{
   gameCode: string
@@ -12,8 +13,6 @@ const router = useRouter()
 
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
-const toast = ref('')
-const showToast = ref(false)
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -22,48 +21,6 @@ const playerName = computed(() => localStorage.getItem('playerName') || '')
 
 let playersSubscription: any = null
 let sessionSubscription: any = null
-
-function displayToast(message: string) {
-  toast.value = message
-  showToast.value = true
-  setTimeout(() => {
-    showToast.value = false
-  }, 2000)
-}
-
-async function copyCode() {
-  try {
-    await navigator.clipboard.writeText(sessionCode.value)
-    displayToast('Código copiado ✅')
-  } catch (err) {
-    console.error('Error copying code:', err)
-  }
-}
-
-async function shareInvite() {
-  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
-  
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: '¡Unite al juego del Impostor!',
-        text: `Unite a mi partida con el código: ${sessionCode.value}`,
-        url: gameUrl,
-      })
-    } catch (err) {
-      // User cancelled or error
-      console.error('Error sharing:', err)
-    }
-  } else {
-    // Fallback: copy link to clipboard
-    try {
-      await navigator.clipboard.writeText(gameUrl)
-      displayToast('Link copiado 📋')
-    } catch (err) {
-      console.error('Error copying link:', err)
-    }
-  }
-}
 
 onMounted(async () => {
   // Check if session exists
@@ -177,25 +134,9 @@ async function goBack() {
         <h2 class="text-4xl font-black impostor-title mb-4">
           ¡ESPERANDO!
         </h2>
-        <div class="bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-2xl p-5 mb-3 shadow-[0_0_30px_rgba(6,182,212,0.5)] border-2 border-cyan-400/50">
-          <p class="text-sm text-white font-bold mb-2 opacity-90">📍 SESIÓN:</p>
-          <button 
-            @click="copyCode"
-            class="text-4xl font-black text-white tracking-[0.2em] [text-shadow:0_0_20px_rgba(255,255,255,0.5)] hover:scale-105 transition-transform cursor-pointer"
-          >
-            {{ sessionCode }}
-          </button>
-          <p class="text-xs text-white/70 mt-2">👆 Tocá para copiar</p>
-        </div>
         
-        <!-- Share button -->
-        <button
-          @click="shareInvite"
-          class="w-full py-3 px-5 bg-gradient-to-br from-emerald-600/80 to-teal-600/80 backdrop-blur-md text-white rounded-xl font-bold text-base hover:from-emerald-700/90 hover:to-teal-700/90 transition-all hover:-translate-y-0.5 cursor-pointer border-2 border-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 mb-4"
-        >
-          <span class="text-xl">🔗</span>
-          <span>Compartir invitación</span>
-        </button>
+        <!-- Session Code Card Component -->
+        <SessionCodeCard :session-code="sessionCode" :show-share-button="true" />
         
         <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border-2 border-fuchsia-500/50">
           <p class="text-lg font-semibold text-gray-300">
@@ -270,34 +211,10 @@ async function goBack() {
         SALIR
       </NeonButton>
     </div>
-    
-    <!-- Toast notification -->
-    <Transition name="toast">
-      <div
-        v-if="showToast"
-        class="fixed top-8 left-1/2 -translate-x-1/2 bg-gradient-to-br from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl font-black shadow-[0_0_30px_rgba(34,197,94,0.6)] border-2 border-green-300/50 z-50"
-      >
-        {{ toast }}
-      </div>
-    </Transition>
   </div>
 </template>
 
 <style scoped>
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translate(-50%, -20px);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -20px);
-}
 
 .neon-card-impostor {
   background: rgba(15, 15, 30, 0.95);
