@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 
+const props = defineProps<{
+  qrJoinCode?: string
+}>()
+
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
   joinSession: [code: string, playerId: string, playerName: string]
+  cancelQrJoin: []
 }>()
 
 const isJoining = ref(false)
@@ -14,6 +19,22 @@ const joinCode = ref('')
 const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
+const showQrNameDialog = ref(false)
+
+// Watch for QR join code from URL parameter
+watch(() => props.qrJoinCode, (newCode) => {
+  if (newCode) {
+    joinCode.value = newCode
+    customName.value = generateFunnyName() // Auto-generate name for QR join
+    showQrNameDialog.value = true
+  } else {
+    // Clear dialog and state when QR code is cleared
+    showQrNameDialog.value = false
+    joinCode.value = ''
+    customName.value = ''
+    error.value = ''
+  }
+}, { immediate: true })
 
 async function createSession() {
   loading.value = true
@@ -116,6 +137,14 @@ function toggleJoinMode() {
 
 function generateName() {
   customName.value = generateFunnyName()
+}
+
+function cancelQrJoin() {
+  showQrNameDialog.value = false
+  joinCode.value = ''
+  customName.value = ''
+  error.value = ''
+  emit('cancelQrJoin')
 }
 </script>
 
