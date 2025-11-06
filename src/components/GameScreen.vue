@@ -228,6 +228,10 @@ function revealWord() {
   wordRevealed.value = true
 }
 
+function toggleWordVisibility() {
+  wordRevealed.value = !wordRevealed.value
+}
+
 async function goBack() {
   // Delete player from database
   try {
@@ -332,8 +336,9 @@ async function goBack() {
           
           <div v-else class="text-center slide-in-up">
             <div 
+              @click="toggleWordVisibility"
               :class="[
-                'p-8 rounded-3xl mb-4 shadow-2xl border-4',
+                'p-8 rounded-3xl mb-4 shadow-2xl border-4 cursor-pointer hover:scale-105 active:scale-95 transition-all',
                 isImpostor 
                   ? 'bg-gradient-to-br from-red-600 via-orange-600 to-red-700 text-white border-red-400 shadow-[0_0_40px_rgba(239,68,68,0.6)]' 
                   : 'bg-gradient-to-br from-blue-600 via-cyan-600 to-green-600 text-white border-blue-400 shadow-[0_0_40px_rgba(37,99,235,0.6)]'
@@ -349,6 +354,12 @@ async function goBack() {
               <p class="text-4xl md:text-5xl font-black tracking-wide [text-shadow:0_0_20px_rgba(255,255,255,0.5)]">
                 {{ currentWord }}
               </p>
+              <div class="mt-6 pt-4 border-t-2 border-white/20">
+                <p class="text-xs font-semibold text-white/70 flex items-center justify-center gap-1">
+                  <MousePointerClick :size="16" />
+                  Toca de nuevo para ocultar
+                </p>
+              </div>
             </div>
             
             <div class="text-sm font-semibold text-gray-300 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-slate-600/50 space-y-3">
