@@ -9,14 +9,14 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   disabled: false,
-  size: 'lg'
+  size: 'sm'
 })
 
 const emit = defineEmits<{
   click: []
 }>()
 
-const baseClasses = 'font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed'
+const baseClasses = 'font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center'
 
 const sizeClasses = {
   sm: 'py-3 px-5 text-base',

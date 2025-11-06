@@ -31,7 +31,7 @@ watch(() => props.qrJoinCode, (newCode) => {
     // Clear dialog and state when QR code is cleared
     showQrNameDialog.value = false
     joinCode.value = ''
-    customName.value = ''
+    customName.value = generateFunnyName() // Regenerate name instead of clearing
     error.value = ''
   }
 }, { immediate: true })
@@ -165,8 +165,8 @@ function generateName() {
         <div class="impostor-silhouette-container">
           <img src="../assets/anon.png" alt="Impostor Silhouette" class="impostor-image" />
         </div>
-        
-        <h1 class="text-6xl font-black mb-2 impostor-title tracking-tight">
+
+        <h1 class="text-5xl md:text-6xl font-black mb-2 impostor-title tracking-tight">
           IMPOSTOR
         </h1>
         <p class="text-2xl font-bold mb-4 text-cyan-400">
@@ -179,12 +179,12 @@ function generateName() {
         <label class="block text-base font-bold mb-2.5 text-yellow-400 flex items-center gap-2">
           <span class="text-xl">➕</span> Tu nombre
         </label>
-        <div class="flex gap-3">
+        <div class="flex gap-3 max-w-full">
           <input 
             v-model="customName"
             type="text"
             placeholder=""
-            class="flex-1 px-5 py-4 rounded-2xl font-semibold text-white placeholder-gray-500 transition-all focus:ring-4 focus:ring-yellow-500/50 focus:outline-none"
+            class="flex-1 px-5 py-4 rounded-2xl font-semibold text-white placeholder-gray-500 transition-all focus:ring-4 focus:ring-yellow-500/50 focus:outline-none w-full"
             style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(255, 193, 7, 0.5);"
             maxlength="20"
             autocomplete="off"
@@ -364,7 +364,7 @@ function generateName() {
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .impostor-silhouette-container {
-    top: -18%;
+    top: -16%;
     width: min(220px, 60vw);
   }
 }
