@@ -1,5 +1,6 @@
 import type { Player } from './supabase'
 import { getRandomWord } from './wordBank'
+import { UI_STRINGS } from './constants'
 
 export interface GameRound {
   word: string
@@ -26,5 +27,5 @@ export function isPlayerImpostor(playerId: string, impostorIds: string[]): boole
 }
 
 export function getWordForPlayer(playerId: string, word: string, impostorIds: string[]): string {
-  return isPlayerImpostor(playerId, impostorIds) ? '¡Sos un IMPOSTOR!' : word
+  return isPlayerImpostor(playerId, impostorIds) ? UI_STRINGS.IMPOSTOR_MESSAGE : word
 }

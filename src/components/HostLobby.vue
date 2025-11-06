@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import QRCodeVue from 'qrcode'
 import { supabase, type Player } from '../lib/supabase'
+import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 
 const props = defineProps<{
   sessionCode: string
@@ -27,8 +28,8 @@ onMounted(async () => {
   const gameUrl = `${window.location.origin}?join=${props.sessionCode}`
   try {
     qrCodeUrl.value = await QRCodeVue.toDataURL(gameUrl, {
-      width: 300,
-      margin: 2,
+      width: GAME_SETTINGS.QR_CODE_WIDTH,
+      margin: GAME_SETTINGS.QR_CODE_MARGIN,
       color: {
         dark: '#7c3aed',
         light: '#ffffff',
@@ -78,8 +79,8 @@ async function loadPlayers() {
 }
 
 async function startGame() {
-  if (players.value.length < 2) {
-    alert('Necesitás al menos 2 jugadores para empezar')
+  if (players.value.length < GAME_SETTINGS.MIN_PLAYERS) {
+    alert(UI_STRINGS.MESSAGES.MIN_PLAYERS)
     return
   }
   
@@ -100,7 +101,7 @@ async function startGame() {
     emit('startGame')
   } catch (err) {
     console.error('Error starting game:', err)
-    alert('Error al iniciar el juego')
+    alert(UI_STRINGS.ERRORS.START_GAME)
   } finally {
     loading.value = false
   }

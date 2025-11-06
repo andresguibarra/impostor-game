@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
+import { UI_STRINGS } from '../lib/constants'
 
 const props = defineProps<{
   sessionCode: string
@@ -133,7 +134,7 @@ async function newRound() {
     await loadGameState()
   } catch (err) {
     console.error('Error starting new round:', err)
-    alert('Error al iniciar nueva ronda')
+    alert(UI_STRINGS.ERRORS.NEW_ROUND)
   } finally {
     loading.value = false
   }

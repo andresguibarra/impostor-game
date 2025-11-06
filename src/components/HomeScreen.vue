@@ -48,7 +48,7 @@ async function createSession() {
     
     emit('createSession', code, playerId, playerName)
   } catch (err: any) {
-    error.value = err.message || 'Failed to create session'
+    error.value = err.message || 'Error al crear sesión'
     console.error('Error creating session:', err)
   } finally {
     loading.value = false
@@ -62,7 +62,7 @@ async function joinSession() {
   try {
     const code = joinCode.value.trim().toUpperCase()
     if (!code) {
-      error.value = 'Please enter a session code'
+      error.value = 'Por favor ingresá un código de sesión'
       loading.value = false
       return
     }
@@ -75,7 +75,7 @@ async function joinSession() {
       .single()
     
     if (sessionError || !session) {
-      error.value = 'Session not found'
+      error.value = 'Sesión no encontrada'
       loading.value = false
       return
     }
@@ -96,7 +96,7 @@ async function joinSession() {
     
     emit('joinSession', code, playerId, playerName)
   } catch (err: any) {
-    error.value = err.message || 'Failed to join session'
+    error.value = err.message || 'Error al unirse a sesión'
     console.error('Error joining session:', err)
   } finally {
     loading.value = false

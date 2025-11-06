@@ -1,3 +1,5 @@
+import { GAME_SETTINGS } from './constants'
+
 // Funny Argentine-inspired name generator
 const prefixes = [
   'El', 'La', 'Don', 'Doña', 'Tío', 'Tía', 'Che', 'San', 'Gringo'
@@ -44,7 +46,7 @@ export function generateFunnyName(): string {
 // Generate a short session code (4-6 characters)
 export function generateSessionCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Removed confusing characters like I, O, 0, 1
-  const length = 5
+  const length = GAME_SETTINGS.SESSION_CODE_LENGTH
   let code = ''
   for (let i = 0; i < length; i++) {
     code += chars[Math.floor(Math.random() * chars.length)]
