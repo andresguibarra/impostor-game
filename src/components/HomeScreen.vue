@@ -223,7 +223,7 @@ function generateName() {
           @click="createSession"
           class="w-full"
         >
-          {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
+          {{ loading ? 'Creando...' : 'NUEVA PARTIDA' }}
         </NeonButton>
         
         <NeonButton
@@ -232,7 +232,7 @@ function generateName() {
           @click="toggleJoinMode"
           class="w-full"
         >
-          UNIRSE A SESIÓN
+          UNIRSE A PARTIDA
         </NeonButton>
       </div>
       
