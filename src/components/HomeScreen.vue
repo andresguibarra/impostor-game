@@ -139,13 +139,6 @@ function generateName() {
   customName.value = generateFunnyName()
 }
 
-function cancelQrJoin() {
-  showQrNameDialog.value = false
-  joinCode.value = ''
-  customName.value = ''
-  error.value = ''
-  emit('cancelQrJoin')
-}
 </script>
 
 <template>
