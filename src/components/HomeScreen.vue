@@ -19,7 +19,6 @@ async function createSession() {
   error.value = ''
   
   try {
-    // Check if Supabase is configured
     if (!isSupabaseConfigured) {
       throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
@@ -28,7 +27,6 @@ async function createSession() {
     const playerId = generatePlayerId()
     const playerName = customName.value.trim() || generateFunnyName()
     
-    // Create session in Supabase
     const { error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -40,7 +38,6 @@ async function createSession() {
     
     if (sessionError) throw sessionError
     
-    // Add host as first player
     const { error: playerError } = await supabase
       .from('players')
       .insert({
@@ -65,7 +62,6 @@ async function joinSession() {
   error.value = ''
   
   try {
-    // Check if Supabase is configured
     if (!isSupabaseConfigured) {
       throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
@@ -77,7 +73,6 @@ async function joinSession() {
       return
     }
     
-    // Check if session exists
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .select('*')
@@ -93,7 +88,6 @@ async function joinSession() {
     const playerId = generatePlayerId()
     const playerName = customName.value.trim() || generateFunnyName()
     
-    // Add player to session
     const { error: playerError } = await supabase
       .from('players')
       .insert({
@@ -127,10 +121,10 @@ function generateName() {
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden">
     <!-- Configuration warning banner -->
-    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-amber-100/90 backdrop-blur-md border-l-4 border-amber-500 text-amber-900 p-4 rounded-2xl shadow-lg slide-in-up">
+    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
         </div>
@@ -141,10 +135,10 @@ function generateName() {
       </div>
     </div>
     
-    <!-- Main card with party styling -->
-    <div class="card-party rounded-[3rem] shadow-2xl p-8 max-w-md w-full relative z-10 card-tilt">
-      <!-- Playful header with animated icon -->
-      <div class="text-center mb-2">
+    <!-- Main card matching reference -->
+    <div class="card-party shadow-2xl p-8 max-w-md w-full relative z-10">
+      <!-- Header matching reference -->
+      <div class="text-center mb-6">
         <div class="text-8xl mb-4 inline-block">
           <div class="bounce-fun">😎😷</div>
         </div>
@@ -155,19 +149,23 @@ function generateName() {
         <p class="text-xl font-bold mb-2" style="color: #8b5cf6;">
           ¡Encontrá al impostor! 🕵️
         </p>
+        <p class="text-sm text-gray-600 font-semibold">
+          🇦🇷 Juego de palabras argentino
+        </p>
       </div>
       
-      <!-- Name input with modern styling -->
+      <!-- Name input -->
       <div class="mb-6 mt-8">
         <label class="block text-sm font-bold mb-2" style="color: #e879f9;">
-          ✨ Tu nombre
+          ✨ Tu nombre (opcional)
         </label>
         <div class="flex gap-2">
           <input 
             v-model="customName"
             type="text"
             placeholder="Dejá vacío para nombre random"
-            class="flex-1 px-4 py-3 bg-gradient-to-r from-fuchsia-50 to-pink-50 border-3 border-fuchsia-300 rounded-2xl focus:ring-4 focus:ring-fuchsia-400 focus:border-fuchsia-500 font-semibold text-gray-800 transition-all"
+            class="flex-1 px-4 py-3 rounded-2xl font-semibold text-gray-800 transition-all"
+            style="background: white; border: 3px solid #e879f9;"
             maxlength="20"
             autocomplete="off"
             autocapitalize="off"
@@ -182,7 +180,8 @@ function generateName() {
           />
           <button
             @click="generateName"
-            class="px-5 py-3 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl hover:scale-110 transition-all shadow-lg text-2xl btn-squish"
+            class="px-5 py-3 rounded-2xl hover:scale-110 transition-all shadow-lg text-2xl btn-squish"
+            style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%); color: white;"
             title="Generar nombre random"
           >
             🎲
@@ -195,13 +194,13 @@ function generateName() {
         <span class="text-xl mr-2">⚠️</span>{{ error }}
       </div>
       
-      <!-- Creative blob-shaped buttons -->
+      <!-- Buttons matching reference exactly -->
       <div v-if="!isJoining" class="space-y-4">
         <button
           @click="createSession"
           :disabled="loading"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish pulse-glow text-white"
-          style="background: linear-gradient(135deg, #e91e63 0%, #d81b60 100%); border-radius: 16px;"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-squish text-white rounded-2xl"
+          style="background: linear-gradient(135deg, #e91e8f 0%, #d81b60 100%);"
         >
           <span class="text-2xl mr-2">🎮</span>
           {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
@@ -209,26 +208,26 @@ function generateName() {
         
         <button
           @click="toggleJoinMode"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all shadow-xl btn-morph btn-squish text-white"
-          style="background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); border-radius: 16px;"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all shadow-xl btn-squish text-white rounded-2xl"
+          style="background: linear-gradient(135deg, #00bfff 0%, #0097a7 100%);"
         >
           <span class="text-2xl mr-2">🚀</span>
           UNIRSE A SESIÓN
         </button>
       </div>
       
-      <!-- Join mode with creative design -->
+      <!-- Join mode -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-bold mb-2" style="color: #00bcd4;">
+          <label class="block text-sm font-bold mb-2" style="color: #00bfff;">
             🔑 Código de sesión
           </label>
           <input 
             v-model="joinCode"
             type="text"
             placeholder="Ej: AB3C5"
-            class="w-full px-5 py-4 border-3 rounded-2xl focus:ring-4 focus:ring-cyan-400 focus:border-cyan-500 uppercase font-black text-2xl text-center tracking-[0.3em] transition-all shimmer"
-            style="background: linear-gradient(to right, #e0f7fa, #b2ebf2); border-color: #00bcd4;"
+            class="w-full px-5 py-4 rounded-2xl uppercase font-black text-2xl text-center tracking-[0.3em] transition-all"
+            style="background: white; border: 3px solid #00bfff;"
             maxlength="6"
             @keyup.enter="joinSession"
           />
@@ -237,8 +236,8 @@ function generateName() {
         <button
           @click="joinSession"
           :disabled="loading || !joinCode.trim()"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish text-white"
-          style="background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%); border-radius: 16px;"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-squish text-white rounded-2xl"
+          style="background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);"
         >
           <span class="text-2xl mr-2">✨</span>
           {{ loading ? 'Uniéndose...' : 'UNIRSE AHORA!' }}
@@ -246,8 +245,8 @@ function generateName() {
         
         <button
           @click="toggleJoinMode"
-          class="w-full py-4 px-6 font-black hover:shadow-xl transition-all shadow-lg btn-squish text-gray-700"
-          style="background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%); border-radius: 16px;"
+          class="w-full py-4 px-6 font-black hover:shadow-xl transition-all shadow-lg btn-squish text-gray-700 rounded-2xl"
+          style="background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);"
         >
           <span class="text-xl mr-2">←</span>
           VOLVER

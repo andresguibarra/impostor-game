@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Animated Background Gradient */
+/* Animated Background Gradient - matching reference exactly */
 @keyframes gradient-shift {
   0% {
     background-position: 0% 50%;
@@ -14,40 +14,38 @@
 }
 
 .bg-animated-gradient {
-  background: linear-gradient(-45deg, #ec4899, #f59e0b, #10b981, #06b6d4, #a855f7, #ec4899);
+  background: linear-gradient(-45deg, #ff1493, #ff69b4, #ffa500, #ffd700, #7fff00, #00ffff, #1e90ff);
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }
 
-/* Floating particles animation */
-@keyframes float-up {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 0;
+/* Floating decorative emojis */
+@keyframes float-around {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.15;
   }
-  10% {
-    opacity: 1;
+  25% {
+    transform: translate(30px, -30px) rotate(90deg);
+    opacity: 0.25;
   }
-  90% {
-    opacity: 1;
+  50% {
+    transform: translate(-20px, -50px) rotate(180deg);
+    opacity: 0.15;
   }
-  100% {
-    transform: translateY(-100vh) translateX(50px) rotate(360deg);
-    opacity: 0;
+  75% {
+    transform: translate(-40px, -20px) rotate(270deg);
+    opacity: 0.25;
   }
 }
 
-.floating-shape {
+.floating-emoji {
   position: absolute;
-  animation: float-up 20s infinite;
+  font-size: 100px;
+  opacity: 0.15;
+  animation: float-around 20s infinite ease-in-out;
   pointer-events: none;
 }
-
-.floating-shape:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 15s; }
-.floating-shape:nth-child(2) { left: 30%; animation-delay: 2s; animation-duration: 18s; }
-.floating-shape:nth-child(3) { left: 50%; animation-delay: 4s; animation-duration: 20s; }
-.floating-shape:nth-child(4) { left: 70%; animation-delay: 6s; animation-duration: 16s; }
-.floating-shape:nth-child(5) { left: 90%; animation-delay: 8s; animation-duration: 19s; }
 
 /* Pulse and glow effects */
 @keyframes pulse-glow {
@@ -137,27 +135,6 @@
   animation: slide-in-bounce 0.8s ease-out forwards;
 }
 
-/* Rotation effects */
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes spin-wobble {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(1.1); }
-  50% { transform: rotate(180deg) scale(1); }
-  75% { transform: rotate(270deg) scale(1.1); }
-}
-
-.spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-.spin-wobble {
-  animation: spin-wobble 4s ease-in-out infinite;
-}
-
 /* Gradient text effects - matching reference exactly */
 .text-gradient-impostor {
   background: linear-gradient(90deg, #ff6b6b 0%, #ff8c42 50%, #ffa726 100%);
@@ -173,65 +150,22 @@
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-party {
-  background: linear-gradient(135deg, #ec4899, #f59e0b, #10b981, #06b6d4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-rainbow {
-  background: linear-gradient(90deg, #ec4899, #f59e0b, #10b981, #06b6d4, #a855f7, #ec4899);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-shift 3s linear infinite;
-}
-
 /* Creative button styles */
-.btn-blob {
-  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: visible;
-}
-
-.btn-blob:hover {
-  border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
-  transform: scale(1.05) rotate(-2deg);
-}
-
-.btn-blob:active {
-  transform: scale(0.95) rotate(2deg);
-}
-
-.btn-morph {
-  border-radius: 50% 20% / 30% 70%;
-  transition: all 0.4s ease;
-}
-
-.btn-morph:hover {
-  border-radius: 20% 50% / 70% 30%;
-  transform: translateY(-5px) rotate(3deg);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-}
-
 .btn-squish {
   transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .btn-squish:active {
-  transform: scale(0.9) rotate(-3deg);
+  transform: scale(0.95);
 }
 
-/* Card with tilt effect */
-.card-tilt {
-  transition: transform 0.3s ease;
-}
-
-.card-tilt:hover {
-  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+/* Card with border */
+.card-party {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 4px solid #e91e8f;
+  border-radius: 2rem;
+  animation: slide-in-bounce 0.8s ease-out forwards;
 }
 
 /* Shimmer effect */
@@ -253,48 +187,4 @@
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
-}
-
-/* Confetti burst effect */
-@keyframes confetti {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-200px) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-.confetti-burst {
-  animation: confetti 1s ease-out forwards;
-}
-
-/* SVG icon animations */
-@keyframes icon-pop {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-}
-
-.icon-pop {
-  animation: icon-pop 0.5s ease-in-out;
-}
-
-/* Neon glow effect */
-.neon-glow {
-  text-shadow: 
-    0 0 10px rgba(236, 72, 153, 0.8),
-    0 0 20px rgba(236, 72, 153, 0.6),
-    0 0 30px rgba(236, 72, 153, 0.4),
-    0 0 40px rgba(236, 72, 153, 0.2);
-}
-
-/* Party card styling */
-.card-party {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-  backdrop-filter: blur(20px);
-  border: 3px solid;
-  border-image: linear-gradient(135deg, #ec4899, #f59e0b, #10b981, #06b6d4) 1;
-  animation: slide-in-bounce 0.8s ease-out forwards;
 }

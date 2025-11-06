@@ -44,12 +44,13 @@ function handleBackToHome() {
 
 <template>
   <div class="min-h-screen bg-animated-gradient relative overflow-hidden">
-    <!-- Floating animated shapes -->
-    <div class="floating-shape" style="bottom: 0; width: 80px; height: 80px; background: radial-gradient(circle, rgba(236, 72, 153, 0.3), transparent); border-radius: 50%;"></div>
-    <div class="floating-shape" style="bottom: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent); border-radius: 50%;"></div>
-    <div class="floating-shape" style="bottom: 0; width: 60px; height: 60px; background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent); border-radius: 50%;"></div>
-    <div class="floating-shape" style="bottom: 0; width: 90px; height: 90px; background: radial-gradient(circle, rgba(6, 182, 212, 0.3), transparent); border-radius: 50%;"></div>
-    <div class="floating-shape" style="bottom: 0; width: 70px; height: 70px; background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent); border-radius: 50%;"></div>
+    <!-- Floating decorative emojis like in reference -->
+    <div class="floating-emoji" style="top: 5%; left: 8%; animation-delay: 0s;">🎭</div>
+    <div class="floating-emoji" style="top: 15%; right: 10%; animation-delay: 2s;">🎪</div>
+    <div class="floating-emoji" style="bottom: 20%; left: 5%; animation-delay: 4s;">🎉</div>
+    <div class="floating-emoji" style="bottom: 30%; right: 8%; animation-delay: 6s; font-size: 120px;">🕵️</div>
+    <div class="floating-emoji" style="top: 50%; left: 3%; animation-delay: 8s; font-size: 80px;">🎊</div>
+    <div class="floating-emoji" style="top: 60%; right: 5%; animation-delay: 10s; font-size: 90px;">🎮</div>
     <HomeScreen 
       v-if="currentScreen === 'home'"
       @create-session="handleCreateSession"
