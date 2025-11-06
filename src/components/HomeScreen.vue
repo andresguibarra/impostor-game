@@ -24,6 +24,7 @@ const showQrNameDialog = ref(false)
 watch(() => props.qrJoinCode, (newCode) => {
   if (newCode) {
     joinCode.value = newCode
+    customName.value = generateFunnyName() // Auto-generate name for QR join
     showQrNameDialog.value = true
   } else {
     // Clear dialog and state when QR code is cleared
