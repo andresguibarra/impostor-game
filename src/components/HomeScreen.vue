@@ -119,7 +119,7 @@ function generateName() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden">
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden dark-impostor-bg">
     <!-- Configuration warning banner -->
     <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">
@@ -135,33 +135,34 @@ function generateName() {
       </div>
     </div>
     
-    <!-- Main card matching reference -->
-    <div class="card-party shadow-2xl p-8 max-w-md w-full relative z-10">
-      <!-- Header matching reference -->
-      <div class="text-center mb-6">
-        <div class="text-8xl mb-4 inline-block">
-          <div class="bounce-fun">😎😷</div>
+    <!-- Main card with neon border like the reference image -->
+    <div class="neon-card-impostor shadow-2xl p-10 max-w-lg w-full relative z-10">
+      <!-- Impostor silhouette header - positioned to overflow top -->
+      <div class="text-center">
+        <div class="impostor-silhouette-container">
+          <img src="../assets/anon.png" alt="Impostor Silhouette" class="impostor-image" />
         </div>
-        <h1 class="text-6xl font-black mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif; letter-spacing: -1px; line-height: 1.1;">
-          <span class="text-gradient-impostor">IMPOSTOR</span><br/>
+        
+        <h1 class="text-6xl font-black mb-2 impostor-title tracking-tight">
+          IMPOSTOR
         </h1>
-        <p class="text-xl font-bold mb-2" style="color: #8b5cf6;">
-          ¡Encontrá al impostor! 🕵️
+        <p class="text-2xl font-bold mb-4 text-cyan-400">
+          ¡Encontrá al impostor!
         </p>
       </div>
       
-      <!-- Name input -->
-      <div class="mb-6 mt-8">
-        <label class="block text-sm font-bold mb-2" style="color: #e879f9;">
-          ✨ Tu nombre
+      <!-- Name input with plus icon like reference -->
+      <div class="mb-5">
+        <label class="block text-base font-bold mb-2.5 text-yellow-400 flex items-center gap-2">
+          <span class="text-xl">➕</span> Tu nombre
         </label>
-        <div class="flex gap-2">
+        <div class="flex gap-3">
           <input 
             v-model="customName"
             type="text"
-            placeholder="Dejá vacío para nombre random"
-            class="flex-1 px-4 py-3 rounded-2xl font-semibold text-gray-800 transition-all"
-            style="background: white; border: 3px solid #e879f9;"
+            placeholder=""
+            class="flex-1 px-5 py-4 rounded-2xl font-semibold text-white placeholder-gray-500 transition-all focus:ring-4 focus:ring-yellow-500/50 focus:outline-none"
+            style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(255, 193, 7, 0.5);"
             maxlength="20"
             autocomplete="off"
             autocapitalize="off"
@@ -176,8 +177,8 @@ function generateName() {
           />
           <button
             @click="generateName"
-            class="px-5 py-3 rounded-2xl hover:scale-110 transition-all shadow-lg text-2xl btn-squish"
-            style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%); color: white;"
+            class="px-5 py-4 rounded-2xl hover:scale-110 transition-all shadow-lg text-3xl btn-squish"
+            style="background: rgba(255, 152, 0, 0.3); border: 2px solid #ff9800;"
             title="Generar nombre random"
           >
             🎲
@@ -186,28 +187,26 @@ function generateName() {
       </div>
       
       <!-- Error message -->
-      <div v-if="error" class="mb-4 p-4 bg-red-100/90 backdrop-blur-sm text-red-700 rounded-2xl text-sm font-semibold border-2 border-red-400 slide-in-bounce shadow-lg">
+      <div v-if="error" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg">
         <span class="text-xl mr-2">⚠️</span>{{ error }}
       </div>
       
-      <!-- Buttons matching reference exactly -->
+      <!-- Buttons with exact styling from reference image -->
       <div v-if="!isJoining" class="space-y-4">
         <button
           @click="createSession"
           :disabled="loading"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-squish text-white rounded-2xl"
-          style="background: linear-gradient(135deg, #e91e8f 0%, #d81b60 100%);"
+          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-game-create"
         >
-          <span class="text-2xl mr-2">🎮</span>
+          <span class="text-3xl mr-3">🎮</span>
           {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
         </button>
         
         <button
           @click="toggleJoinMode"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all shadow-xl btn-squish text-white rounded-2xl"
-          style="background: linear-gradient(135deg, #00bfff 0%, #0097a7 100%);"
+          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all btn-game-join"
         >
-          <span class="text-2xl mr-2">🚀</span>
+          <span class="text-3xl mr-3">🚀</span>
           UNIRSE A SESIÓN
         </button>
       </div>
@@ -215,15 +214,15 @@ function generateName() {
       <!-- Join mode -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-bold mb-2" style="color: #00bfff;">
-            🔑 Código de sesión
+          <label class="block text-base font-bold mb-2.5 text-cyan-400 flex items-center gap-2">
+            <span class="text-xl">🔑</span> Código de sesión
           </label>
           <input 
             v-model="joinCode"
             type="text"
             placeholder="Ej: AB3C5"
-            class="w-full px-5 py-4 rounded-2xl uppercase font-black text-2xl text-center tracking-[0.3em] transition-all"
-            style="background: white; border: 3px solid #00bfff;"
+            class="w-full px-5 py-5 rounded-2xl uppercase font-black text-3xl text-center tracking-widest transition-all focus:ring-4 focus:ring-cyan-500/50 focus:outline-none text-white placeholder-gray-600"
+            style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(0, 188, 212, 0.5);"
             maxlength="6"
             @keyup.enter="joinSession"
           />
@@ -232,17 +231,15 @@ function generateName() {
         <button
           @click="joinSession"
           :disabled="loading || !joinCode.trim()"
-          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-squish text-white rounded-2xl"
-          style="background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);"
+          class="w-full py-5 px-6 text-2xl font-black rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-game-confirm"
         >
-          <span class="text-2xl mr-2">✨</span>
-          {{ loading ? 'Uniéndose...' : 'UNIRSE AHORA!' }}
+          <span class="text-3xl mr-3">✅</span>
+          {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
         </button>
         
         <button
           @click="toggleJoinMode"
-          class="w-full py-4 px-6 font-black hover:shadow-xl transition-all shadow-lg btn-squish text-gray-700 rounded-2xl"
-          style="background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);"
+          class="w-full py-4 px-6 text-lg font-black rounded-2xl transition-all btn-game-back"
         >
           <span class="text-xl mr-2">←</span>
           VOLVER
@@ -251,3 +248,275 @@ function generateName() {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Dark impostor background */
+.dark-impostor-bg {
+  background: linear-gradient(135deg, 
+    #0a0a15 0%, 
+    #1a1a2e 25%, 
+    #16213e 50%, 
+    #1a1a2e 75%, 
+    #0a0a15 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Neon card with rainbow border like the reference */
+.neon-card-impostor {
+  background: rgba(15, 15, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 2rem;
+  border: 4px solid transparent;
+  min-height: 70vh;
+  padding-top: 8em;
+  background-image: 
+    linear-gradient(rgba(15, 15, 30, 0.95), rgba(15, 15, 30, 0.95)),
+    linear-gradient(135deg, 
+      #00ff87 0%, 
+      #60efff 25%, 
+      #a855f7 50%, 
+      #ec4899 75%, 
+      #ef4444 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  animation: neonPulse 3s ease-in-out infinite;
+}
+
+/* Desktop padding adjustment */
+@media (min-width: 768px) {
+  .neon-card-impostor {
+    padding-top: 9em;
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 135, 0.4), 0 0 80px rgba(168, 85, 247, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(96, 239, 255, 0.5), 0 0 100px rgba(236, 72, 153, 0.4); }
+}
+
+/* Impostor title with orange gradient */
+.impostor-title {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 25%, #ffa500 50%, #ff8c00 75%, #ff6b00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6));
+  text-shadow: 0 0 30px rgba(255, 140, 0, 0.8);
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6)); }
+  50% { filter: drop-shadow(0 4px 20px rgba(255, 140, 0, 0.9)); }
+}
+
+/* Impostor image overflowing the top - absolute positioning with percentage */
+.impostor-silhouette-container {
+  position: absolute;
+  top: -22%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+  width: min(280px, 32vw);
+}
+
+.impostor-image {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .impostor-silhouette-container {
+    top: -18%;
+    width: min(220px, 60vw);
+  }
+}
+
+/* Game buttons with neon/cyberpunk style matching the card */
+.btn-game-create {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 3px solid;
+  border-color: rgba(251, 191, 36, 0.8);
+  color: white;
+  text-shadow: 
+    0 0 10px rgba(251, 191, 36, 0.8),
+    0 0 20px rgba(245, 158, 11, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 0 20px rgba(245, 158, 11, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-game-create:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 
+    0 0 30px rgba(245, 158, 11, 0.7),
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.btn-game-create:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 0 15px rgba(245, 158, 11, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-game-join {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.9) 0%, rgba(8, 145, 178, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 3px solid;
+  border-color: rgba(103, 232, 249, 0.8);
+  color: white;
+  text-shadow: 
+    0 0 10px rgba(103, 232, 249, 0.8),
+    0 0 20px rgba(6, 182, 212, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 0 20px rgba(6, 182, 212, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-game-join:hover {
+  transform: translateY(-2px);
+  border-color: rgba(103, 232, 249, 1);
+  box-shadow: 
+    0 0 30px rgba(6, 182, 212, 0.7),
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.btn-game-join:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 0 15px rgba(6, 182, 212, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-game-confirm {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(21, 128, 61, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 3px solid;
+  border-color: rgba(134, 239, 172, 0.8);
+  color: white;
+  text-shadow: 
+    0 0 10px rgba(134, 239, 172, 0.8),
+    0 0 20px rgba(34, 197, 94, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 0 20px rgba(34, 197, 94, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-game-confirm:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(134, 239, 172, 1);
+  box-shadow: 
+    0 0 30px rgba(34, 197, 94, 0.7),
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.btn-game-confirm:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 
+    0 0 15px rgba(34, 197, 94, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-game-back {
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.7) 0%, rgba(51, 65, 85, 0.8) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid;
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #e2e8f0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 0 10px rgba(71, 85, 105, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-game-back:hover {
+  transform: translateY(-1px);
+  border-color: rgba(148, 163, 184, 0.7);
+  box-shadow: 
+    0 0 15px rgba(71, 85, 105, 0.4),
+    0 5px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15);
+}
+
+.btn-game-back:active {
+  transform: translateY(0px);
+  box-shadow: 
+    0 0 8px rgba(71, 85, 105, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Button hover effect */
+.btn-impostor {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.btn-impostor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-impostor:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-impostor:active {
+  transform: scale(0.95);
+}
+
+/* Slide in animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.slide-in-bounce {
+  animation: slideInUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+</style>

@@ -43,14 +43,7 @@ function handleBackToHome() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-animated-gradient relative overflow-hidden">
-    <!-- Floating decorative emojis like in reference -->
-    <div class="floating-emoji" style="top: 5%; left: 8%; animation-delay: 0s;">🎭</div>
-    <div class="floating-emoji" style="top: 15%; right: 10%; animation-delay: 2s;">🎪</div>
-    <div class="floating-emoji" style="bottom: 20%; left: 5%; animation-delay: 4s;">🎉</div>
-    <div class="floating-emoji" style="bottom: 30%; right: 8%; animation-delay: 6s; font-size: 120px;">🕵️</div>
-    <div class="floating-emoji" style="top: 50%; left: 3%; animation-delay: 8s; font-size: 80px;">🎊</div>
-    <div class="floating-emoji" style="top: 60%; right: 5%; animation-delay: 10s; font-size: 90px;">🎮</div>
+  <div class="min-h-screen dark-impostor-bg-main relative overflow-hidden">
     <HomeScreen 
       v-if="currentScreen === 'home'"
       @create-session="handleCreateSession"
@@ -87,5 +80,20 @@ function handleBackToHome() {
 </template>
 
 <style scoped>
+.dark-impostor-bg-main {
+  background: linear-gradient(135deg, 
+    #0a0a15 0%, 
+    #1a1a2e 25%, 
+    #16213e 50%, 
+    #1a1a2e 75%, 
+    #0a0a15 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
 </style>
 
