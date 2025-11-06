@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import QRCodeVue from 'qrcode'
 import { supabase, type Player } from '../lib/supabase'
 import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 import NeonButton from './NeonButton.vue'
 
 const props = defineProps<{
-  sessionCode: string
-  playerId: string
-  playerName: string
+  gameCode: string
 }>()
 
-const emit = defineEmits<{
-  startGame: []
-  back: []
-}>()
+const router = useRouter()
 
 const players = ref<Player[]>([])
 const impostorCount = ref(1)
@@ -23,6 +19,10 @@ const showQR = ref(false)
 const loading = ref(false)
 const toast = ref('')
 const showToast = ref(false)
+
+// Get session data from localStorage or props
+const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
+const playerId = computed(() => localStorage.getItem('playerId') || '')
 
 let playersSubscription: any = null
 
@@ -34,23 +34,14 @@ function displayToast(message: string) {
   }, 2000)
 }
 
-async function copyCode() {
-  try {
-    await navigator.clipboard.writeText(props.sessionCode)
-    displayToast('Código copiado ✅')
-  } catch (err) {
-    console.error('Error copying code:', err)
-  }
-}
-
 async function shareInvite() {
-  const gameUrl = `${window.location.origin}?join=${props.sessionCode}`
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
 
   if (navigator.share) {
     try {
       await navigator.share({
         title: '¡Unite al juego del Impostor!',
-        text: `Unite a mi partida con el código: ${props.sessionCode}`,
+        text: `Unite a mi partida con el código: ${sessionCode.value}`,
         url: gameUrl,
       })
     } catch (err) {
@@ -69,8 +60,14 @@ async function shareInvite() {
 }
 
 onMounted(async () => {
+  // Check if session exists
+  if (!sessionCode.value) {
+    router.push('/')
+    return
+  }
+
   // Generate QR code with deep link
-  const gameUrl = `${window.location.origin}?join=${props.sessionCode}`
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
   try {
     qrCodeUrl.value = await QRCodeVue.toDataURL(gameUrl, {
       width: GAME_SETTINGS.QR_CODE_WIDTH,
@@ -89,14 +86,14 @@ onMounted(async () => {
 
   // Subscribe to player changes
   playersSubscription = supabase
-    .channel(`session:${props.sessionCode}:players`)
+    .channel(`session:${sessionCode.value}:players`)
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
         table: 'players',
-        filter: `session_id=eq.${props.sessionCode}`,
+        filter: `session_id=eq.${sessionCode.value}`,
       },
       () => {
         loadPlayers()
@@ -115,7 +112,7 @@ async function loadPlayers() {
   const { data, error } = await supabase
     .from('players')
     .select('*')
-    .eq('session_id', props.sessionCode)
+    .eq('session_id', sessionCode.value)
     .order('joined_at', { ascending: true })
 
   if (!error && data) {
@@ -139,17 +136,25 @@ async function startGame() {
         impostor_count: impostorCount.value,
         round_number: 1,
       })
-      .eq('code', props.sessionCode)
+      .eq('code', sessionCode.value)
 
     if (error) throw error
 
-    emit('startGame')
+    router.push(`/game/${sessionCode.value}`)
   } catch (err) {
     console.error('Error starting game:', err)
     alert(UI_STRINGS.ERRORS.START_GAME)
   } finally {
     loading.value = false
   }
+}
+
+function goBack() {
+  localStorage.removeItem('gameCode')
+  localStorage.removeItem('playerId')
+  localStorage.removeItem('playerName')
+  localStorage.removeItem('isHost')
+  router.push('/')
 }
 
 function incrementImpostors() {
@@ -270,7 +275,7 @@ function decrementImpostors() {
           {{ loading ? '⏳ INICIANDO...' : '¡INICIAR JUEGO!' }}
         </NeonButton>
 
-        <NeonButton variant="back" icon="←" size="md" @click="emit('back')" class="w-full">
+        <NeonButton variant="back" icon="←" size="md" @click="goBack" class="w-full">
           SALIR
         </NeonButton>
       </div>

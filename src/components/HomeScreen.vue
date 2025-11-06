@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 
-const props = defineProps<{
-  qrJoinCode?: string
-}>()
-
-const emit = defineEmits<{
-  createSession: [code: string, playerId: string, playerName: string]
-  joinSession: [code: string, playerId: string, playerName: string]
-  cancelQrJoin: []
-}>()
+const router = useRouter()
+const route = useRoute()
 
 const isJoining = ref(false)
 const joinCode = ref('')
@@ -21,20 +15,15 @@ const error = ref('')
 const loading = ref(false)
 const showQrNameDialog = ref(false)
 
-// Watch for QR join code from URL parameter
-watch(() => props.qrJoinCode, (newCode) => {
-  if (newCode) {
-    joinCode.value = newCode
-    customName.value = generateFunnyName() // Auto-generate name for QR join
+// Check for QR join code from URL parameter
+onMounted(() => {
+  const qrCode = route.query.join
+  if (qrCode && typeof qrCode === 'string') {
+    joinCode.value = qrCode.toUpperCase()
+    customName.value = generateFunnyName()
     showQrNameDialog.value = true
-  } else {
-    // Clear dialog and state when QR code is cleared
-    showQrNameDialog.value = false
-    joinCode.value = ''
-    customName.value = generateFunnyName() // Regenerate name instead of clearing
-    error.value = ''
   }
-}, { immediate: true })
+})
 
 async function createSession() {
   loading.value = true
@@ -69,8 +58,14 @@ async function createSession() {
       })
     
     if (playerError) throw playerError
+
+    // Save session to localStorage
+    localStorage.setItem('gameCode', code)
+    localStorage.setItem('playerId', playerId)
+    localStorage.setItem('playerName', playerName)
+    localStorage.setItem('isHost', 'true')
     
-    emit('createSession', code, playerId, playerName)
+    router.push(`/host/${code}`)
   } catch (err: any) {
     error.value = err.message || 'Error al crear sesión'
     console.error('Error creating session:', err)
@@ -119,8 +114,15 @@ async function joinSession() {
       })
     
     if (playerError) throw playerError
+
+    // Save session to localStorage
+    localStorage.setItem('gameCode', code)
+    localStorage.setItem('playerId', playerId)
+    localStorage.setItem('playerName', playerName)
+    localStorage.setItem('isHost', 'false')
     
-    emit('joinSession', code, playerId, playerName)
+    // Clear QR code from URL
+    router.replace(`/join/${code}`)
   } catch (err: any) {
     error.value = err.message || 'Error al unirse a sesión'
     console.error('Error joining session:', err)

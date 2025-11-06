@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
 
 const props = defineProps<{
-  sessionCode: string
-  playerId: string
-  playerName: string
-  isHost: boolean
+  gameCode: string
 }>()
 
-const emit = defineEmits<{
-  back: []
-}>()
+const router = useRouter()
 
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
@@ -22,26 +18,38 @@ const isImpostor = ref<boolean>(false)
 const loading = ref(false)
 const wordRevealed = ref(false)
 
+// Get session data from localStorage or props
+const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
+const playerId = computed(() => localStorage.getItem('playerId') || '')
+const playerName = computed(() => localStorage.getItem('playerName') || '')
+const isHost = computed(() => localStorage.getItem('isHost') === 'true')
+
 let playersSubscription: any = null
 let sessionSubscription: any = null
 
 const canStartNewRound = computed(() => {
-  return props.isHost && !loading.value
+  return isHost.value && !loading.value
 })
 
 onMounted(async () => {
+  // Check if session exists
+  if (!sessionCode.value) {
+    router.push('/')
+    return
+  }
+
   await loadGameState()
   
   // Subscribe to changes
   playersSubscription = supabase
-    .channel(`game:${props.sessionCode}:players`)
+    .channel(`game:${sessionCode.value}:players`)
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
         table: 'players',
-        filter: `session_id=eq.${props.sessionCode}`,
+        filter: `session_id=eq.${sessionCode.value}`,
       },
       () => {
         loadPlayers()
@@ -50,14 +58,14 @@ onMounted(async () => {
     .subscribe()
   
   sessionSubscription = supabase
-    .channel(`game:${props.sessionCode}`)
+    .channel(`game:${sessionCode.value}`)
     .on(
       'postgres_changes',
       {
         event: 'UPDATE',
         schema: 'public',
         table: 'sessions',
-        filter: `code=eq.${props.sessionCode}`,
+        filter: `code=eq.${sessionCode.value}`,
       },
       () => {
         loadGameState()
@@ -79,7 +87,7 @@ async function loadPlayers() {
   const { data, error } = await supabase
     .from('players')
     .select('*')
-    .eq('session_id', props.sessionCode)
+    .eq('session_id', sessionCode.value)
     .order('joined_at', { ascending: true })
   
   if (!error && data) {
@@ -93,7 +101,7 @@ async function loadGameState() {
   const { data, error } = await supabase
     .from('sessions')
     .select('*')
-    .eq('code', props.sessionCode)
+    .eq('code', sessionCode.value)
     .single()
   
   if (!error && data) {
@@ -102,8 +110,8 @@ async function loadGameState() {
     if (data.current_word && data.impostors) {
       // Show word or impostor status
       const impostorIds = data.impostors as string[]
-      isImpostor.value = impostorIds.includes(props.playerId)
-      currentWord.value = getWordForPlayer(props.playerId, data.current_word, impostorIds)
+      isImpostor.value = impostorIds.includes(playerId.value)
+      currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
     }
   }
 }
@@ -126,7 +134,7 @@ async function newRound() {
         impostors: round.impostorIds,
         round_number: (session.value?.round_number || 0) + 1,
       })
-      .eq('code', props.sessionCode)
+      .eq('code', sessionCode.value)
     
     if (error) throw error
     
@@ -142,6 +150,14 @@ async function newRound() {
 
 function revealWord() {
   wordRevealed.value = true
+}
+
+function goBack() {
+  localStorage.removeItem('gameCode')
+  localStorage.removeItem('playerId')
+  localStorage.removeItem('playerName')
+  localStorage.removeItem('isHost')
+  router.push('/')
 }
 </script>
 
@@ -277,7 +293,7 @@ function revealWord() {
         </button>
         
         <button
-          @click="emit('back')"
+          @click="goBack"
           class="w-full bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 py-4 rounded-2xl font-black hover:from-gray-400 hover:to-gray-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
         >
           <span class="text-xl mr-2">←</span>

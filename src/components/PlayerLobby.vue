@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 
 const props = defineProps<{
-  sessionCode: string
-  playerId: string
-  playerName: string
+  gameCode: string
 }>()
 
-const emit = defineEmits<{
-  gameStarted: []
-  back: []
-}>()
+const router = useRouter()
 
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
 const toast = ref('')
 const showToast = ref(false)
+
+// Get session data from localStorage or props
+const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
+const playerId = computed(() => localStorage.getItem('playerId') || '')
+const playerName = computed(() => localStorage.getItem('playerName') || '')
 
 let playersSubscription: any = null
 let sessionSubscription: any = null
@@ -32,7 +33,7 @@ function displayToast(message: string) {
 
 async function copyCode() {
   try {
-    await navigator.clipboard.writeText(props.sessionCode)
+    await navigator.clipboard.writeText(sessionCode.value)
     displayToast('Código copiado ✅')
   } catch (err) {
     console.error('Error copying code:', err)
@@ -40,13 +41,13 @@ async function copyCode() {
 }
 
 async function shareInvite() {
-  const gameUrl = `${window.location.origin}?join=${props.sessionCode}`
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
   
   if (navigator.share) {
     try {
       await navigator.share({
         title: '¡Unite al juego del Impostor!',
-        text: `Unite a mi partida con el código: ${props.sessionCode}`,
+        text: `Unite a mi partida con el código: ${sessionCode.value}`,
         url: gameUrl,
       })
     } catch (err) {
@@ -65,20 +66,26 @@ async function shareInvite() {
 }
 
 onMounted(async () => {
+  // Check if session exists
+  if (!sessionCode.value) {
+    router.push('/')
+    return
+  }
+
   // Load initial data
   await loadPlayers()
   await loadSession()
   
   // Subscribe to player changes
   playersSubscription = supabase
-    .channel(`session:${props.sessionCode}:players`)
+    .channel(`session:${sessionCode.value}:players`)
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
         table: 'players',
-        filter: `session_id=eq.${props.sessionCode}`,
+        filter: `session_id=eq.${sessionCode.value}`,
       },
       () => {
         loadPlayers()
@@ -88,18 +95,18 @@ onMounted(async () => {
   
   // Subscribe to session changes (to detect game start)
   sessionSubscription = supabase
-    .channel(`session:${props.sessionCode}`)
+    .channel(`session:${sessionCode.value}`)
     .on(
       'postgres_changes',
       {
         event: 'UPDATE',
         schema: 'public',
         table: 'sessions',
-        filter: `code=eq.${props.sessionCode}`,
+        filter: `code=eq.${sessionCode.value}`,
       },
       (payload: any) => {
         if (payload.new.round_number > 0) {
-          emit('gameStarted')
+          router.push(`/game/${sessionCode.value}`)
         }
         loadSession()
       }
@@ -120,7 +127,7 @@ async function loadPlayers() {
   const { data, error } = await supabase
     .from('players')
     .select('*')
-    .eq('session_id', props.sessionCode)
+    .eq('session_id', sessionCode.value)
     .order('joined_at', { ascending: true })
   
   if (!error && data) {
@@ -132,12 +139,20 @@ async function loadSession() {
   const { data, error } = await supabase
     .from('sessions')
     .select('*')
-    .eq('code', props.sessionCode)
+    .eq('code', sessionCode.value)
     .single()
   
   if (!error && data) {
     session.value = data
   }
+}
+
+function goBack() {
+  localStorage.removeItem('gameCode')
+  localStorage.removeItem('playerId')
+  localStorage.removeItem('playerName')
+  localStorage.removeItem('isHost')
+  router.push('/')
 }
 </script>
 
@@ -238,7 +253,7 @@ async function loadSession() {
         variant="back"
         icon="←"
         size="md"
-        @click="emit('back')"
+        @click="goBack"
         class="w-full"
       >
         SALIR
