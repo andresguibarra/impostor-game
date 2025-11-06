@@ -142,9 +142,10 @@ function decrementImpostors() {
 
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
+            <!-- Header -->
       <div class="text-center mb-6">
         <div class="flex mb-4 justify-center items-center gap-3">
-          <Gamepad2 :size="32" />
+          <Gamepad2 :size="32" class="text-orange-500" />
           <h2 class="text-3xl font-black impostor-title">
             Creando Partida
           </h2>
@@ -181,7 +182,7 @@ function decrementImpostors() {
           <Users :size="24" />
           JUGADORES CONECTADOS ({{ players.length }})
         </h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
           <div v-for="(player, index) in players" :key="player.id"
             class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-cyan-500/40 shadow-md hover:border-cyan-400/60 transition-all">
             <span class="font-black text-white flex items-center gap-2">
@@ -197,7 +198,7 @@ function decrementImpostors() {
         </div>
 
         <p v-if="players.length < 2"
-          class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl py-3 px-4 border-2 border-amber-500/50 gap-2">
+          class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl p-4 border-2 border-dashed border-amber-500/50 gap-2">
           <AlertTriangle :size="20" />
           Necesitás al menos 2 jugadores
         </p>
@@ -210,7 +211,7 @@ function decrementImpostors() {
           {{ loading ? '⏳ INICIANDO...' : '¡INICIAR JUEGO!' }}
         </NeonButton>
 
-        <NeonButton variant="back" icon="←" size="md" @click="goBack" class="w-full">
+        <NeonButton variant="back" icon="←" @click="goBack" class="w-full">
           SALIR
         </NeonButton>
       </div>

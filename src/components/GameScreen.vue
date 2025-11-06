@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
-import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Send, Share2, Sparkles, Drama, FileText, Search, MessageCircle, Users, X } from 'lucide-vue-next'
+import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Share2, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
+import ShareModal from './ShareModal.vue'
 
 const props = defineProps<{
   gameCode: string
@@ -426,43 +427,13 @@ async function goBack() {
     </button>
 
     <!-- Share Modal -->
-    <Transition name="modal-fade">
-      <div v-if="showShareModal" @click="closeShareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg p-4">
-        <div @click.stop class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-4 border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.5)] relative">
-          <!-- Close button -->
-          <button
-            @click="closeShareModal"
-            class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
-          >
-            <X :size="24" />
-          </button>
-
-          <h3 class="text-3xl font-black text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
-            ¡Compartí la partida!
-          </h3>
-
-          <!-- QR Code -->
-          <div class="bg-white rounded-2xl p-4 mb-6 flex justify-center">
-            <img v-if="qrCode" :src="qrCode" alt="QR Code" class="w-64 h-64" />
-          </div>
-
-          <!-- Session Code -->
-          <div class="text-center mb-6">
-            <p class="text-sm text-white/60 font-bold mb-2">CÓDIGO DE SESIÓN:</p>
-            <p class="text-4xl font-black text-white tracking-widest">{{ sessionCode }}</p>
-          </div>
-
-          <!-- Share Button -->
-          <button
-            @click="shareInvite"
-            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl text-xl font-black hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(168,85,247,0.5)] border-2 border-purple-400/50 flex items-center justify-center gap-2"
-          >
-            <Send :size="24" />
-            COMPARTIR
-          </button>
-        </div>
-      </div>
-    </Transition>
+    <ShareModal 
+      :show="showShareModal"
+      :session-code="sessionCode"
+      :qr-code="qrCode"
+      @close="closeShareModal"
+      @share="shareInvite"
+    />
   </div>
 </template>
 
