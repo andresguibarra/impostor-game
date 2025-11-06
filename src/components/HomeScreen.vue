@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
-import NeonButton from './NeonButton.vue'
+import { Settings, AlertTriangle, Gamepad2, Rocket, Key, Check, ArrowLeft } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
@@ -149,12 +149,13 @@ function generateName() {
     <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
+          <Settings :size="20" class="text-yellow-600" />
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium">⚙️ Configuración requerida</h3>
+          <h3 class="text-sm font-medium flex items-center gap-1">
+            <Settings :size="16" />
+            Configuración requerida
+          </h3>
           <p class="text-sm mt-1">La aplicación necesita credenciales de Supabase para funcionar. Si sos el administrador, configurá las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>
         </div>
       </div>
@@ -212,37 +213,36 @@ function generateName() {
       </div>
       
       <!-- Error message -->
-      <div v-if="error" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg">
-        <span class="text-xl mr-2">⚠️</span>{{ error }}
+      <div v-if="error" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg flex items-center gap-2">
+        <AlertTriangle :size="20" />
+        {{ error }}
       </div>
       
       <!-- Buttons with Neon components -->
       <div v-if="!isJoining" class="space-y-4">
-        <NeonButton
-          variant="primary"
-          icon="🎮"
+        <button
           :disabled="loading"
           @click="createSession"
-          class="w-full"
+          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-amber-500/90 to-amber-600/95 border-3 border-amber-300/80 text-white shadow-[0_0_20px_rgba(245,158,11,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(245,158,11,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(251,191,36,0.8),0_0_20px_rgba(245,158,11,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
         >
+          <Gamepad2 :size="24" class="mr-3" />
           {{ loading ? 'Creando...' : 'NUEVA PARTIDA' }}
-        </NeonButton>
+        </button>
         
-        <NeonButton
-          variant="secondary"
-          icon="🚀"
+        <button
           @click="toggleJoinMode"
-          class="w-full"
+          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-cyan-500/90 to-cyan-600/95 border-3 border-cyan-300/80 text-white shadow-[0_0_20px_rgba(6,182,212,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(6,182,212,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(103,232,249,0.8),0_0_20px_rgba(6,182,212,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
         >
+          <Rocket :size="24" class="mr-3" />
           UNIRSE A PARTIDA
-        </NeonButton>
+        </button>
       </div>
       
       <!-- Join mode -->
       <div v-else class="space-y-4">
         <div>
           <label class="block text-base font-bold mb-2.5 text-cyan-400 flex items-center gap-2">
-            <span class="text-xl">🔑</span> Código de sesión
+            <Key :size="20" /> Código de sesión
           </label>
           <input 
             v-model="joinCode"
@@ -255,25 +255,22 @@ function generateName() {
           />
         </div>
         
-        <NeonButton
-          variant="success"
-          icon="✅"
+        <button
           :disabled="loading || !joinCode.trim()"
           @click="joinSession"
-          class="w-full"
+          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-green-500/90 to-green-700/95 border-3 border-green-300/80 text-white shadow-[0_0_20px_rgba(34,197,94,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(34,197,94,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(134,239,172,0.8),0_0_20px_rgba(34,197,94,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
         >
+          <Check :size="24" class="mr-3" />
           {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
-        </NeonButton>
+        </button>
         
-        <NeonButton
-          variant="back"
-          icon="←"
-          size="md"
+        <button
           @click="toggleJoinMode"
-          class="w-full"
+          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-4 px-6 text-xl bg-gradient-to-br from-slate-600/70 to-slate-700/80 border-2 border-slate-400/50 text-slate-200 shadow-[0_0_10px_rgba(71,85,105,0.3),0_4px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_0_15px_rgba(71,85,105,0.4),0_5px_15px_rgba(0,0,0,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_8px_rgba(71,85,105,0.3),0_2px_8px_rgba(0,0,0,0.2)] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]"
         >
+          <ArrowLeft :size="20" class="mr-2" />
           VOLVER
-        </NeonButton>
+        </button>
       </div>
     </div>
   </div>

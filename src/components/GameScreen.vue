@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
+import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Send, Share2, Sparkles, Drama, FileText, Search, MessageCircle, Users, X } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -266,8 +267,8 @@ async function goBack() {
           <p class="text-3xl md:text-4xl font-black text-white mb-2">
             ¡NUEVA RONDA!
           </p>
-          <p class="text-xl text-gray-300 font-bold">
-            Preparate para jugar... 🎮
+          <p class="text-xl text-gray-300 font-bold flex items-center justify-center gap-2">
+            Preparate para jugar... <Gamepad2 :size="24" />
           </p>
         </div>
       </div>
@@ -284,14 +285,14 @@ async function goBack() {
             @click="openShareModal"
             class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center"
           >
-            <span class="text-xs font-bold text-white/80">📍 SESIÓN</span>
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1"><MapPin :size="14" /> SESIÓN</span>
             <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
-            <p class="text-xs text-white/60 mt-1">
-              👆 Compartir
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Compartir
             </p>
           </div>
           <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex flex-col justify-center">
-            <span class="text-xs font-bold text-white/80">🎮 RONDA</span>
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1"><Gamepad2 :size="14" /> RONDA</span>
             <p class="text-lg font-black text-white">#{{ session?.round_number || 0 }}</p>
           </div>
         </div>
@@ -300,23 +301,29 @@ async function goBack() {
       <!-- Word reveal section -->
       <div class="mb-6">
         <div v-if="!currentWord" class="text-center py-12 bg-slate-800/60 backdrop-blur-md rounded-2xl border-2 border-purple-500/50">
-          <p class="text-xl font-black text-gray-300 mb-2">
-            {{ isHost ? '👆 Iniciá la ronda' : '⏳ Esperando...' }}
+          <p class="text-xl font-black text-gray-300 mb-2 flex items-center justify-center gap-2">
+            <MousePointerClick v-if="isHost" :size="24" />
+            <Loader2 v-else :size="24" class="animate-spin" />
+            {{ isHost ? 'Iniciá la ronda' : 'Esperando...' }}
           </p>
-          <p class="text-3xl animate-pulse">🎪</p>
+          <div class="flex justify-center">
+            <Sparkles :size="32" class="animate-pulse text-purple-400" />
+          </div>
         </div>
         
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
-            <p class="text-lg font-black text-gray-300 mb-4 bg-gradient-to-br from-amber-600/80 to-yellow-600/80 backdrop-blur-md rounded-xl p-4 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-              <span class="text-2xl mr-2">👀</span>
+            <p class="text-lg font-black text-gray-300 mb-4 bg-gradient-to-br from-amber-600/80 to-yellow-600/80 backdrop-blur-md rounded-xl p-4 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2">
+              <Eye :size="24" />
               <span class="text-white">¡Tocá para ver tu palabra!</span>
             </p>
             <button
               @click="revealWord"
               class="w-full py-16 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50"
             >
-              <div class="text-6xl mb-2 animate-bounce">👁️</div>
+              <div class="flex justify-center mb-2">
+                <Eye :size="64" class="animate-bounce" />
+              </div>
               ¡REVELAR!
             </button>
           </div>
@@ -330,8 +337,9 @@ async function goBack() {
                   : 'bg-gradient-to-br from-blue-600 via-cyan-600 to-green-600 text-white border-blue-400 shadow-[0_0_40px_rgba(37,99,235,0.6)]'
               ]"
             >
-              <div class="text-5xl mb-3 animate-pulse">
-                {{ isImpostor ? '🎭' : '📝' }}
+              <div class="flex justify-center mb-3">
+                <Drama v-if="isImpostor" :size="48" class="animate-pulse" />
+                <FileText v-else :size="48" class="animate-pulse" />
               </div>
               <p class="text-base font-bold mb-2 opacity-90">
                 {{ isImpostor ? '' : 'TU PALABRA:' }}
@@ -343,15 +351,15 @@ async function goBack() {
             
             <div class="text-sm font-semibold text-gray-300 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-slate-600/50 space-y-3">
               <p v-if="isImpostor" class="flex items-start gap-2">
-                <span class="text-2xl">🎭</span>
+                <Drama :size="24" class="flex-shrink-0" />
                 <span>¡Adiviná la palabra sin que te descubran!</span>
               </p>
               <p v-else class="flex items-start gap-2">
-                <span class="text-2xl">🕵️</span>
+                <Search :size="24" class="flex-shrink-0" />
                 <span>Hay <span class="font-black text-red-400 text-lg">{{ session?.impostor_count }}</span> impostor(es) entre nosotros</span>
               </p>
               <p v-if="!isImpostor" class="flex items-start gap-2">
-                <span class="text-2xl">💬</span>
+                <MessageCircle :size="24" class="flex-shrink-0" />
                 <span>Hablá con los demás para descubrir al impostor</span>
               </p>
             </div>
@@ -362,7 +370,7 @@ async function goBack() {
       <!-- Players list with styled cards -->
       <div class="mb-6">
         <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
-          <span class="text-2xl">👥</span>
+          <Users :size="24" />
           JUGADORES ({{ players.length }}):
         </h3>
         <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
@@ -373,7 +381,7 @@ async function goBack() {
             :style="{ animationDelay: `${index * 0.05}s` }"
           >
             <span class="font-black text-white flex items-center gap-2">
-              <span class="text-xl">🎮</span>
+              <Gamepad2 :size="20" />
               {{ player.name }}
             </span>
             <span
@@ -387,23 +395,23 @@ async function goBack() {
       </div>
       
       <!-- Actions with vibrant buttons -->
-            <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
         <button
           v-if="isHost"
           @click="newRound"
           :disabled="!canStartNewRound"
-          class="w-full bg-gradient-to-r from-lime-500 to-green-600 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(132,204,22,0.5)] border-2 border-lime-400/50"
+          class="w-full bg-gradient-to-r from-lime-500 to-green-600 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(132,204,22,0.5)] border-2 border-lime-400/50 flex items-center justify-center gap-2"
         >
-          <span class="text-2xl mr-2">{{ loading ? '⏳' : '🔄' }}</span>
+          <Loader2 v-if="loading" :size="24" class="animate-spin" />
+          <RefreshCw v-else :size="24" />
           {{ loading ? 'GENERANDO...' : '¡NUEVA RONDA!' }}
         </button>
         
         <button
           @click="goBack"
-          class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 rounded-2xl font-black hover:from-gray-700 hover:to-gray-800 transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-gray-500/50"
+          class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 rounded-2xl font-black hover:from-gray-700 hover:to-gray-800 transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-gray-500/50 flex items-center justify-center gap-2"
         >
-          <span class="text-xl mr-2">←</span>
+          <ArrowLeft :size="20" />
           SALIR DEL JUEGO
         </button>
       </div>
@@ -414,9 +422,7 @@ async function goBack() {
       @click="openShareModal"
       class="fixed bottom-6 right-6 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] transition-all transform hover:scale-110 active:scale-95 border-2 border-purple-400/50"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-      </svg>
+      <Share2 :size="24" />
     </button>
 
     <!-- Share Modal -->
@@ -428,9 +434,7 @@ async function goBack() {
             @click="closeShareModal"
             class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X :size="24" />
           </button>
 
           <h3 class="text-3xl font-black text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
@@ -451,9 +455,9 @@ async function goBack() {
           <!-- Share Button -->
           <button
             @click="shareInvite"
-            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl text-xl font-black hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(168,85,247,0.5)] border-2 border-purple-400/50"
+            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl text-xl font-black hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(168,85,247,0.5)] border-2 border-purple-400/50 flex items-center justify-center gap-2"
           >
-            <span class="text-2xl mr-2">📤</span>
+            <Send :size="24" />
             COMPARTIR
           </button>
         </div>

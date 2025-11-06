@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
+import { Loader2, Gamepad2, Sparkles, Drama, Users } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -130,7 +131,9 @@ async function goBack() {
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
       <div class="text-center mb-6">
-        <div class="text-7xl mb-4">⏳</div>
+        <div class="flex justify-center mb-4">
+          <Loader2 :size="64" class="animate-spin text-purple-400" />
+        </div>
         <h2 class="text-4xl font-black impostor-title mb-4">
           ¡ESPERANDO!
         </h2>
@@ -148,16 +151,16 @@ async function goBack() {
       <!-- Waiting animation -->
       <div class="flex justify-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl py-8 border-2 border-amber-500/50">
         <div class="flex gap-3">
-          <div class="text-5xl animate-pulse" style="animation-delay: 0s;">🎮</div>
-          <div class="text-5xl animate-pulse" style="animation-delay: 0.3s;">🎯</div>
-          <div class="text-5xl animate-pulse" style="animation-delay: 0.6s;">🎪</div>
+          <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
+          <Sparkles :size="48" class="animate-pulse text-yellow-400" style="animation-delay: 0.3s;" />
+          <Drama :size="48" class="animate-pulse text-red-400" style="animation-delay: 0.6s;" />
         </div>
       </div>
       
       <!-- Game info -->
       <div v-if="session" class="mb-6 p-5 bg-slate-800/60 backdrop-blur-md rounded-2xl border-2 border-purple-500/50">
         <p class="text-base font-black text-purple-300 flex items-center gap-2">
-          <span class="text-2xl">🎭</span>
+          <Drama :size="24" />
           <span>IMPOSTORES EN JUEGO: <span class="text-2xl impostor-title">{{ session.impostor_count }}</span></span>
         </p>
       </div>
@@ -165,7 +168,7 @@ async function goBack() {
       <!-- Players list -->
       <div class="mb-6">
         <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
-          <span class="text-2xl">👥</span>
+          <Users :size="24" />
           JUGADORES ({{ players.length }}):
         </h3>
         <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
@@ -176,7 +179,7 @@ async function goBack() {
             :style="{ animationDelay: `${index * 0.1}s` }"
           >
             <span class="font-black text-white flex items-center gap-2">
-              <span class="text-2xl">🎮</span>
+              <Gamepad2 :size="20" />
               {{ player.name }}
             </span>
             <span

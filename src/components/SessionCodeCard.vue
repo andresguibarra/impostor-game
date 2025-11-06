@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import QRCodeVue from 'qrcode'
 import { GAME_SETTINGS } from '../lib/constants'
-import NeonButton from './NeonButton.vue'
+import { MousePointerClick, Key, Link2, X, Smartphone, Scan } from 'lucide-vue-next'
 
 const props = defineProps<{
   sessionCode: string
@@ -72,16 +72,17 @@ onMounted(async () => {
       class="bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-2xl p-5 mb-3 shadow-[0_0_30px_rgba(168,85,247,0.5)] border-2 border-purple-400/50 cursor-pointer"
       @click="shareInvite()"
     >
-      <p class="text-sm text-white font-bold mb-2 opacity-90">
-        🔑 CÓDIGO DE SESIÓN:
+      <p class="text-sm text-white font-bold mb-2 opacity-90 flex items-center justify-center gap-1">
+        <Key :size="14" /> CÓDIGO DE SESIÓN:
       </p>
       <div
         class="text-5xl font-black text-white tracking-[0.3em] [text-shadow:0_0_20px_rgba(255,255,255,0.5)] hover:scale-105 transition-transform"
       >
         {{ sessionCode }}
       </div>
-      <p class="text-xs text-white/70 mt-2">
-        👆 Tocá para compartir
+      <p class="text-xs text-white/70 mt-2 flex items-center justify-center gap-1">
+        <MousePointerClick :size="12" />
+        Tocá para compartir
       </p>
     </div>
 
@@ -91,21 +92,24 @@ onMounted(async () => {
       @click="shareInvite"
       class="w-full py-3 px-5 bg-gradient-to-br from-emerald-600/80 to-teal-600/80 backdrop-blur-md text-white rounded-xl font-bold text-base hover:from-emerald-700/90 hover:to-teal-700/90 transition-all hover:-translate-y-0.5 cursor-pointer border-2 border-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 mb-4"
     >
-      <span class="text-xl">🔗</span>
+      <Link2 :size="20" />
       <span>Compartir invitación</span>
     </button>
 
     <!-- QR Code Button -->
     <div class="text-center mb-6">
-      <NeonButton
-        :variant="showQR ? 'back' : 'secondary'"
-        :icon="showQR ? '❌' : '📱'"
-        size="md"
+      <button
         @click="showQR = !showQR"
-        class="w-full"
+        :class="[
+          'w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md flex items-center justify-center py-4 px-6 text-xl',
+          showQR 
+            ? 'bg-gradient-to-br from-slate-600/70 to-slate-700/80 border-2 border-slate-400/50 text-slate-200 shadow-[0_0_10px_rgba(71,85,105,0.3),0_4px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_0_15px_rgba(71,85,105,0.4),0_5px_15px_rgba(0,0,0,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_8px_rgba(71,85,105,0.3),0_2px_8px_rgba(0,0,0,0.2)] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'
+            : 'bg-gradient-to-br from-cyan-500/90 to-cyan-600/95 border-3 border-cyan-300/80 text-white shadow-[0_0_20px_rgba(6,182,212,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(6,182,212,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(103,232,249,0.8),0_0_20px_rgba(6,182,212,0.6),2px_2px_4px_rgba(0,0,0,0.5)]'
+        ]"
       >
+        <component :is="showQR ? X : Smartphone" :size="24" class="mr-2" />
         {{ showQR ? 'OCULTAR QR' : 'MOSTRAR QR' }}
-      </NeonButton>
+      </button>
 
       <!-- QR Modal -->
       <div
@@ -116,14 +120,14 @@ onMounted(async () => {
           <div class="relative">
             <img :src="qrCodeUrl" alt="QR Code" class="border-4 border-slate-700 rounded-2xl shadow-2xl" />
             <div
-              class="absolute -top-3 -right-3 bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white text-4xl rounded-full p-2 animate-pulse"
+              class="absolute -top-3 -right-3 bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white rounded-full p-2 animate-pulse"
             >
-              📱
+              <Smartphone :size="32" />
             </div>
           </div>
         </div>
         <p class="text-base font-black text-purple-300 flex items-center justify-center gap-2">
-          <span class="text-2xl">👆</span>
+          <Scan :size="20" />
           ¡Escaneá para unirte!
         </p>
       </div>

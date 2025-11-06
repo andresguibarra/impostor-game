@@ -5,6 +5,7 @@ import { supabase, type Player } from '../lib/supabase'
 import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
+import { Gamepad2, Drama, Users, Crown, AlertTriangle } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -143,7 +144,7 @@ function decrementImpostors() {
       <!-- Header -->
       <div class="text-center mb-6">
         <div class="flex mb-4 justify-center items-center gap-3">
-          <div class="text-3xl mr-2">🎮</div>
+          <Gamepad2 :size="32" />
           <h2 class="text-3xl font-black impostor-title">
             Creando Partida
           </h2>
@@ -156,7 +157,7 @@ function decrementImpostors() {
       <!-- Impostor count -->
       <div class="mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-orange-500/50">
         <label class="block text-base font-black text-amber-400 mb-3 flex items-center justify-center gap-2">
-          <span class="text-2xl">🎭</span>
+          <Drama :size="24" />
           <span>IMPOSTORES EN JUEGO</span>
         </label>
         <div class="flex items-center justify-center gap-4">
@@ -177,14 +178,15 @@ function decrementImpostors() {
       <!-- Players list -->
       <div class="mb-6">
         <h3 class="text-lg font-black text-cyan-400 mb-3 flex items-center justify-center gap-2">
-          <span class="text-2xl">👥</span>
+          <Users :size="24" />
           JUGADORES CONECTADOS ({{ players.length }})
         </h3>
         <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
           <div v-for="(player, index) in players" :key="player.id"
             class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-cyan-500/40 shadow-md hover:border-cyan-400/60 transition-all">
             <span class="font-black text-white flex items-center gap-2">
-              <span class="text-2xl">{{ index === 0 ? '👑' : '🎮' }}</span>
+              <Crown v-if="index === 0" :size="24" class="text-yellow-400" />
+              <Gamepad2 v-else :size="20" />
               {{ player.name }}
             </span>
             <span v-if="player.id === playerId"
@@ -195,8 +197,9 @@ function decrementImpostors() {
         </div>
 
         <p v-if="players.length < 2"
-          class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl py-3 px-4 border-2 border-amber-500/50">
-          <span class="text-2xl mr-2">⚠️</span> Necesitás al menos 2 jugadores
+          class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl py-3 px-4 border-2 border-amber-500/50 gap-2">
+          <AlertTriangle :size="20" />
+          Necesitás al menos 2 jugadores
         </p>
       </div>
 
