@@ -16,6 +16,7 @@ const error = ref('')
 const loading = ref(false)
 const joinCodeInput = ref<HTMLInputElement | null>(null)
 const isDiceAnimating = ref(false)
+const fromQrCode = ref(false)
 
 // Check for QR join code from URL parameter
 onMounted(() => {
@@ -23,13 +24,14 @@ onMounted(() => {
   if (qrCode && typeof qrCode === 'string') {
     joinCode.value = qrCode
     customName.value = generateFunnyName()
+    fromQrCode.value = true
     isJoining.value = true
   }
 })
 
-// Auto-focus join code input when switching to join mode
+// Auto-focus join code input when switching to join mode (only if not from QR)
 watch(isJoining, async (newValue) => {
-  if (newValue) {
+  if (newValue && !fromQrCode.value) {
     await nextTick()
     joinCodeInput.value?.focus()
   }
@@ -145,6 +147,7 @@ function toggleJoinMode() {
   isJoining.value = !isJoining.value
   error.value = ''
   joinCode.value = ''
+  fromQrCode.value = false
 }
 
 function generateName() {
