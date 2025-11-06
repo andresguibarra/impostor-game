@@ -5,7 +5,7 @@ import { supabase, type Player } from '../lib/supabase'
 import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Gamepad2, Drama, Users, Crown, AlertTriangle } from 'lucide-vue-next'
+import { Gamepad2, Drama, Users, Crown, AlertTriangle, Rocket, Loader2, ArrowLeft } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -206,12 +206,15 @@ function decrementImpostors() {
 
       <!-- Actions -->
       <div class="space-y-3">
-        <NeonButton variant="success" icon="🚀" :disabled="loading || players.length < 2" @click="startGame"
+        <NeonButton variant="success" :disabled="loading || players.length < 2" @click="startGame"
           class="w-full">
-          {{ loading ? '⏳ INICIANDO...' : '¡INICIAR JUEGO!' }}
+          <Rocket v-if="!loading" :size="20" class="inline mr-2" />
+          <Loader2 v-else :size="20" class="inline mr-2 animate-spin" />
+          {{ loading ? 'INICIANDO...' : '¡INICIAR JUEGO!' }}
         </NeonButton>
 
-        <NeonButton variant="back" icon="←" @click="goBack" class="w-full">
+        <NeonButton variant="back" @click="goBack" class="w-full">
+          <ArrowLeft :size="20" class="inline mr-2" />
           SALIR
         </NeonButton>
       </div>

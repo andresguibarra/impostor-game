@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
 import { Settings, AlertTriangle, Gamepad2, Rocket, Key, Check, ArrowLeft } from 'lucide-vue-next'
+import NeonButton from './NeonButton.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -14,6 +15,7 @@ const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
 const showQrNameDialog = ref(false)
+const joinCodeInput = ref<HTMLInputElement | null>(null)
 
 // Check for QR join code from URL parameter
 onMounted(() => {
@@ -22,6 +24,14 @@ onMounted(() => {
     joinCode.value = qrCode.toUpperCase()
     customName.value = generateFunnyName()
     showQrNameDialog.value = true
+  }
+})
+
+// Auto-focus join code input when switching to join mode
+watch(isJoining, async (newValue) => {
+  if (newValue) {
+    await nextTick()
+    joinCodeInput.value?.focus()
   }
 })
 
@@ -220,22 +230,24 @@ function generateName() {
       
       <!-- Buttons with Neon components -->
       <div v-if="!isJoining" class="space-y-4">
-        <button
+        <NeonButton 
+          variant="primary" 
           :disabled="loading"
           @click="createSession"
-          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-amber-500/90 to-amber-600/95 border-3 border-amber-300/80 text-white shadow-[0_0_20px_rgba(245,158,11,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(245,158,11,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(251,191,36,0.8),0_0_20px_rgba(245,158,11,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
+          class="w-full"
         >
           <Gamepad2 :size="24" class="mr-3" />
           {{ loading ? 'Creando...' : 'NUEVA PARTIDA' }}
-        </button>
+        </NeonButton>
         
-        <button
+        <NeonButton 
+          variant="secondary"
           @click="toggleJoinMode"
-          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-cyan-500/90 to-cyan-600/95 border-3 border-cyan-300/80 text-white shadow-[0_0_20px_rgba(6,182,212,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(6,182,212,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(103,232,249,0.8),0_0_20px_rgba(6,182,212,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
+          class="w-full"
         >
           <Rocket :size="24" class="mr-3" />
           UNIRSE A PARTIDA
-        </button>
+        </NeonButton>
       </div>
       
       <!-- Join mode -->
@@ -245,6 +257,7 @@ function generateName() {
             <Key :size="20" /> Código de sesión
           </label>
           <input 
+            ref="joinCodeInput"
             v-model="joinCode"
             type="text"
             placeholder="Ej: AB3C5"
@@ -255,22 +268,24 @@ function generateName() {
           />
         </div>
         
-        <button
+        <NeonButton 
+          variant="success"
           :disabled="loading || !joinCode.trim()"
           @click="joinSession"
-          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-3 px-5 text-base bg-gradient-to-br from-green-500/90 to-green-700/95 border-3 border-green-300/80 text-white shadow-[0_0_20px_rgba(34,197,94,0.5),0_4px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7),0_6px_20px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_15px_rgba(34,197,94,0.4),0_2px_10px_rgba(0,0,0,0.3)] [text-shadow:0_0_10px_rgba(134,239,172,0.8),0_0_20px_rgba(34,197,94,0.6),2px_2px_4px_rgba(0,0,0,0.5)]"
+          class="w-full"
         >
           <Check :size="24" class="mr-3" />
           {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
-        </button>
+        </NeonButton>
         
-        <button
+        <NeonButton 
+          variant="back"
           @click="toggleJoinMode"
-          class="w-full font-black rounded-3xl transition-all cursor-pointer backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center py-4 px-6 text-xl bg-gradient-to-br from-slate-600/70 to-slate-700/80 border-2 border-slate-400/50 text-slate-200 shadow-[0_0_10px_rgba(71,85,105,0.3),0_4px_12px_rgba(0,0,0,0.25)] hover:shadow-[0_0_15px_rgba(71,85,105,0.4),0_5px_15px_rgba(0,0,0,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_0_8px_rgba(71,85,105,0.3),0_2px_8px_rgba(0,0,0,0.2)] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]"
+          class="w-full"
         >
           <ArrowLeft :size="20" class="mr-2" />
           VOLVER
-        </button>
+        </NeonButton>
       </div>
     </div>
   </div>
