@@ -20,6 +20,7 @@ This guide will help you deploy the Impostor Game to Firebase Hosting.
 1. In your Firebase project dashboard, click on "Hosting" in the left sidebar
 2. Click "Get started"
 3. You don't need to install Firebase CLI or initialize locally - the project is already configured
+4. **Important**: Update the `.firebaserc` file in your repository to match your Firebase project name (replace "impostor-game" with your actual Firebase project ID)
 
 ## Step 3: Generate Firebase Service Account
 
@@ -32,7 +33,7 @@ This guide will help you deploy the Impostor Game to Firebase Hosting.
 
 ## Step 4: Add GitHub Secret
 
-1. Go to your GitHub repository: `https://github.com/andresguibarra/impostor-game`
+1. Go to your GitHub repository (Settings page)
 2. Click on "Settings" tab
 3. In the left sidebar, expand "Secrets and variables" and click "Actions"
 4. Click "New repository secret"
@@ -80,7 +81,7 @@ firebase deploy --only hosting
 After the first successful deployment:
 
 1. Go to Firebase Console → Hosting
-2. You'll see your site URL (something like `https://impostor-game.web.app`)
+2. You'll see your site URL (something like `https://YOUR_PROJECT_ID.web.app`)
 3. Click on the URL to view your deployed application
 
 ## Custom Domain (Optional)
@@ -123,7 +124,7 @@ The following files configure Firebase Hosting:
   - Sets cache headers for static assets
 
 - `.firebaserc` - Firebase project configuration
-  - Specifies the default Firebase project
+  - Specifies the default Firebase project (update the project name to match your Firebase project)
 
 - `.github/workflows/deploy.yml` - GitHub Actions workflow
   - Builds and deploys on push to main branch
