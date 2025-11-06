@@ -97,55 +97,69 @@ async function loadSession() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4">
-    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
-      <!-- Header -->
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden">
+    <!-- Animated background decorations -->
+    <div class="absolute top-10 left-10 text-6xl opacity-20 emoji-float">⏳</div>
+    <div class="absolute bottom-20 right-10 text-6xl opacity-20 emoji-float" style="animation-delay: 0.7s;">🎉</div>
+    <div class="absolute top-1/2 right-10 text-5xl opacity-20 rotate-slow">🎪</div>
+    
+    <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-md w-full card-animate relative z-10 border-4 border-cyan-400">
+      <!-- Header with playful styling -->
       <div class="text-center mb-6">
-        <h2 class="text-3xl font-bold text-purple-600 mb-2">
-          🎮 Esperando inicio...
+        <div class="text-7xl mb-4 bounce-subtle">⏳</div>
+        <h2 class="text-4xl font-black text-gradient-party mb-4" style="font-family: 'Comic Sans MS', cursive, sans-serif;">
+          ¡ESPERANDO!
         </h2>
-        <div class="bg-purple-100 rounded-lg p-4 mb-4">
-          <p class="text-sm text-gray-600 mb-1">Sesión:</p>
-          <p class="text-3xl font-bold text-purple-600 tracking-wider">
+        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl p-5 mb-4 shadow-xl">
+          <p class="text-sm text-white font-bold mb-1 opacity-90">📍 SESIÓN:</p>
+          <p class="text-4xl font-black text-white tracking-[0.2em]">
             {{ sessionCode }}
           </p>
         </div>
-        <p class="text-gray-600">
-          Hola, <span class="font-bold text-purple-600">{{ playerName }}</span>!
-        </p>
-      </div>
-      
-      <!-- Waiting animation -->
-      <div class="flex justify-center mb-6">
-        <div class="animate-pulse text-6xl">
-          ⏳
+        <div class="bg-gradient-to-r from-fuchsia-100 to-pink-100 rounded-2xl p-4 border-3 border-fuchsia-300">
+          <p class="text-lg font-semibold text-gray-700">
+            Hola, <span class="font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-pink-600 text-xl">{{ playerName }}</span>! 👋
+          </p>
         </div>
       </div>
       
-      <!-- Game info -->
-      <div v-if="session" class="mb-6 p-4 bg-purple-50 rounded-lg">
-        <p class="text-sm text-gray-700">
-          <span class="font-semibold">Impostores:</span> {{ session.impostor_count }}
+      <!-- Fun waiting animation -->
+      <div class="flex justify-center mb-6 bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl py-8 border-3 border-amber-300">
+        <div class="flex gap-3">
+          <div class="text-5xl animate-pulse" style="animation-delay: 0s;">🎮</div>
+          <div class="text-5xl animate-pulse" style="animation-delay: 0.3s;">🎯</div>
+          <div class="text-5xl animate-pulse" style="animation-delay: 0.6s;">🎪</div>
+        </div>
+      </div>
+      
+      <!-- Game info with vibrant design -->
+      <div v-if="session" class="mb-6 p-5 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl border-3 border-purple-400">
+        <p class="text-base font-black text-purple-800 flex items-center gap-2">
+          <span class="text-2xl">🎭</span>
+          <span>IMPOSTORES EN JUEGO: <span class="text-2xl text-gradient-party">{{ session.impostor_count }}</span></span>
         </p>
       </div>
       
-      <!-- Players list -->
+      <!-- Players list with animated cards -->
       <div class="mb-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-3">
-          Jugadores conectados ({{ players.length }}):
+        <h3 class="text-xl font-black text-gray-800 mb-3 flex items-center gap-2">
+          <span class="text-2xl">👥</span>
+          JUGADORES ({{ players.length }}):
         </h3>
         <div class="space-y-2 max-h-64 overflow-y-auto">
           <div
-            v-for="player in players"
+            v-for="(player, index) in players"
             :key="player.id"
-            class="flex items-center justify-between p-3 bg-gray-100 rounded-lg"
+            class="flex items-center justify-between p-4 bg-gradient-to-r from-lime-100 to-green-100 rounded-xl border-2 border-lime-300 shadow-md slide-in-up"
+            :style="{ animationDelay: `${index * 0.1}s` }"
           >
-            <span class="font-medium text-gray-800">
+            <span class="font-black text-gray-800 flex items-center gap-2">
+              <span class="text-2xl">🎮</span>
               {{ player.name }}
             </span>
             <span
               v-if="player.id === playerId"
-              class="text-xs bg-purple-600 text-white px-2 py-1 rounded-full"
+              class="text-xs bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-1 rounded-full font-black shadow-lg pulse-glow"
             >
               VOS
             </span>
@@ -153,16 +167,24 @@ async function loadSession() {
         </div>
       </div>
       
-      <p class="text-center text-gray-600 mb-6">
-        Esperando a que el host inicie el juego...
-      </p>
+      <!-- Waiting message with fun design -->
+      <div class="text-center mb-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-5 border-3 border-amber-300">
+        <p class="text-lg font-black text-gray-700 flex items-center justify-center gap-2">
+          <span class="text-3xl bounce-subtle">⏰</span>
+          <span>Esperando al host...</span>
+        </p>
+        <p class="text-sm font-semibold text-gray-600 mt-2">
+          ¡El juego comenzará pronto! 🎊
+        </p>
+      </div>
       
       <!-- Back button -->
       <button
         @click="emit('back')"
-        class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+        class="w-full bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 py-4 rounded-2xl font-black hover:from-gray-400 hover:to-gray-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
       >
-        ← Salir
+        <span class="text-xl mr-2">←</span>
+        SALIR
       </button>
     </div>
   </div>

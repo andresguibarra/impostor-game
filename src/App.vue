@@ -43,7 +43,7 @@ function handleBackToHome() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500">
+  <div class="min-h-screen bg-gradient-to-br from-fuchsia-500 via-amber-400 to-cyan-400">
     <HomeScreen 
       v-if="currentScreen === 'home'"
       @create-session="handleCreateSession"
