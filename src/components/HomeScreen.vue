@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { generateSessionCode, generatePlayerId, generateFunnyName } from '../lib/utils'
 import { supabase, isSupabaseConfigured, SUPABASE_NOT_CONFIGURED_ERROR } from '../lib/supabase'
+import NeonButton from './NeonButton.vue'
 
 const props = defineProps<{
   qrJoinCode?: string
@@ -40,7 +41,6 @@ async function createSession() {
   error.value = ''
   
   try {
-    // Check if Supabase is configured
     if (!isSupabaseConfigured) {
       throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
@@ -49,7 +49,6 @@ async function createSession() {
     const playerId = generatePlayerId()
     const playerName = customName.value.trim() || generateFunnyName()
     
-    // Create session in Supabase
     const { error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -61,7 +60,6 @@ async function createSession() {
     
     if (sessionError) throw sessionError
     
-    // Add host as first player
     const { error: playerError } = await supabase
       .from('players')
       .insert({
@@ -86,7 +84,6 @@ async function joinSession() {
   error.value = ''
   
   try {
-    // Check if Supabase is configured
     if (!isSupabaseConfigured) {
       throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
@@ -98,7 +95,6 @@ async function joinSession() {
       return
     }
     
-    // Check if session exists
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .select('*')
@@ -114,7 +110,6 @@ async function joinSession() {
     const playerId = generatePlayerId()
     const playerName = customName.value.trim() || generateFunnyName()
     
-    // Add player to session
     const { error: playerError } = await supabase
       .from('players')
       .insert({
@@ -154,102 +149,50 @@ function cancelQrJoin() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4">
-    <!-- QR Code Join Name Dialog -->
-    <div 
-      v-if="showQrNameDialog" 
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      @click.self="cancelQrJoin"
-    >
-      <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
-        <h2 class="text-3xl font-bold text-center mb-2 text-purple-600">
-          📱 Unirse via QR
-        </h2>
-        <p class="text-center text-gray-600 mb-6">
-          Código de sesión: <span class="font-bold text-purple-600">{{ joinCode }}</span>
-        </p>
-        
-        <!-- Name input -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Tu nombre (opcional)
-          </label>
-          <div class="flex gap-2">
-            <input 
-              v-model="customName"
-              type="text"
-              placeholder="Dejá vacío para nombre random"
-              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              maxlength="20"
-              @keyup.enter="joinSession"
-            />
-            <button
-              @click="generateName"
-              class="px-4 py-3 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition"
-              title="Generar nombre random"
-            >
-              🎲
-            </button>
-          </div>
-        </div>
-        
-        <!-- Error message -->
-        <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-          {{ error }}
-        </div>
-        
-        <!-- Actions -->
-        <div class="space-y-3">
-          <button
-            @click="joinSession"
-            :disabled="loading"
-            class="w-full bg-purple-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ loading ? 'Uniéndose...' : '✅ Unirse a la Sala' }}
-          </button>
-          
-          <button
-            @click="cancelQrJoin"
-            :disabled="loading"
-            class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
-          >
-            ✕ Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-    
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden dark-impostor-bg">
     <!-- Configuration warning banner -->
-    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-lg">
+    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium">Configuración requerida</h3>
+          <h3 class="text-sm font-medium">⚙️ Configuración requerida</h3>
           <p class="text-sm mt-1">La aplicación necesita credenciales de Supabase para funcionar. Si sos el administrador, configurá las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>
         </div>
       </div>
     </div>
     
-    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
-      <h1 class="text-4xl font-bold text-center mb-2 text-purple-600">
-        🎭 El juego del impostor
-      </h1>
+    <!-- Main card with neon border like the reference image -->
+    <div class="neon-card-impostor shadow-2xl p-10 max-w-lg w-full relative z-10">
+      <!-- Impostor silhouette header - positioned to overflow top -->
+      <div class="text-center">
+        <div class="impostor-silhouette-container">
+          <img src="../assets/anon.png" alt="Impostor Silhouette" class="impostor-image" />
+        </div>
+        
+        <h1 class="text-6xl font-black mb-2 impostor-title tracking-tight">
+          IMPOSTOR
+        </h1>
+        <p class="text-2xl font-bold mb-4 text-cyan-400">
+          ¡Encontrá al impostor!
+        </p>
+      </div>
       
-      <!-- Name input -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Tu nombre
+      <!-- Name input with plus icon like reference -->
+      <div class="mb-5">
+        <label class="block text-base font-bold mb-2.5 text-yellow-400 flex items-center gap-2">
+          <span class="text-xl">➕</span> Tu nombre
         </label>
-        <div class="flex gap-2">
+        <div class="flex gap-3">
           <input 
             v-model="customName"
             type="text"
-            placeholder="Dejá vacío para nombre random"
-            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            placeholder=""
+            class="flex-1 px-5 py-4 rounded-2xl font-semibold text-white placeholder-gray-500 transition-all focus:ring-4 focus:ring-yellow-500/50 focus:outline-none"
+            style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(255, 193, 7, 0.5);"
             maxlength="20"
             autocomplete="off"
             autocapitalize="off"
@@ -264,7 +207,8 @@ function cancelQrJoin() {
           />
           <button
             @click="generateName"
-            class="px-4 py-3 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition"
+            class="px-5 py-4 rounded-2xl hover:scale-110 transition-all shadow-lg text-3xl btn-squish"
+            style="background: rgba(255, 152, 0, 0.3); border: 2px solid #ff9800;"
             title="Generar nombre random"
           >
             🎲
@@ -273,59 +217,182 @@ function cancelQrJoin() {
       </div>
       
       <!-- Error message -->
-      <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-        {{ error }}
+      <div v-if="error" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg">
+        <span class="text-xl mr-2">⚠️</span>{{ error }}
       </div>
       
-      <!-- Create or Join -->
+      <!-- Buttons with Neon components -->
       <div v-if="!isJoining" class="space-y-4">
-        <button
-          @click="createSession"
+        <NeonButton
+          variant="primary"
+          icon="🎮"
           :disabled="loading"
-          class="w-full bg-purple-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="createSession"
+          class="w-full"
         >
-          {{ loading ? 'Creando...' : '🎮 Crear Sesión' }}
-        </button>
+          {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
+        </NeonButton>
         
-        <button
+        <NeonButton
+          variant="secondary"
+          icon="🚀"
           @click="toggleJoinMode"
-          class="w-full bg-white text-purple-600 py-4 rounded-lg text-lg font-semibold border-2 border-purple-600 hover:bg-purple-50 transition"
+          class="w-full"
         >
-          🚪 Unirse a Sesión
-        </button>
+          UNIRSE A SESIÓN
+        </NeonButton>
       </div>
       
       <!-- Join mode -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Código de sesión
+          <label class="block text-base font-bold mb-2.5 text-cyan-400 flex items-center gap-2">
+            <span class="text-xl">🔑</span> Código de sesión
           </label>
           <input 
             v-model="joinCode"
             type="text"
             placeholder="Ej: AB3C5"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
+            class="w-full px-5 py-5 rounded-2xl uppercase font-black text-3xl text-center tracking-widest transition-all focus:ring-4 focus:ring-cyan-500/50 focus:outline-none text-white placeholder-gray-600"
+            style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(0, 188, 212, 0.5);"
             maxlength="6"
             @keyup.enter="joinSession"
           />
         </div>
         
-        <button
-          @click="joinSession"
+        <NeonButton
+          variant="success"
+          icon="✅"
           :disabled="loading || !joinCode.trim()"
-          class="w-full bg-purple-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="joinSession"
+          class="w-full"
         >
-          {{ loading ? 'Uniéndose...' : '✅ Unirse' }}
-        </button>
+          {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
+        </NeonButton>
         
-        <button
+        <NeonButton
+          variant="back"
+          icon="←"
+          size="md"
           @click="toggleJoinMode"
-          class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+          class="w-full"
         >
-          ← Volver
-        </button>
+          VOLVER
+        </NeonButton>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Dark impostor background */
+.dark-impostor-bg {
+  background: linear-gradient(135deg, 
+    #0a0a15 0%, 
+    #1a1a2e 25%, 
+    #16213e 50%, 
+    #1a1a2e 75%, 
+    #0a0a15 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Neon card with rainbow border like the reference */
+.neon-card-impostor {
+  background: rgba(15, 15, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 2rem;
+  border: 4px solid transparent;
+  min-height: 70vh;
+  padding-top: 8em;
+  background-image: 
+    linear-gradient(rgba(15, 15, 30, 0.95), rgba(15, 15, 30, 0.95)),
+    linear-gradient(135deg, 
+      #00ff87 0%, 
+      #60efff 25%, 
+      #a855f7 50%, 
+      #ec4899 75%, 
+      #ef4444 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  animation: neonPulse 3s ease-in-out infinite;
+}
+
+/* Desktop padding adjustment */
+@media (min-width: 768px) {
+  .neon-card-impostor {
+    padding-top: 9em;
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 135, 0.4), 0 0 80px rgba(168, 85, 247, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(96, 239, 255, 0.5), 0 0 100px rgba(236, 72, 153, 0.4); }
+}
+
+/* Impostor title with orange gradient */
+.impostor-title {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 25%, #ffa500 50%, #ff8c00 75%, #ff6b00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6));
+  text-shadow: 0 0 30px rgba(255, 140, 0, 0.8);
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { filter: drop-shadow(0 4px 12px rgba(255, 140, 0, 0.6)); }
+  50% { filter: drop-shadow(0 4px 20px rgba(255, 140, 0, 0.9)); }
+}
+
+/* Impostor image overflowing the top - absolute positioning with percentage */
+.impostor-silhouette-container {
+  position: absolute;
+  top: -22%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+  width: min(280px, 32vw);
+}
+
+.impostor-image {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .impostor-silhouette-container {
+    top: -18%;
+    width: min(220px, 60vw);
+  }
+}
+
+/* Slide in animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.slide-in-bounce {
+  animation: slideInUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+</style>

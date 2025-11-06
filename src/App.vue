@@ -69,7 +69,7 @@ function handleCancelQrJoin() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500">
+  <div class="min-h-screen dark-impostor-bg-main relative overflow-hidden">
     <HomeScreen 
       v-if="currentScreen === 'home'"
       :qr-join-code="qrJoinCode"
@@ -108,5 +108,20 @@ function handleCancelQrJoin() {
 </template>
 
 <style scoped>
+.dark-impostor-bg-main {
+  background: linear-gradient(135deg, 
+    #0a0a15 0%, 
+    #1a1a2e 25%, 
+    #16213e 50%, 
+    #1a1a2e 75%, 
+    #0a0a15 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
 </style>
 
