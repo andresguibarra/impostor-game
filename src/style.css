@@ -158,13 +158,26 @@
   animation: spin-wobble 4s ease-in-out infinite;
 }
 
-/* Gradient text effects */
+/* Gradient text effects - matching reference exactly */
+.text-gradient-impostor {
+  background: linear-gradient(90deg, #ff6b6b 0%, #ff8c42 50%, #ffa726 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-game {
+  background: linear-gradient(90deg, #f9d71c 0%, #8bc34a 50%, #26c6da 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .text-gradient-party {
   background: linear-gradient(135deg, #ec4899, #f59e0b, #10b981, #06b6d4);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: pulse-scale 3s ease-in-out infinite;
 }
 
 .text-gradient-rainbow {

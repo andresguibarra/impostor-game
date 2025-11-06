@@ -148,21 +148,22 @@ function generateName() {
         <div class="text-8xl mb-4 inline-block">
           <div class="bounce-fun">😎😷</div>
         </div>
-        <h1 class="text-6xl font-black text-gradient-rainbow mb-3 neon-glow" style="font-family: 'Arial Black', sans-serif; letter-spacing: -2px;">
-          IMPOSTOR<br/>GAME
+        <h1 class="text-6xl font-black mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif; letter-spacing: -1px; line-height: 1.1;">
+          <span class="text-gradient-impostor">IMPOSTOR</span><br/>
+          <span class="text-gradient-game">GAME</span>
         </h1>
-        <p class="text-xl font-bold text-gradient-party mb-2">
-          ¡Encontrá al impostor!
+        <p class="text-xl font-bold mb-2" style="color: #8b5cf6;">
+          ¡Encontrá al impostor! 🕵️
         </p>
         <p class="text-sm text-gray-600 font-semibold">
-          Juego de palabras argentino 🇦🇷
+          🇦🇷 Juego de palabras argentino
         </p>
       </div>
       
       <!-- Name input with modern styling -->
       <div class="mb-6 mt-8">
-        <label class="block text-sm font-bold text-fuchsia-600 mb-2">
-          Tu nombre (opcional)
+        <label class="block text-sm font-bold mb-2" style="color: #e879f9;">
+          ✨ Tu nombre (opcional)
         </label>
         <div class="flex gap-2">
           <input 
@@ -202,7 +203,8 @@ function generateName() {
         <button
           @click="createSession"
           :disabled="loading"
-          class="w-full bg-gradient-to-r from-fuchsia-500 via-pink-500 to-pink-600 text-white py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish pulse-glow"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish pulse-glow text-white"
+          style="background: linear-gradient(135deg, #e91e63 0%, #d81b60 100%); border-radius: 16px;"
         >
           <span class="text-2xl mr-2">🎮</span>
           {{ loading ? 'Creando...' : 'CREAR SESIÓN' }}
@@ -210,7 +212,8 @@ function generateName() {
         
         <button
           @click="toggleJoinMode"
-          class="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-blue-600 text-white py-5 px-6 text-xl font-black hover:shadow-2xl transition-all shadow-xl btn-morph btn-squish"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all shadow-xl btn-morph btn-squish text-white"
+          style="background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); border-radius: 16px;"
         >
           <span class="text-2xl mr-2">🚀</span>
           UNIRSE A SESIÓN
@@ -220,14 +223,15 @@ function generateName() {
       <!-- Join mode with creative design -->
       <div v-else class="space-y-4">
         <div>
-          <label class="block text-sm font-bold text-cyan-600 mb-2">
-            Código de sesión
+          <label class="block text-sm font-bold mb-2" style="color: #00bcd4;">
+            🔑 Código de sesión
           </label>
           <input 
             v-model="joinCode"
             type="text"
             placeholder="Ej: AB3C5"
-            class="w-full px-5 py-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-3 border-cyan-300 rounded-2xl focus:ring-4 focus:ring-cyan-400 focus:border-cyan-500 uppercase font-black text-2xl text-center tracking-[0.3em] transition-all shimmer"
+            class="w-full px-5 py-4 border-3 rounded-2xl focus:ring-4 focus:ring-cyan-400 focus:border-cyan-500 uppercase font-black text-2xl text-center tracking-[0.3em] transition-all shimmer"
+            style="background: linear-gradient(to right, #e0f7fa, #b2ebf2); border-color: #00bcd4;"
             maxlength="6"
             @keyup.enter="joinSession"
           />
@@ -236,7 +240,8 @@ function generateName() {
         <button
           @click="joinSession"
           :disabled="loading || !joinCode.trim()"
-          class="w-full bg-gradient-to-r from-lime-400 via-green-500 to-green-600 text-white py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish"
+          class="w-full py-5 px-6 text-xl font-black hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-blob btn-squish text-white"
+          style="background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%); border-radius: 16px;"
         >
           <span class="text-2xl mr-2">✨</span>
           {{ loading ? 'Uniéndose...' : 'UNIRSE AHORA!' }}
@@ -244,7 +249,8 @@ function generateName() {
         
         <button
           @click="toggleJoinMode"
-          class="w-full bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 py-4 px-6 rounded-2xl font-black hover:shadow-xl transition-all shadow-lg btn-squish"
+          class="w-full py-4 px-6 font-black hover:shadow-xl transition-all shadow-lg btn-squish text-gray-700"
+          style="background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%); border-radius: 16px;"
         >
           <span class="text-xl mr-2">←</span>
           VOLVER
