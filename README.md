@@ -86,51 +86,55 @@ yarn build
 yarn preview
 ```
 
-## 📦 Deployment to GitHub Pages
+## 📦 Deployment to Firebase Hosting
 
-1. Update the `base` in `vite.config.ts` to match your repository name:
+The project is configured to deploy automatically to Firebase Hosting via GitHub Actions.
 
-```typescript
-export default defineConfig({
-  base: '/your-repo-name/',
-  // ...
-})
-```
+### Automatic Deployment (Recommended)
 
-2. Build the project:
+1. Create a Firebase project at https://firebase.google.com/
+2. Install Firebase CLI locally: `npm install -g firebase-tools`
+3. Login to Firebase: `firebase login`
+4. Initialize Firebase in your project (already configured):
+   - `firebase.json` and `.firebaserc` are already set up
+5. Generate a Firebase service account key:
+   - Go to Firebase Console → Project Settings → Service Accounts
+   - Click "Generate New Private Key"
+   - Save the JSON file securely
+6. Add the service account JSON as a GitHub secret:
+   - Go to your GitHub repository → Settings → Secrets and Variables → Actions
+   - Create a new secret named `FIREBASE_SERVICE_ACCOUNT`
+   - Paste the entire JSON content as the value
+7. Push to main branch - GitHub Actions will automatically build and deploy
+
+The deployment workflow is defined in `.github/workflows/deploy.yml` and will:
+- Build the project with your Supabase environment variables
+- Deploy to Firebase Hosting automatically on every push to main
+
+### Manual Deployment
+
+If you want to deploy manually:
 
 ```bash
-yarn deploy
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Build the project
+yarn build
+
+# Deploy to Firebase Hosting
+firebase deploy --only hosting
 ```
 
-3. Deploy the `dist` folder to GitHub Pages using GitHub Actions or manually.
+### Configuration
 
-### GitHub Actions Deployment (Recommended)
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: yarn
-      - run: yarn build
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
+The Firebase configuration is in `firebase.json`:
+- Public directory: `dist`
+- Single Page App: All routes redirect to `index.html`
+- Cache control headers for static assets
 
 ## 🎯 How to Play
 
