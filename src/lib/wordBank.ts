@@ -1,16 +1,16 @@
 export const wordBank = [
   // Lugares y Geografía
-  "Pampa",
+  "Buenos Aires",
+  "Córdoba",
+  "Rosario",
+  "Mar del Plata",
   "Patagonia",
-  "Andes",
   "Iguazú",
-  "Aconcagua",
-  "Glaciar",
-  "Puna",
-  "Quebrada",
-  "Estancia",
-  "Rancho",
-  
+  "Mendoza",
+  "Bariloche",
+  "Tigre",
+  "La Plata",
+
   // Gastronomía
   "Asado",
   "Mate",
@@ -24,160 +24,149 @@ export const wordBank = [
   "Provoleta",
   "Facturas",
   "Medialunas",
-  "Churros",
   "Fernet",
+  "Pizza",
+  "Helado",
+  "Cerveza",
   "Malbec",
-  
-  // Folklore y Tradiciones
+
+  // Cultura y Tradiciones
   "Gaucho",
-  "Boleadoras",
-  "Facón",
-  "Rastra",
-  "Bombacha",
-  "Alpargatas",
   "Poncho",
   "Boina",
-  "Chamame",
   "Zamba",
   "Chacarera",
-  "Malambo",
   "Tango",
   "Milonga",
-  "Payador",
   "Guitarra",
   "Bombo",
   "Bandoneón",
-  
+  "Peña",
+  "Carnaval",
+  "Mateada",
+  "Fogón",
+
   // Animales
-  "Ñandú",
-  "Guanaco",
-  "Vicuña",
-  "Puma",
-  "Yacaré",
   "Carpincho",
   "Hornero",
+  "Puma",
+  "Yacaré",
   "Cóndor",
-  "Chinchilla",
-  "Vizcacha",
-  "Tucán",
   "Pingüino",
   "Ballena",
   "Lobo marino",
-  
-  // Plantas
-  "Ombú",
+  "Caballo",
+  "Perro",
+
+  // Plantas y Naturaleza
   "Ceibo",
-  "Quebracho",
-  "Algarrobo",
+  "Ombú",
   "Yerba",
   "Cactus",
   "Cardón",
-  
-  // Personajes y Cultura
-  "Martín Fierro",
-  "Evita",
+  "Campo",
+  "Río",
+  "Playa",
+  "Montaña",
+  "Lago",
+
+  // Personajes y Cultura Popular
   "Maradona",
+  "Messi",
+  "Evita",
   "Gardel",
   "Borges",
   "Cortázar",
-  "Che Guevara",
-  "San Martín",
-  
-  // Deportes
-  "Polo",
-  "Pato",
+  "Charly García",
+  "Fito Páez",
+  "Susana Giménez",
+  "Tini",
+  "Ricardo Darín",
+
+  // Deportes y Juegos
   "Truco",
-  "Pelota",
+  "Pádel",
+  "Fútbol",
   "Bochas",
-  
+  "Polo",
+  "Tenis",
+  "Ping pong",
+  "Metegol",
+  "Karting",
+
   // Objetos y Vida Cotidiana
   "Birome",
-  "Calefón",
+  "Celular",
   "Colectivo",
-  "Baldosa",
-  "Banderín",
-  
-  // Expresiones y Conceptos
+  "Subte",
+  "Moto",
+  "Remera",
+  "Ojota",
+  "Parrilla",
+  "Heladera",
+  "Ventilador",
+  "Mate",
+  "Bombilla",
+
+  // Expresiones y Costumbres
   "Fiesta",
-  "Peña",
+  "Amigo",
   "Siesta",
   "Sobremesa",
-  "Pulpería",
-  "Almacén",
-  "Conventillo",
-  
-  // Naturaleza
-  "Pampeano",
-  "Serrano",
-  "Cordillera",
-  "Litoral",
-  "Laguna",
-  "Río",
-  "Delta",
-  "Salinas",
-  
-  // Folklore Mitológico
-  "Pachamama",
-  "Coquena",
-  "Zupay",
-  "Kakuy",
-  "Añá",
-  "Luz mala",
-  "Lobizón",
-  "Pombero",
-  "Yasí Yateré",
-  "Curupí",
-  
-  // Danzas
-  "Gato",
-  "Escondido",
-  "Carnavalito",
-  "Huayno",
-  "Cueca",
-  
-  // Instrumentos
-  "Charango",
-  "Erke",
-  "Siku",
-  "Quena",
-  "Caja",
-  
+  "Birra",
+  "Picada",
+  "Chamuyo",
+  "Che",
+  "Boliche",
+  "Barrio",
+  "Merienda",
+  "Vacaciones",
+
   // Comidas Regionales
   "Humita",
   "Tamales",
   "Carbonada",
-  "Cazuela",
   "Puchero",
-  "Mondongo",
+  "Locro",
   "Choclo",
-  "Quinoa",
-  
+  "Ñoquis",
+  "Pastelitos",
+  "Panqueque",
+  "Tarta",
+
   // Bebidas
   "Vino",
-  "Torrontés",
-  "Quilmes",
-  "Mosto",
-  "Aloja",
-  
-  // Textiles
-  "Telar",
-  "Aguayo",
-  "Mantilla",
-  "Vincha",
-  
-  // Trabajo Rural
-  "Tropero",
-  "Arriero",
-  "Domador",
-  "Carrero",
-  "Chasqui",
-  
-  // Arquitectura
-  "Rancho",
-  "Adobe",
+  "Fernet",
+  "Cerveza",
+  "Coca",
+  "Agua",
+  "Café",
+  "Té",
+  "Jugo",
+
+  // Trabajo y oficios
+  "Panadero",
+  "Carpintero",
+  "Docente",
+  "Mecánico",
+  "Electricista",
+  "Repartidor",
+  "Mozo",
+  "Carnicero",
+  "Verdulero",
+  "Taxista",
+
+  // Arquitectura y Lugares
+  "Casa",
   "Quincho",
   "Galería",
-  "Alero",
+  "Patio",
+  "Plaza",
+  "Balcón",
+  "Edificio",
+  "Kiosco",
+  "Escuela",
+  "Cancha",
 ]
 
 export function getRandomWord(): string {

@@ -16,6 +16,7 @@ const error = ref('')
 const loading = ref(false)
 const showQrNameDialog = ref(false)
 const joinCodeInput = ref<HTMLInputElement | null>(null)
+const isDiceAnimating = ref(false)
 
 // Check for QR join code from URL parameter
 onMounted(() => {
@@ -149,6 +150,10 @@ function toggleJoinMode() {
 
 function generateName() {
   customName.value = generateFunnyName()
+  isDiceAnimating.value = true
+  setTimeout(() => {
+    isDiceAnimating.value = false
+  }, 600)
 }
 
 </script>
@@ -213,11 +218,11 @@ function generateName() {
           />
           <button
             @click="generateName"
-            class="px-5 py-4 rounded-2xl hover:scale-110 transition-all shadow-lg text-3xl btn-squish"
+            class="px-5 py-4 rounded-2xl hover:scale-110 transition-all shadow-lg text-3xl"
             style="background: rgba(255, 152, 0, 0.3); border: 2px solid #ff9800;"
             title="Generar nombre random"
           >
-            🎲
+            <span :class="{ 'dice-shake': isDiceAnimating }" class="inline-block">🎲</span>
           </button>
         </div>
       </div>
@@ -401,5 +406,23 @@ function generateName() {
 
 .slide-in-bounce {
   animation: slideInUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Dice shake animation */
+@keyframes diceShake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  10% { transform: rotate(-15deg) scale(1.1); }
+  20% { transform: rotate(15deg) scale(1.1); }
+  30% { transform: rotate(-15deg) scale(1.1); }
+  40% { transform: rotate(15deg) scale(1.1); }
+  50% { transform: rotate(-10deg) scale(1.15); }
+  60% { transform: rotate(10deg) scale(1.15); }
+  70% { transform: rotate(-5deg) scale(1.1); }
+  80% { transform: rotate(5deg) scale(1.1); }
+  90% { transform: rotate(0deg) scale(1.05); }
+}
+
+.dice-shake {
+  animation: diceShake 0.6s ease-in-out;
 }
 </style>

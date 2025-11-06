@@ -6,6 +6,7 @@ import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
 import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Share2, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
 import ShareModal from './ShareModal.vue'
+import NeonButton from './NeonButton.vue'
 
 const props = defineProps<{
   gameCode: string
@@ -284,7 +285,7 @@ async function goBack() {
         <div class="flex justify-between items-stretch mb-3 gap-3">
           <div 
             @click="openShareModal"
-            class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center"
+            class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center"
           >
             <span class="text-xs font-bold text-white/80 flex items-center gap-1"><MapPin :size="14" /> SESIÓN</span>
             <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
@@ -292,7 +293,7 @@ async function goBack() {
               <MousePointerClick :size="12" /> Compartir
             </p>
           </div>
-          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex flex-col justify-center">
+          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex flex-col justify-center items-center text-center">
             <span class="text-xs font-bold text-white/80 flex items-center gap-1"><Gamepad2 :size="14" /> RONDA</span>
             <p class="text-lg font-black text-white">#{{ session?.round_number || 0 }}</p>
           </div>
@@ -397,34 +398,28 @@ async function goBack() {
       
       <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
-        <button
+        <NeonButton
           v-if="isHost"
           @click="newRound"
           :disabled="!canStartNewRound"
-          class="w-full bg-gradient-to-r from-lime-500 to-green-600 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-600 hover:to-green-700 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(132,204,22,0.5)] border-2 border-lime-400/50 flex items-center justify-center gap-2"
+          variant="success"
+          class="w-full"
         >
-          <Loader2 v-if="loading" :size="24" class="animate-spin" />
-          <RefreshCw v-else :size="24" />
+          <Loader2 v-if="loading" :size="24" class="animate-spin mr-2" />
+          <RefreshCw v-else :size="24" class="mr-2" />
           {{ loading ? 'GENERANDO...' : '¡NUEVA RONDA!' }}
-        </button>
+        </NeonButton>
         
-        <button
+        <NeonButton
           @click="goBack"
-          class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 rounded-2xl font-black hover:from-gray-700 hover:to-gray-800 transition-all transform hover:scale-105 active:scale-95 shadow-lg border-2 border-gray-500/50 flex items-center justify-center gap-2"
+          variant="back"
+          class="w-full"
         >
-          <ArrowLeft :size="20" />
+          <ArrowLeft :size="20" class="mr-2" />
           SALIR DEL JUEGO
-        </button>
+        </NeonButton>
       </div>
     </div>
-
-    <!-- Floating Share Button -->
-    <button
-      @click="openShareModal"
-      class="fixed bottom-6 right-6 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] transition-all transform hover:scale-110 active:scale-95 border-2 border-purple-400/50"
-    >
-      <Share2 :size="24" />
-    </button>
 
     <!-- Share Modal -->
     <ShareModal 
