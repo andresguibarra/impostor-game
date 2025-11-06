@@ -14,14 +14,20 @@ const playerName = ref<string>('')
 const isHost = ref<boolean>(false)
 const qrJoinCode = ref<string>('')
 
+function cleanupUrl() {
+  // Remove join parameter from URL
+  const url = new URL(window.location.href)
+  url.searchParams.delete('join')
+  window.history.replaceState({}, '', url.pathname + url.search)
+}
+
 onMounted(() => {
   // Check if there's a join code in the URL (QR code scan)
   const urlParams = new URLSearchParams(window.location.search)
   const joinCode = urlParams.get('join')
   if (joinCode) {
     qrJoinCode.value = joinCode.toUpperCase()
-    // Clean up URL to prevent dialog reappearing on refresh
-    window.history.replaceState({}, '', window.location.pathname)
+    // Don't clean up URL yet - keep it for page refresh
   }
 })
 
@@ -39,6 +45,7 @@ function handleJoinSession(code: string, id: string, name: string) {
   playerName.value = name
   isHost.value = false
   qrJoinCode.value = '' // Clear QR code after successful join
+  cleanupUrl() // Clean up URL after successful join
   currentScreen.value = 'player-lobby'
 }
 
@@ -57,6 +64,7 @@ function handleBackToHome() {
 
 function handleCancelQrJoin() {
   qrJoinCode.value = '' // Clear QR code when user cancels
+  cleanupUrl() // Clean up URL when user cancels
 }
 </script>
 
