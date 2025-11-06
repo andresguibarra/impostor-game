@@ -19,6 +19,8 @@ const loading = ref(false)
 const wordRevealed = ref(false)
 const showCountdown = ref(false)
 const countdown = ref(3)
+const showShareModal = ref(false)
+const qrCode = ref<string>('')
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -93,6 +95,50 @@ async function loadPlayers() {
   
   if (!error && data) {
     players.value = data
+  }
+}
+
+async function openShareModal() {
+  showShareModal.value = true
+  
+  // Generate QR code
+  const QRCode = (await import('qrcode')).default
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+  qrCode.value = await QRCode.toDataURL(gameUrl, {
+    width: 300,
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF',
+    },
+  })
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+async function shareInvite() {
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '¡Unite al juego del Impostor!',
+        text: `Unite a mi partida con el código: ${sessionCode.value}`,
+        url: gameUrl,
+      })
+    } catch (err) {
+      console.error('Error sharing:', err)
+    }
+  } else {
+    // Fallback: copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(gameUrl)
+      alert('Link copiado al portapapeles')
+    } catch (err) {
+      console.error('Error copying link:', err)
+    }
   }
 }
 
@@ -233,12 +279,18 @@ async function goBack() {
         <h2 class="text-4xl font-black impostor-title mb-4">
           ¡A JUGAR!
         </h2>
-        <div class="flex justify-between items-center mb-3 gap-3">
-          <div class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+        <div class="flex justify-between items-stretch mb-3 gap-3">
+          <div 
+            @click="openShareModal"
+            class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center"
+          >
             <span class="text-xs font-bold text-white/80">📍 SESIÓN</span>
             <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
+            <p class="text-xs text-white/60 mt-1">
+              👆 Compartir
+            </p>
           </div>
-          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex flex-col justify-center">
             <span class="text-xs font-bold text-white/80">🎮 RONDA</span>
             <p class="text-lg font-black text-white">#{{ session?.round_number || 0 }}</p>
           </div>
@@ -356,6 +408,57 @@ async function goBack() {
         </button>
       </div>
     </div>
+
+    <!-- Floating Share Button -->
+    <button
+      @click="openShareModal"
+      class="fixed bottom-6 right-6 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] transition-all transform hover:scale-110 active:scale-95 border-2 border-purple-400/50"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+      </svg>
+    </button>
+
+    <!-- Share Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showShareModal" @click="closeShareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg p-4">
+        <div @click.stop class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-4 border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.5)] relative">
+          <!-- Close button -->
+          <button
+            @click="closeShareModal"
+            class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <h3 class="text-3xl font-black text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
+            ¡Compartí la partida!
+          </h3>
+
+          <!-- QR Code -->
+          <div class="bg-white rounded-2xl p-4 mb-6 flex justify-center">
+            <img v-if="qrCode" :src="qrCode" alt="QR Code" class="w-64 h-64" />
+          </div>
+
+          <!-- Session Code -->
+          <div class="text-center mb-6">
+            <p class="text-sm text-white/60 font-bold mb-2">CÓDIGO DE SESIÓN:</p>
+            <p class="text-4xl font-black text-white tracking-widest">{{ sessionCode }}</p>
+          </div>
+
+          <!-- Share Button -->
+          <button
+            @click="shareInvite"
+            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl text-xl font-black hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(168,85,247,0.5)] border-2 border-purple-400/50"
+          >
+            <span class="text-2xl mr-2">📤</span>
+            COMPARTIR
+          </button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -417,6 +520,27 @@ async function goBack() {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(132, 204, 22, 0.8);
+}
+
+/* Modal transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active > div,
+.modal-fade-leave-active > div {
+  transition: transform 0.3s ease;
+}
+
+.modal-fade-enter-from > div,
+.modal-fade-leave-to > div {
+  transform: scale(0.9);
 }
 
 /* Slide in animations */
