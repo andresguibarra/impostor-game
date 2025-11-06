@@ -18,7 +18,16 @@ export function startNewRound(players: Player[], impostorCount: number): GameRou
 }
 
 export function selectRandomImpostors(players: Player[], count: number): string[] {
-  const shuffled = [...players].sort(() => Math.random() - 0.5)
+  // Fisher-Yates shuffle algorithm for true randomness
+  const shuffled = [...players]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = shuffled[i]
+    if (temp && shuffled[j]) {
+      shuffled[i] = shuffled[j]
+      shuffled[j] = temp
+    }
+  }
   return shuffled.slice(0, Math.min(count, players.length)).map(p => p.id)
 }
 
