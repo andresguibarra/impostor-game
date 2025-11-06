@@ -36,6 +36,7 @@ function handleJoinSession(code: string, id: string, name: string) {
   playerId.value = id
   playerName.value = name
   isHost.value = false
+  qrJoinCode.value = '' // Clear QR code after successful join
   currentScreen.value = 'player-lobby'
 }
 
@@ -49,6 +50,11 @@ function handleBackToHome() {
   playerId.value = ''
   playerName.value = ''
   isHost.value = false
+  qrJoinCode.value = '' // Clear QR code when going back to home
+}
+
+function handleCancelQrJoin() {
+  qrJoinCode.value = '' // Clear QR code when user cancels
 }
 </script>
 
@@ -59,6 +65,7 @@ function handleBackToHome() {
       :qr-join-code="qrJoinCode"
       @create-session="handleCreateSession"
       @join-session="handleJoinSession"
+      @cancel-qr-join="handleCancelQrJoin"
     />
     
     <HostLobby 

@@ -10,6 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   createSession: [code: string, playerId: string, playerName: string]
   joinSession: [code: string, playerId: string, playerName: string]
+  cancelQrJoin: []
 }>()
 
 const isJoining = ref(false)
@@ -136,15 +137,12 @@ function generateName() {
   customName.value = generateFunnyName()
 }
 
-async function joinViaQr() {
-  await joinSession()
-}
-
 function cancelQrJoin() {
   showQrNameDialog.value = false
   joinCode.value = ''
   customName.value = ''
   error.value = ''
+  emit('cancelQrJoin')
 }
 </script>
 
@@ -176,7 +174,7 @@ function cancelQrJoin() {
               placeholder="Dejá vacío para nombre random"
               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               maxlength="20"
-              @keyup.enter="joinViaQr"
+              @keyup.enter="joinSession"
             />
             <button
               @click="generateName"
@@ -196,7 +194,7 @@ function cancelQrJoin() {
         <!-- Actions -->
         <div class="space-y-3">
           <button
-            @click="joinViaQr"
+            @click="joinSession"
             :disabled="loading"
             class="w-full bg-purple-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
