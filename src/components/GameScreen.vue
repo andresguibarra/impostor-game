@@ -319,10 +319,6 @@ async function goBack() {
         
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
-            <p class="text-lg font-black text-gray-300 mb-4 bg-gradient-to-br from-amber-600/80 to-yellow-600/80 backdrop-blur-md rounded-xl p-4 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2">
-              <Eye :size="24" />
-              <span class="text-white">¡Tocá para ver tu palabra!</span>
-            </p>
             <button
               @click="revealWord"
               class="w-full py-16 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50"
@@ -331,6 +327,12 @@ async function goBack() {
                 <Eye :size="64" class="animate-bounce" />
               </div>
               ¡REVELAR!
+              <div class="mt-6 pt-4 border-t-2 border-white/20">
+                <p class="text-xs font-semibold text-white/70 flex items-center justify-center gap-1">
+                  <MousePointerClick :size="16" />
+                  ¡Tocá para ver tu palabra!
+                </p>
+              </div>
             </button>
           </div>
           
