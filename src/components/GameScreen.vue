@@ -421,14 +421,16 @@ async function goBack() {
       </div>
     </div>
 
-    <!-- Share Modal -->
-    <ShareModal 
-      :show="showShareModal"
-      :session-code="sessionCode"
-      :qr-code="qrCode"
-      @close="closeShareModal"
-      @share="shareInvite"
-    />
+    <!-- Share Modal with Teleport -->
+    <Teleport to="body">
+      <ShareModal 
+        :show="showShareModal"
+        :session-code="sessionCode"
+        :qr-code="qrCode"
+        @close="closeShareModal"
+        @share="shareInvite"
+      />
+    </Teleport>
   </div>
 </template>
 

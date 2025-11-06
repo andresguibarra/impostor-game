@@ -92,14 +92,16 @@ onMounted(async () => {
       </p>
     </div>
 
-    <!-- Share Modal -->
-    <ShareModal 
-      :show="showShareModal"
-      :session-code="sessionCode"
-      :qr-code="qrCodeUrl"
-      @close="closeShareModal"
-      @share="shareInvite"
-    />
+    <!-- Share Modal with Teleport -->
+    <Teleport to="body">
+      <ShareModal 
+        :show="showShareModal"
+        :session-code="sessionCode"
+        :qr-code="qrCodeUrl"
+        @close="closeShareModal"
+        @share="shareInvite"
+      />
+    </Teleport>
 
     <!-- Toast notification -->
     <Transition name="toast">
