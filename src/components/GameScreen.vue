@@ -147,116 +147,116 @@ function revealWord() {
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden">
-    <!-- Animated background decorations -->
-    <div class="absolute top-10 right-10 text-6xl opacity-20 emoji-float">🎯</div>
-    <div class="absolute bottom-10 left-10 text-6xl opacity-20 emoji-float" style="animation-delay: 0.8s;">🕵️</div>
+    <!-- Spy-themed background elements -->
+    <div class="absolute top-10 right-10 text-6xl opacity-10 flicker">🎯</div>
+    <div class="absolute bottom-10 left-10 text-6xl opacity-10 flicker" style="animation-delay: 0.8s;">🔍</div>
     
-    <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-md w-full card-animate relative z-10 border-4 border-purple-400">
+    <div class="dossier-card backdrop-blur-xl rounded-xl shadow-2xl p-8 max-w-md w-full card-stealth relative z-10">
       <!-- Header with game info -->
       <div class="text-center mb-6">
-        <div class="text-6xl mb-3 bounce-subtle">🎯</div>
-        <h2 class="text-4xl font-black text-gradient-party mb-4" style="font-family: 'Comic Sans MS', cursive, sans-serif;">
-          ¡A JUGAR!
+        <div class="text-5xl mb-3 flicker">🎯</div>
+        <h2 class="text-4xl font-bold text-gradient-spy mb-4 uppercase tracking-tight" style="font-family: 'Courier New', monospace;">
+          Misión Activa
         </h2>
         <div class="flex justify-between items-center mb-3 gap-3">
-          <div class="flex-1 bg-gradient-to-r from-fuchsia-100 to-pink-100 rounded-xl p-3 border-2 border-fuchsia-300">
-            <span class="text-xs font-bold text-fuchsia-700">📍 SESIÓN</span>
-            <p class="text-lg font-black text-fuchsia-700">{{ sessionCode }}</p>
+          <div class="flex-1 bg-slate-800/50 rounded-lg p-3 border-2 border-red-600/50">
+            <span class="text-xs font-bold text-red-400 uppercase tracking-wider">📍 Código</span>
+            <p class="text-lg font-black text-red-400">{{ sessionCode }}</p>
           </div>
-          <div class="flex-1 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-xl p-3 border-2 border-cyan-300">
-            <span class="text-xs font-bold text-cyan-700">🎮 RONDA</span>
-            <p class="text-lg font-black text-cyan-700">#{{ session?.round_number || 0 }}</p>
+          <div class="flex-1 bg-slate-800/50 rounded-lg p-3 border-2 border-blue-600/50">
+            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">🔄 Ronda</span>
+            <p class="text-lg font-black text-blue-400">#{{ session?.round_number || 0 }}</p>
           </div>
         </div>
-        <div class="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-3 border-2 border-amber-300">
-          <p class="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700">
-            {{ playerName }} 🎮
+        <div class="bg-slate-800/50 rounded-lg p-3 border-2 border-yellow-600/50">
+          <p class="text-base font-bold text-gradient-intel uppercase tracking-wide">
+            {{ playerName }} 🕵️
           </p>
         </div>
       </div>
       
       <!-- Word reveal section -->
       <div class="mb-6">
-        <div v-if="!currentWord" class="text-center py-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl border-3 border-purple-300">
-          <p class="text-xl font-black text-gray-700 mb-2">
-            {{ isHost ? '👆 Iniciá la ronda' : '⏳ Esperando...' }}
+        <div v-if="!currentWord" class="text-center py-12 bg-slate-800/50 rounded-lg border-2 border-slate-600">
+          <p class="text-xl font-bold text-slate-300 mb-2 uppercase tracking-wide">
+            {{ isHost ? '👆 Iniciar ronda' : '⏳ Esperando...' }}
           </p>
-          <p class="text-3xl bounce-subtle">🎪</p>
+          <p class="text-3xl flicker">🔒</p>
         </div>
         
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
-            <p class="text-lg font-black text-gray-700 mb-4 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl p-4 border-2 border-amber-300">
-              <span class="text-2xl mr-2">👀</span>
-              ¡Tocá para ver tu palabra!
+            <p class="text-lg font-bold text-slate-200 mb-4 bg-slate-800/50 rounded-lg p-4 border-2 border-yellow-600/50 uppercase tracking-wide">
+              <span class="text-2xl mr-2">👁️</span>
+              Pulsar para revelar
             </p>
             <button
               @click="revealWord"
-              class="w-full py-16 bg-gradient-to-br from-fuchsia-500 via-purple-500 to-pink-500 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-600 hover:via-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95 shadow-2xl pulse-glow"
+              class="w-full py-16 bg-gradient-to-br from-red-600 via-orange-600 to-red-700 rounded-xl text-white text-3xl font-bold hover:from-red-700 hover:via-orange-700 hover:to-red-800 transition-all transform hover:scale-105 active:scale-95 shadow-2xl pulse-danger uppercase tracking-wide"
             >
-              <div class="text-6xl mb-2 bounce-subtle">👁️</div>
-              ¡REVELAR!
+              <div class="text-6xl mb-2 flicker">🔓</div>
+              REVELAR
             </button>
           </div>
           
           <div v-else class="text-center fade-in">
             <div 
               :class="[
-                'p-8 rounded-3xl mb-4 shadow-2xl border-4',
+                'p-8 rounded-xl mb-4 shadow-2xl border-4',
                 isImpostor 
-                  ? 'bg-gradient-to-br from-red-500 via-orange-500 to-red-600 text-white border-red-400 pulse-glow' 
-                  : 'bg-gradient-to-br from-blue-500 via-cyan-500 to-green-500 text-white border-blue-400'
+                  ? 'bg-gradient-impostor text-white border-red-600 pulse-danger' 
+                  : 'bg-gradient-agent text-white border-blue-600'
               ]"
             >
-              <div class="text-5xl mb-3 bounce-subtle">
+              <div class="text-5xl mb-3 flicker">
                 {{ isImpostor ? '🎭' : '📝' }}
               </div>
-              <p class="text-base font-bold mb-2 opacity-90">
-                {{ isImpostor ? '¡SOS EL IMPOSTOR!' : 'TU PALABRA:' }}
+              <p class="text-base font-bold mb-2 opacity-90 uppercase tracking-wider">
+                {{ isImpostor ? 'Eres el impostor' : 'Tu palabra:' }}
               </p>
-              <p class="text-5xl font-black tracking-wide">
+              <p class="text-5xl font-black tracking-wide" style="font-family: 'Courier New', monospace;">
                 {{ currentWord }}
               </p>
             </div>
             
-            <div class="text-sm font-semibold text-gray-700 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-5 border-2 border-gray-300 space-y-3">
+            <div class="text-sm font-semibold text-slate-300 bg-slate-800/50 rounded-lg p-5 border-2 border-slate-600 space-y-3">
               <p v-if="isImpostor" class="flex items-start gap-2">
                 <span class="text-2xl">🎭</span>
-                <span>¡Adiviná la palabra sin que te descubran!</span>
+                <span>Debes adivinar la palabra sin ser descubierto</span>
               </p>
               <p v-else class="flex items-start gap-2">
-                <span class="text-2xl">🕵️</span>
-                <span>Hay <span class="font-black text-red-600 text-lg">{{ session?.impostor_count }}</span> impostor(es) entre nosotros</span>
+                <span class="text-2xl">🔍</span>
+                <span>Hay <span class="font-black text-red-400 text-lg">{{ session?.impostor_count }}</span> impostor(es) infiltrados</span>
               </p>
               <p class="flex items-start gap-2">
                 <span class="text-2xl">💬</span>
-                <span>Hablá con los demás para descubrir al impostor</span>
+                <span>Interroga a los demás agentes para descubrir al impostor</span>
               </p>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Players list with styled cards -->
+      <!-- Players list with spy-styled cards -->
       <div class="mb-6">
-        <h3 class="text-xl font-black text-gray-800 mb-3 flex items-center gap-2">
+        <h3 class="text-xl font-bold text-slate-300 mb-3 flex items-center gap-2 uppercase tracking-wide">
           <span class="text-2xl">👥</span>
-          JUGADORES ({{ players.length }}):
+          Agentes ({{ players.length }}):
         </h3>
         <div class="space-y-2 max-h-48 overflow-y-auto">
           <div
             v-for="(player, index) in players"
             :key="player.id"
-            class="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl border-2 border-indigo-300 shadow-md"
+            class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border-2 border-slate-600 shadow-md"
             :style="{ animationDelay: `${index * 0.05}s` }"
           >
-            <span class="font-black text-gray-800 flex items-center gap-2">
-              <span class="text-xl">🎮</span>
+            <span class="font-bold text-slate-200 flex items-center gap-2">
+              <span class="text-xl">🕵️</span>
               {{ player.name }}
             </span>
             <span
               v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white px-3 py-1 rounded-full font-black shadow-lg"
+              class="text-xs bg-gradient-intel text-slate-900 px-3 py-1 rounded-full font-black shadow-lg"
             >
               VOS
             </span>
@@ -264,24 +264,24 @@ function revealWord() {
         </div>
       </div>
       
-      <!-- Actions with vibrant buttons -->
+      <!-- Actions with spy-themed buttons -->
       <div class="space-y-3">
         <button
           v-if="isHost"
           @click="newRound"
           :disabled="!canStartNewRound"
-          class="w-full bg-gradient-to-r from-lime-400 to-green-500 text-white py-5 rounded-2xl text-xl font-black hover:from-lime-500 hover:to-green-600 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-party"
+          class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-5 rounded-lg text-xl font-bold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl btn-spy uppercase tracking-wide"
         >
           <span class="text-2xl mr-2">{{ loading ? '⏳' : '🔄' }}</span>
-          {{ loading ? 'GENERANDO...' : '¡NUEVA RONDA!' }}
+          {{ loading ? 'Generando...' : 'Nueva ronda' }}
         </button>
         
         <button
           @click="emit('back')"
-          class="w-full bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 py-4 rounded-2xl font-black hover:from-gray-400 hover:to-gray-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+          class="w-full bg-slate-700 text-slate-300 py-4 rounded-lg font-bold hover:bg-slate-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg uppercase tracking-wide"
         >
           <span class="text-xl mr-2">←</span>
-          SALIR DEL JUEGO
+          Abortar misión
         </button>
       </div>
     </div>
