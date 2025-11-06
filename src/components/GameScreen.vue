@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
-import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Share2, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
+import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
 import ShareModal from './ShareModal.vue'
 import NeonButton from './NeonButton.vue'
 
