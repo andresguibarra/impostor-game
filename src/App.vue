@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import HomeScreen from './components/HomeScreen.vue'
 import HostLobby from './components/HostLobby.vue'
 import PlayerLobby from './components/PlayerLobby.vue'
@@ -12,6 +12,24 @@ const sessionCode = ref<string>('')
 const playerId = ref<string>('')
 const playerName = ref<string>('')
 const isHost = ref<boolean>(false)
+const qrJoinCode = ref<string>('')
+
+function cleanupUrl() {
+  // Remove join parameter from URL
+  const url = new URL(window.location.href)
+  url.searchParams.delete('join')
+  window.history.replaceState({}, '', url.pathname + url.search)
+}
+
+onMounted(() => {
+  // Check if there's a join code in the URL (QR code scan)
+  const urlParams = new URLSearchParams(window.location.search)
+  const joinCode = urlParams.get('join')
+  if (joinCode) {
+    qrJoinCode.value = joinCode.toUpperCase()
+    // Don't clean up URL yet - keep it for page refresh
+  }
+})
 
 function handleCreateSession(code: string, id: string, name: string) {
   sessionCode.value = code
@@ -26,6 +44,8 @@ function handleJoinSession(code: string, id: string, name: string) {
   playerId.value = id
   playerName.value = name
   isHost.value = false
+  qrJoinCode.value = '' // Clear QR code after successful join
+  cleanupUrl() // Clean up URL after successful join
   currentScreen.value = 'player-lobby'
 }
 
@@ -39,6 +59,12 @@ function handleBackToHome() {
   playerId.value = ''
   playerName.value = ''
   isHost.value = false
+  qrJoinCode.value = '' // Clear QR code when going back to home
+}
+
+function handleCancelQrJoin() {
+  qrJoinCode.value = '' // Clear QR code when user cancels
+  cleanupUrl() // Clean up URL when user cancels
 }
 </script>
 
@@ -46,8 +72,10 @@ function handleBackToHome() {
   <div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500">
     <HomeScreen 
       v-if="currentScreen === 'home'"
+      :qr-join-code="qrJoinCode"
       @create-session="handleCreateSession"
       @join-session="handleJoinSession"
+      @cancel-qr-join="handleCancelQrJoin"
     />
     
     <HostLobby 
