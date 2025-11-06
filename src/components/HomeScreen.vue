@@ -10,7 +10,7 @@ const emit = defineEmits<{
 
 const isJoining = ref(false)
 const joinCode = ref('')
-const customName = ref('')
+const customName = ref(generateFunnyName())
 const error = ref('')
 const loading = ref(false)
 
@@ -144,20 +144,16 @@ function generateName() {
         </div>
         <h1 class="text-6xl font-black mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif; letter-spacing: -1px; line-height: 1.1;">
           <span class="text-gradient-impostor">IMPOSTOR</span><br/>
-          <span class="text-gradient-game">GAME</span>
         </h1>
         <p class="text-xl font-bold mb-2" style="color: #8b5cf6;">
           ¡Encontrá al impostor! 🕵️
-        </p>
-        <p class="text-sm text-gray-600 font-semibold">
-          🇦🇷 Juego de palabras argentino
         </p>
       </div>
       
       <!-- Name input -->
       <div class="mb-6 mt-8">
         <label class="block text-sm font-bold mb-2" style="color: #e879f9;">
-          ✨ Tu nombre (opcional)
+          ✨ Tu nombre
         </label>
         <div class="flex gap-2">
           <input 
@@ -251,11 +247,6 @@ function generateName() {
           <span class="text-xl mr-2">←</span>
           VOLVER
         </button>
-      </div>
-      
-      <div class="mt-8 text-center text-xs text-gray-500 font-semibold">
-        <p class="wiggle inline-block">🎉</p> Diversión garantizada <p class="wiggle inline-block" style="animation-delay: 0.5s;">🎊</p>
-        <p class="text-xs opacity-60 mt-1">Mobile-first • Vue 3 + Vite + Tailwind</p>
       </div>
     </div>
   </div>
