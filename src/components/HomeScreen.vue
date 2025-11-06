@@ -22,7 +22,7 @@ const isDiceAnimating = ref(false)
 onMounted(() => {
   const qrCode = route.query.join
   if (qrCode && typeof qrCode === 'string') {
-    joinCode.value = qrCode.toUpperCase()
+    joinCode.value = qrCode
     customName.value = generateFunnyName()
     showQrNameDialog.value = true
   }
@@ -94,7 +94,7 @@ async function joinSession() {
       throw new Error(SUPABASE_NOT_CONFIGURED_ERROR)
     }
     
-    const code = joinCode.value.trim().toUpperCase()
+    const code = joinCode.value.trim()
     if (!code) {
       error.value = 'Por favor ingresá un código de sesión'
       loading.value = false
@@ -264,11 +264,13 @@ function generateName() {
           <input 
             ref="joinCodeInput"
             v-model="joinCode"
-            type="text"
-            placeholder="Ej: AB3C5"
-            class="w-full px-5 py-5 rounded-2xl uppercase font-black text-3xl text-center tracking-widest transition-all focus:ring-4 focus:ring-cyan-500/50 focus:outline-none text-white placeholder-gray-600"
+            type="tel"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder="Ej: 123"
+            class="w-full px-5 py-5 rounded-2xl font-black text-3xl text-center tracking-widest transition-all focus:ring-4 focus:ring-cyan-500/50 focus:outline-none text-white placeholder-gray-600"
             style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(0, 188, 212, 0.5);"
-            maxlength="6"
+            maxlength="3"
             @keyup.enter="joinSession"
           />
         </div>

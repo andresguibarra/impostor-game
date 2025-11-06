@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Prevent double-tap zoom on iOS */
+* {
+  touch-action: manipulation;
+}
+
 /* Animated Background Gradient - matching reference exactly */
 @keyframes gradient-shift {
   0% {
