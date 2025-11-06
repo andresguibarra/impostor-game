@@ -25,8 +25,8 @@ watch(() => props.qrJoinCode, (newCode) => {
   if (newCode) {
     joinCode.value = newCode
     showQrNameDialog.value = true
-  } else if (showQrNameDialog.value) {
-    // Clear dialog when parent clears the QR code
+  } else {
+    // Clear dialog and state when QR code is cleared
     showQrNameDialog.value = false
     joinCode.value = ''
     customName.value = ''

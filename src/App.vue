@@ -20,6 +20,8 @@ onMounted(() => {
   const joinCode = urlParams.get('join')
   if (joinCode) {
     qrJoinCode.value = joinCode.toUpperCase()
+    // Clean up URL to prevent dialog reappearing on refresh
+    window.history.replaceState({}, '', window.location.pathname)
   }
 })
 
