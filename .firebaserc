@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "impostor-game"
-  }
+    "default": "impostor-game-c70dd"
+  },
+  "targets": {},
+  "etags": {}
 }
