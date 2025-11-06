@@ -43,7 +43,13 @@ function handleBackToHome() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-fuchsia-500 via-amber-400 to-cyan-400">
+  <div class="min-h-screen bg-animated-gradient relative overflow-hidden">
+    <!-- Floating animated shapes -->
+    <div class="floating-shape" style="bottom: 0; width: 80px; height: 80px; background: radial-gradient(circle, rgba(236, 72, 153, 0.3), transparent); border-radius: 50%;"></div>
+    <div class="floating-shape" style="bottom: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent); border-radius: 50%;"></div>
+    <div class="floating-shape" style="bottom: 0; width: 60px; height: 60px; background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent); border-radius: 50%;"></div>
+    <div class="floating-shape" style="bottom: 0; width: 90px; height: 90px; background: radial-gradient(circle, rgba(6, 182, 212, 0.3), transparent); border-radius: 50%;"></div>
+    <div class="floating-shape" style="bottom: 0; width: 70px; height: 70px; background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent); border-radius: 50%;"></div>
     <HomeScreen 
       v-if="currentScreen === 'home'"
       @create-session="handleCreateSession"
