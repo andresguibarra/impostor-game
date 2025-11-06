@@ -23,7 +23,6 @@ const countdown = ref(3)
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
 const playerId = computed(() => localStorage.getItem('playerId') || '')
-const playerName = computed(() => localStorage.getItem('playerName') || '')
 const isHost = computed(() => localStorage.getItem('isHost') === 'true')
 
 let playersSubscription: any = null
