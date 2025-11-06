@@ -148,6 +148,11 @@ function toggleJoinMode() {
   error.value = ''
   joinCode.value = ''
   fromQrCode.value = false
+  
+  // Clear QR code from URL if present
+  if (route.query.join) {
+    router.replace({ query: {} })
+  }
 }
 
 function generateName() {
