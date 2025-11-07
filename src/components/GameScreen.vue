@@ -220,7 +220,7 @@ async function newRound() {
     // Determine the new round number
     // For the first round, keep it at 1; for subsequent rounds, increment
     const currentRoundNumber = session.value?.round_number || 0
-    const newRoundNumber = isFirstRound.value ? currentRoundNumber : currentRoundNumber + 1
+    const newRoundNumber = isFirstRound.value ? 1 : currentRoundNumber + 1
     
     // Update session with new round data
     const { error } = await supabase
