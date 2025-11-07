@@ -336,7 +336,7 @@ async function goBack() {
           <div v-if="!wordRevealed" class="text-center">
             <button
               @click="revealWord"
-              class="w-full py-16 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50"
+              class="w-full p-8 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50"
             >
               <div class="flex justify-center mb-2">
                 <Eye :size="64" class="animate-bounce" />
