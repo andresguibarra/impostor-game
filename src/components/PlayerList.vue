@@ -9,11 +9,13 @@ const props = defineProps<{
 }>()
 
 // Determine host based on hostId prop or first player
+// The hostId prop comes from session.host_id which is the authoritative source
+// Fallback to first player (sorted by joined_at) when hostId is not provided
 const getIsHost = (player: Player) => {
   if (props.hostId) {
     return player.id === props.hostId
   }
-  // First player is host by default
+  // First player is host by default (players are sorted by joined_at ascending)
   return props.players.length > 0 && props.players[0]?.id === player.id
 }
 </script>
