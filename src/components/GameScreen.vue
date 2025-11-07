@@ -294,7 +294,7 @@ async function goBack() {
       <!-- Header with game info -->
       <div class="text-center mb-6">
         <h2 class="text-4xl font-black impostor-title mb-4">
-          ¡A JUGAR! - RONDA #{{ session?.round_number || 0 }}
+          RONDA #{{ session?.round_number || 0 }}
         </h2>
         <div class="flex justify-between items-stretch mb-3 gap-3">
           <div 
