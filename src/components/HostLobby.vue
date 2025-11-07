@@ -186,13 +186,13 @@ function decrementImpostors() {
           <div v-for="(player, index) in players" :key="player.id"
             class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-cyan-500/40 shadow-md hover:border-cyan-400/60 transition-all">
             <span class="font-black text-white flex items-center gap-2">
-              <Crown v-if="index === 0" :size="24" class="text-yellow-400" />
+              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
               <Gamepad2 v-else :size="20" />
               {{ player.name }}
             </span>
             <span v-if="player.id === playerId"
               class="text-xs bg-gradient-to-br from-fuchsia-500 to-pink-600 text-white px-3 py-1 rounded-full font-black shadow-lg">
-              VOS
+              YO
             </span>
           </div>
         </div>

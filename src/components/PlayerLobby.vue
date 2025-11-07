@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Loader2, Gamepad2, Sparkles, Drama, Users } from 'lucide-vue-next'
+import { Loader2, Gamepad2, Sparkles, Drama, Users, Crown } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -179,14 +179,15 @@ async function goBack() {
             :style="{ animationDelay: `${index * 0.1}s` }"
           >
             <span class="font-black text-white flex items-center gap-2">
-              <Gamepad2 :size="20" />
+              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
+              <Gamepad2 v-else :size="20" />
               {{ player.name }}
             </span>
             <span
               v-if="player.id === playerId"
               class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
             >
-              VOS
+              YO
             </span>
           </div>
         </div>

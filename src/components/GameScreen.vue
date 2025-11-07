@@ -6,6 +6,7 @@ import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
 import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
 import ShareModal from './ShareModal.vue'
+import PlayerListModal from './PlayerListModal.vue'
 import NeonButton from './NeonButton.vue'
 
 const props = defineProps<{
@@ -23,6 +24,7 @@ const wordRevealed = ref(false)
 const showCountdown = ref(false)
 const countdown = ref(3)
 const showShareModal = ref(false)
+const showPlayerListModal = ref(false)
 const qrCode = ref<string>('')
 
 // Get session data from localStorage or props
@@ -119,6 +121,14 @@ async function openShareModal() {
 
 function closeShareModal() {
   showShareModal.value = false
+}
+
+function openPlayerListModal() {
+  showPlayerListModal.value = true
+}
+
+function closePlayerListModal() {
+  showPlayerListModal.value = false
 }
 
 async function shareInvite() {
@@ -284,7 +294,7 @@ async function goBack() {
       <!-- Header with game info -->
       <div class="text-center mb-6">
         <h2 class="text-4xl font-black impostor-title mb-4">
-          ¡A JUGAR!
+          ¡A JUGAR! - RONDA #{{ session?.round_number || 0 }}
         </h2>
         <div class="flex justify-between items-stretch mb-3 gap-3">
           <div 
@@ -297,9 +307,14 @@ async function goBack() {
               <MousePointerClick :size="12" /> Compartir
             </p>
           </div>
-          <div class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] flex flex-col justify-center items-center text-center">
-            <span class="text-xs font-bold text-white/80 flex items-center gap-1"><Gamepad2 :size="14" /> RONDA</span>
-            <p class="text-lg font-black text-white">#{{ session?.round_number || 0 }}</p>
+          <div 
+            @click="openPlayerListModal"
+            class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1"><Users :size="14" /> JUGADORES</span>
+            <p class="text-lg font-black text-white">{{ players.length }}</p>
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Ver lista
+            </p>
           </div>
         </div>
       </div>
@@ -382,33 +397,6 @@ async function goBack() {
         </div>
       </div>
       
-      <!-- Players list with styled cards -->
-      <div class="mb-6">
-        <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
-          <Users :size="24" />
-          JUGADORES ({{ players.length }}):
-        </h3>
-        <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-          <div
-            v-for="(player, index) in players"
-            :key="player.id"
-            class="flex items-center justify-between p-3 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-lime-500/40 shadow-md hover:border-lime-400/60 transition-all slide-in-up"
-            :style="{ animationDelay: `${index * 0.05}s` }"
-          >
-            <span class="font-black text-white flex items-center gap-2">
-              <Gamepad2 :size="20" />
-              {{ player.name }}
-            </span>
-            <span
-              v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
-            >
-              VOS
-            </span>
-          </div>
-        </div>
-      </div>
-      
       <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
         <NeonButton
@@ -442,6 +430,17 @@ async function goBack() {
         :qr-code="qrCode"
         @close="closeShareModal"
         @share="shareInvite"
+      />
+    </Teleport>
+
+    <!-- Player List Modal with Teleport -->
+    <Teleport to="body">
+      <PlayerListModal
+        :show="showPlayerListModal"
+        :players="players"
+        :current-player-id="playerId"
+        :host-id="session?.host_id"
+        @close="closePlayerListModal"
       />
     </Teleport>
   </div>
