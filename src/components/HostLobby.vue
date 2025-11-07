@@ -16,12 +16,40 @@ const router = useRouter()
 const players = ref<Player[]>([])
 const impostorCount = ref(1)
 const loading = ref(false)
+const isStartingGame = ref(false) // Flag to prevent cleanup when starting game
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
 const playerId = computed(() => localStorage.getItem('playerId') || '')
 
 let playersSubscription: any = null
+
+// Cleanup function to remove player and session from database
+async function cleanupHostSession() {
+  try {
+    const playerIdToDelete = playerId.value
+    const sessionCodeToDelete = sessionCode.value
+    
+    if (playerIdToDelete) {
+      console.log('Cleaning up host player:', playerIdToDelete)
+      await supabase
+        .from('players')
+        .delete()
+        .eq('id', playerIdToDelete)
+    }
+    
+    // Delete session since host is leaving
+    if (sessionCodeToDelete) {
+      console.log('Cleaning up host session:', sessionCodeToDelete)
+      await supabase
+        .from('sessions')
+        .delete()
+        .eq('code', sessionCodeToDelete)
+    }
+  } catch (err) {
+    console.error('Error in host cleanup:', err)
+  }
+}
 
 onMounted(async () => {
   // Check if session exists
@@ -30,12 +58,29 @@ onMounted(async () => {
     return
   }
 
+  // Verify session exists in database
+  const { data: sessionData, error: sessionError } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('code', sessionCode.value)
+    .single()
+
+  if (sessionError || !sessionData) {
+    console.log('Session not found, redirecting to home')
+    localStorage.removeItem('gameCode')
+    localStorage.removeItem('playerId')
+    localStorage.removeItem('playerName')
+    localStorage.removeItem('isHost')
+    router.push('/')
+    return
+  }
+
   // Load initial players
   await loadPlayers()
 
-  // Subscribe to player changes
+  // Subscribe to player changes with unique channel name
   playersSubscription = supabase
-    .channel(`session:${sessionCode.value}:players`)
+    .channel(`host-lobby-players-${sessionCode.value}-${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -44,17 +89,36 @@ onMounted(async () => {
         table: 'players',
         filter: `session_id=eq.${sessionCode.value}`,
       },
-      () => {
-        loadPlayers()
+      async () => {
+        console.log('Player change detected in host lobby')
+        await loadPlayers()
       }
     )
-    .subscribe()
+    .subscribe((status) => {
+      console.log('Host lobby players subscription status:', status)
+    })
+
+  // Listen for page unload to cleanup session
+  window.addEventListener('beforeunload', () => {
+    // Only cleanup if not starting game
+    if (!isStartingGame.value) {
+      cleanupHostSession()
+    }
+  })
 })
 
 onUnmounted(() => {
+  // Only cleanup if not starting game (meaning user is actually leaving)
+  if (!isStartingGame.value) {
+    cleanupHostSession()
+  }
+  
   if (playersSubscription) {
     playersSubscription.unsubscribe()
   }
+  
+  // Remove event listener
+  window.removeEventListener('beforeunload', cleanupHostSession)
 })
 
 async function loadPlayers() {
@@ -76,6 +140,7 @@ async function startGame() {
   }
 
   loading.value = true
+  isStartingGame.value = true // Mark that we're starting the game
 
   try {
     // Update session to start game
@@ -93,27 +158,18 @@ async function startGame() {
   } catch (err) {
     console.error('Error starting game:', err)
     alert(UI_STRINGS.ERRORS.START_GAME)
+    isStartingGame.value = false // Reset flag on error
   } finally {
     loading.value = false
   }
 }
 
 async function goBack() {
-  // Delete player from database and delete the session if host
-  try {
-    await supabase
-      .from('players')
-      .delete()
-      .eq('id', playerId.value)
-    
-    // Delete session if host
-    await supabase
-      .from('sessions')
-      .delete()
-      .eq('code', sessionCode.value)
-  } catch (err) {
-    console.error('Error deleting session:', err)
-  }
+  // Mark that we're intentionally leaving (not starting game)
+  isStartingGame.value = false
+  
+  // Cleanup player and session
+  await cleanupHostSession()
   
   // Clear localStorage
   localStorage.removeItem('gameCode')

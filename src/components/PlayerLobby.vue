@@ -14,6 +14,7 @@ const router = useRouter()
 
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
+const isJoiningGame = ref(false) // Flag to prevent cleanup when joining game
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -23,6 +24,22 @@ const playerName = computed(() => localStorage.getItem('playerName') || '')
 let playersSubscription: any = null
 let sessionSubscription: any = null
 
+// Cleanup function to remove player from database
+async function cleanupPlayerSession() {
+  try {
+    const playerIdToDelete = playerId.value
+    if (playerIdToDelete) {
+      console.log('Cleaning up player:', playerIdToDelete)
+      await supabase
+        .from('players')
+        .delete()
+        .eq('id', playerIdToDelete)
+    }
+  } catch (err) {
+    console.error('Error in player cleanup:', err)
+  }
+}
+
 onMounted(async () => {
   // Check if session exists
   if (!sessionCode.value) {
@@ -30,13 +47,18 @@ onMounted(async () => {
     return
   }
 
-  // Load initial data
+  // Load initial data and verify session exists
   await loadPlayers()
   await loadSession()
   
-  // Subscribe to player changes
+  // If loadSession redirected us, don't continue
+  if (!session.value) {
+    return
+  }
+  
+  // Subscribe to player changes with unique channel name
   playersSubscription = supabase
-    .channel(`session:${sessionCode.value}:players`)
+    .channel(`player-lobby-players-${sessionCode.value}-${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -45,15 +67,18 @@ onMounted(async () => {
         table: 'players',
         filter: `session_id=eq.${sessionCode.value}`,
       },
-      () => {
-        loadPlayers()
+      async () => {
+        console.log('Player change detected in player lobby')
+        await loadPlayers()
       }
     )
-    .subscribe()
+    .subscribe((status) => {
+      console.log('Player lobby players subscription status:', status)
+    })
   
-  // Subscribe to session changes (to detect game start)
+  // Subscribe to session changes (to detect game start) with unique channel name
   sessionSubscription = supabase
-    .channel(`session:${sessionCode.value}`)
+    .channel(`player-lobby-session-${sessionCode.value}-${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -62,23 +87,60 @@ onMounted(async () => {
         table: 'sessions',
         filter: `code=eq.${sessionCode.value}`,
       },
-      (payload: any) => {
+      async (payload: any) => {
+        console.log('Session change detected in player lobby')
         if (payload.new.round_number > 0) {
+          isJoiningGame.value = true // Mark that we're joining the game
           router.push(`/game/${sessionCode.value}`)
         }
-        loadSession()
+        await loadSession()
       }
     )
-    .subscribe()
+    .on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'sessions',
+        filter: `code=eq.${sessionCode.value}`,
+      },
+      () => {
+        console.log('Session deleted, redirecting to home')
+        localStorage.removeItem('gameCode')
+        localStorage.removeItem('playerId')
+        localStorage.removeItem('playerName')
+        localStorage.removeItem('isHost')
+        router.push('/')
+      }
+    )
+    .subscribe((status) => {
+      console.log('Player lobby session subscription status:', status)
+    })
+
+  // Listen for page unload to cleanup player
+  window.addEventListener('beforeunload', () => {
+    // Only cleanup if not joining game
+    if (!isJoiningGame.value) {
+      cleanupPlayerSession()
+    }
+  })
 })
 
 onUnmounted(() => {
+  // Only cleanup if not joining game (meaning user is actually leaving)
+  if (!isJoiningGame.value) {
+    cleanupPlayerSession()
+  }
+  
   if (playersSubscription) {
     playersSubscription.unsubscribe()
   }
   if (sessionSubscription) {
     sessionSubscription.unsubscribe()
   }
+  
+  // Remove event listener
+  window.removeEventListener('beforeunload', cleanupPlayerSession)
 })
 
 async function loadPlayers() {
@@ -100,21 +162,38 @@ async function loadSession() {
     .eq('code', sessionCode.value)
     .single()
   
-  if (!error && data) {
+  // If session not found or error, redirect to home
+  if (error) {
+    console.error('Error loading session:', error)
+    if (error.code === 'PGRST116') {
+      console.log('Session no longer exists, redirecting to home')
+      localStorage.removeItem('gameCode')
+      localStorage.removeItem('playerId')
+      localStorage.removeItem('playerName')
+      localStorage.removeItem('isHost')
+      router.push('/')
+      return
+    }
+  }
+  
+  if (data) {
     session.value = data
+  } else {
+    console.log('No session data found, redirecting to home')
+    localStorage.removeItem('gameCode')
+    localStorage.removeItem('playerId')
+    localStorage.removeItem('playerName')
+    localStorage.removeItem('isHost')
+    router.push('/')
   }
 }
 
 async function goBack() {
-  // Delete player from database
-  try {
-    await supabase
-      .from('players')
-      .delete()
-      .eq('id', playerId.value)
-  } catch (err) {
-    console.error('Error deleting player:', err)
-  }
+  // Mark that we're intentionally leaving (not joining game)
+  isJoiningGame.value = false
+  
+  // Cleanup player from database
+  await cleanupPlayerSession()
   
   // Clear localStorage
   localStorage.removeItem('gameCode')

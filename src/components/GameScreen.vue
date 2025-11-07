@@ -44,6 +44,45 @@ const isFirstRound = computed(() => {
   return session.value?.round_number === 1 && !session.value?.current_word
 })
 
+// Cleanup function to remove player from database
+async function cleanupPlayer() {
+  try {
+    const playerIdToDelete = playerId.value
+    if (playerIdToDelete) {
+      console.log('Cleaning up player:', playerIdToDelete)
+      
+      const { data, error } = await supabase
+        .from('players')
+        .delete()
+        .eq('id', playerIdToDelete)
+        .select()
+
+      if (error) {
+        console.error('Error deleting player:', error)
+      } else {
+        console.log('Player deleted successfully:', data)
+      }
+
+      // If host, delete the session
+      if (isHost.value && sessionCode.value) {
+        console.log('Host deleting session:', sessionCode.value)
+        const { error: sessionError } = await supabase
+          .from('sessions')
+          .delete()
+          .eq('code', sessionCode.value)
+        
+        if (sessionError) {
+          console.error('Error deleting session:', sessionError)
+        } else {
+          console.log('Session deleted successfully')
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error in cleanup:', err)
+  }
+}
+
 onMounted(async () => {
   // Check if session exists
   if (!sessionCode.value) {
@@ -53,9 +92,9 @@ onMounted(async () => {
 
   await loadGameState()
 
-  // Subscribe to changes
+  // Subscribe to player changes with unique channel name
   playersSubscription = supabase
-    .channel(`game:${sessionCode.value}:players`)
+    .channel(`game-players-${sessionCode.value}-${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -64,14 +103,18 @@ onMounted(async () => {
         table: 'players',
         filter: `session_id=eq.${sessionCode.value}`,
       },
-      () => {
-        loadPlayers()
+      async () => {
+        console.log('Player change detected')
+        await loadPlayers()
       }
     )
-    .subscribe()
+    .subscribe((status) => {
+      console.log('Players subscription status:', status)
+    })
 
+  // Subscribe to session changes with unique channel name
   sessionSubscription = supabase
-    .channel(`game:${sessionCode.value}`)
+    .channel(`game-session-${sessionCode.value}-${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -80,23 +123,54 @@ onMounted(async () => {
         table: 'sessions',
         filter: `code=eq.${sessionCode.value}`,
       },
-      () => {
-        loadGameState()
+      async () => {
+        console.log('Session change detected')
+        await loadGameState()
       }
     )
-    .subscribe()
+    .on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'sessions',
+        filter: `code=eq.${sessionCode.value}`,
+      },
+      () => {
+        console.log('Session deleted, redirecting to home')
+        localStorage.removeItem('gameCode')
+        localStorage.removeItem('playerId')
+        localStorage.removeItem('playerName')
+        localStorage.removeItem('isHost')
+        router.push('/')
+      }
+    )
+    .subscribe((status) => {
+      console.log('Session subscription status:', status)
+    })
+
+  // Listen for page unload to cleanup player
+  window.addEventListener('beforeunload', () => {
+    // Synchronous cleanup attempt
+    cleanupPlayer()
+  })
 })
 
 onUnmounted(() => {
+  // Cleanup subscriptions
   if (playersSubscription) {
     playersSubscription.unsubscribe()
   }
   if (sessionSubscription) {
     sessionSubscription.unsubscribe()
   }
+  
+  // Remove event listener
+  window.removeEventListener('beforeunload', cleanupPlayer)
 })
 
 async function loadPlayers() {
+  console.log('loadPlayers called for session:', sessionCode.value)
   const { data, error } = await supabase
     .from('players')
     .select('*')
@@ -104,7 +178,10 @@ async function loadPlayers() {
     .order('joined_at', { ascending: true })
 
   if (!error && data) {
+    console.log('Players loaded:', data.length, 'players')
     players.value = data
+  } else if (error) {
+    console.error('Error loading players:', error)
   }
 }
 
@@ -186,23 +263,45 @@ async function loadGameState() {
     .eq('code', sessionCode.value)
     .single()
 
-  if (!error && data) {
-    // Detect if it's a new round by comparing round numbers
-    const isNewRound = session.value && data.round_number > session.value.round_number
+  // If session not found or error, redirect to home
+  if (error) {
+    console.error('Error loading session:', error)
+    if (error.code === 'PGRST116') {
+      console.log('Session no longer exists, redirecting to home')
+      localStorage.removeItem('gameCode')
+      localStorage.removeItem('playerId')
+      localStorage.removeItem('playerName')
+      localStorage.removeItem('isHost')
+      router.push('/')
+      return
+    }
+  }
 
-    session.value = data
+  if (!data) {
+    console.log('No session data found, redirecting to home')
+    localStorage.removeItem('gameCode')
+    localStorage.removeItem('playerId')
+    localStorage.removeItem('playerName')
+    localStorage.removeItem('isHost')
+    router.push('/')
+    return
+  }
 
-    if (data.current_word && data.impostors) {
-      // Show word or impostor status
-      const impostorIds = data.impostors as string[]
-      isImpostor.value = impostorIds.includes(playerId.value)
-      currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
+  // Detect if it's a new round by comparing round numbers
+  const isNewRound = session.value && data.round_number > session.value.round_number
 
-      // Hide word and show countdown if it's a new round
-      if (isNewRound) {
-        wordRevealed.value = false
-        await startCountdown()
-      }
+  session.value = data
+
+  if (data.current_word && data.impostors) {
+    // Show word or impostor status
+    const impostorIds = data.impostors as string[]
+    isImpostor.value = impostorIds.includes(playerId.value)
+    currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
+
+    // Hide word and show countdown if it's a new round
+    if (isNewRound) {
+      wordRevealed.value = false
+      await startCountdown()
     }
   }
 }
@@ -253,29 +352,54 @@ function toggleWordVisibility() {
 }
 
 async function goBack() {
-  // Delete player from database
+  console.log('=== goBack called - starting cleanup ===')
+  console.log('Player ID to delete:', playerId.value)
+  console.log('Session code:', sessionCode.value)
+  console.log('Is host:', isHost.value)
+  
   try {
-    await supabase
-      .from('players')
-      .delete()
-      .eq('id', playerId.value)
-
+    // First, delete the player
+    if (playerId.value) {
+      const { error: deleteError } = await supabase
+        .from('players')
+        .delete()
+        .eq('id', playerId.value)
+      
+      if (deleteError) {
+        console.error('Error deleting player:', deleteError)
+      } else {
+        console.log('Player deleted successfully')
+      }
+      
+      // Small delay to ensure the delete propagates
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
     // If host, delete the session
-    if (isHost.value) {
-      await supabase
+    if (isHost.value && sessionCode.value) {
+      const { error: sessionError } = await supabase
         .from('sessions')
         .delete()
         .eq('code', sessionCode.value)
+      
+      if (sessionError) {
+        console.error('Error deleting session:', sessionError)
+      } else {
+        console.log('Session deleted successfully')
+      }
     }
   } catch (err) {
-    console.error('Error leaving game:', err)
+    console.error('Error in goBack cleanup:', err)
   }
-
+  
+  console.log('=== Cleanup completed ===')
+  
   // Clear localStorage
   localStorage.removeItem('gameCode')
   localStorage.removeItem('playerId')
   localStorage.removeItem('playerName')
   localStorage.removeItem('isHost')
+  
   router.push('/')
 }
 </script>
