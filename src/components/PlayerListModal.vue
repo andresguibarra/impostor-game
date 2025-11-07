@@ -28,7 +28,7 @@ const emit = defineEmits<{
         </button>
 
         <h3 class="text-3xl font-black text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 flex items-center justify-center gap-2">
-          <Users :size="32" />
+          <Users :size="32" class="text-cyan-400" />
           Jugadores ({{ players.length }})
         </h3>
 
