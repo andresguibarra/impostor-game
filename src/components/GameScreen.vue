@@ -39,6 +39,11 @@ const canStartNewRound = computed(() => {
   return isHost.value && !loading.value
 })
 
+// Check if it's the first round (round 1 with no current word assigned yet)
+const isFirstRound = computed(() => {
+  return session.value?.round_number === 1 && !session.value?.current_word
+})
+
 onMounted(async () => {
   // Check if session exists
   if (!sessionCode.value) {
@@ -212,13 +217,18 @@ async function newRound() {
     // Generate new round
     const round = startNewRound(players.value, session.value?.impostor_count || 1)
     
+    // Determine the new round number
+    // For the first round, keep it at 1; for subsequent rounds, increment
+    const currentRoundNumber = session.value?.round_number || 0
+    const newRoundNumber = isFirstRound.value ? currentRoundNumber : currentRoundNumber + 1
+    
     // Update session with new round data
     const { error } = await supabase
       .from('sessions')
       .update({
         current_word: round.word,
         impostors: round.impostorIds,
-        round_number: (session.value?.round_number || 0) + 1,
+        round_number: newRoundNumber,
       })
       .eq('code', sessionCode.value)
     
@@ -408,7 +418,7 @@ async function goBack() {
         >
           <Loader2 v-if="loading" :size="24" class="animate-spin mr-2" />
           <RefreshCw v-else :size="24" class="mr-2" />
-          {{ loading ? 'GENERANDO...' : '¡NUEVA RONDA!' }}
+          {{ loading ? 'GENERANDO...' : (isFirstRound ? '¡INICIAR RONDA!' : '¡NUEVA RONDA!') }}
         </NeonButton>
         
         <NeonButton
