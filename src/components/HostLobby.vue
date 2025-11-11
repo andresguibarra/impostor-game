@@ -78,6 +78,10 @@ onMounted(async () => {
   // Initialize impostor count from session data
   impostorCount.value = sessionData.impostor_count || 1
 
+  // Check if host player still exists in database (might have been removed on refresh)
+  // and re-add them if necessary
+  await ensurePlayerExists()
+
   // Load initial players
   await loadPlayers()
 
@@ -133,6 +137,41 @@ async function loadPlayers() {
 
   if (!error && data) {
     players.value = data
+  }
+}
+
+async function ensurePlayerExists() {
+  // Check if host player exists in database
+  const playerIdValue = playerId.value
+  const playerNameValue = localStorage.getItem('playerName') || 'Host'
+  
+  const { data: existingPlayer, error: checkError } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', playerIdValue)
+    .eq('session_id', sessionCode.value)
+    .single()
+  
+  // If player doesn't exist (e.g., removed on page refresh), re-add them
+  if (checkError && checkError.code === 'PGRST116') {
+    console.log('Host player not found in database, re-adding:', playerIdValue)
+    const { error: insertError } = await supabase
+      .from('players')
+      .insert({
+        id: playerIdValue,
+        name: playerNameValue,
+        session_id: sessionCode.value,
+      })
+    
+    if (insertError) {
+      console.error('Error re-adding host player:', insertError)
+    } else {
+      console.log('Host player successfully re-added to session')
+    }
+  } else if (!checkError && existingPlayer) {
+    console.log('Host player already exists in database')
+  } else if (checkError) {
+    console.error('Error checking host player existence:', checkError)
   }
 }
 
