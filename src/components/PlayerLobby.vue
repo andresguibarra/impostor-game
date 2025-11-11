@@ -5,7 +5,8 @@ import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import ShareModal from './ShareModal.vue'
 import PlayerListModal from './PlayerListModal.vue'
-import { Loader2, Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick } from 'lucide-vue-next'
+import { Loader2, Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick, Crown } from 'lucide-vue-next'
+import SessionCodeCard from './SessionCodeCard.vue'
 
 const props = defineProps<{
   gameCode: string
@@ -59,6 +60,10 @@ onMounted(async () => {
   if (!session.value) {
     return
   }
+  
+  // Check if player still exists in database (might have been removed on refresh)
+  // and re-add them if necessary
+  await ensurePlayerExists()
   
   // Subscribe to player changes with unique channel name
   playersSubscription = supabase
@@ -241,6 +246,37 @@ async function shareInvite() {
     } catch (err) {
       console.error('Error copying link:', err)
     }
+async function ensurePlayerExists() {
+  // Check if player exists in database
+  const { data: existingPlayer, error: checkError } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', playerId.value)
+    .eq('session_id', sessionCode.value)
+    .single()
+  
+  // If player doesn't exist (e.g., removed on page refresh), re-add them
+  if (checkError && checkError.code === 'PGRST116') {
+    console.log('Player not found in database, re-adding:', playerId.value)
+    const { error: insertError } = await supabase
+      .from('players')
+      .insert({
+        id: playerId.value,
+        name: playerName.value,
+        session_id: sessionCode.value,
+      })
+    
+    if (insertError) {
+      console.error('Error re-adding player:', insertError)
+    } else {
+      console.log('Player successfully re-added to session')
+      // Reload players to update the UI
+      await loadPlayers()
+    }
+  } else if (!checkError && existingPlayer) {
+    console.log('Player already exists in database')
+  } else if (checkError) {
+    console.error('Error checking player existence:', checkError)
   }
 }
 
@@ -266,11 +302,8 @@ async function goBack() {
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
       <div class="text-center mb-6">
-        <div class="flex justify-center mb-4">
-          <Loader2 :size="64" class="animate-spin text-purple-400" />
-        </div>
         <h2 class="text-4xl font-black impostor-title mb-4">
-          ¡ESPERANDO!
+          Hola, <span class="font-black text-fuchsia-400">{{ playerName }}</span>! 👋
         </h2>
         
         <!-- Session Code and Players Cards Side by Side -->
@@ -297,19 +330,22 @@ async function goBack() {
           </div>
         </div>
         
-        <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border-2 border-fuchsia-500/50">
-          <p class="text-lg font-semibold text-gray-300">
-            Hola, <span class="font-black text-fuchsia-400 text-xl">{{ playerName }}</span>! 👋
+        <!-- Combined Waiting animation and message -->
+        <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border-2 border-amber-500/50">
+          <div class="flex justify-center mb-4">
+            <div class="flex gap-3">
+              <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
+              <Sparkles :size="48" class="animate-pulse text-yellow-400" style="animation-delay: 0.3s;" />
+              <Drama :size="48" class="animate-pulse text-red-400" style="animation-delay: 0.6s;" />
+            </div>
+          </div>
+          <p class="text-lg font-black text-amber-400 flex items-center justify-center gap-2">
+            <span class="text-3xl">⏰</span>
+            <span>Esperando al host...</span>
           </p>
-        </div>
-      </div>
-      
-      <!-- Waiting animation -->
-      <div class="flex justify-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl py-8 border-2 border-amber-500/50">
-        <div class="flex gap-3">
-          <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
-          <Sparkles :size="48" class="animate-pulse text-yellow-400" style="animation-delay: 0.3s;" />
-          <Drama :size="48" class="animate-pulse text-red-400" style="animation-delay: 0.6s;" />
+          <p class="text-sm font-semibold text-gray-400 mt-2">
+            ¡El juego comenzará pronto! 🎊
+          </p>
         </div>
       </div>
       
@@ -330,6 +366,32 @@ async function goBack() {
         <p class="text-sm font-semibold text-gray-400 mt-2">
           ¡El juego comenzará pronto! 🎊
         </p>
+      <!-- Players list -->
+      <div class="mb-6">
+        <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
+          <Users :size="24" />
+          JUGADORES ({{ players.length }}):
+        </h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+          <div
+            v-for="(player, index) in players"
+            :key="player.id"
+            class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-lime-500/40 shadow-md hover:border-lime-400/60 transition-all slide-in-up"
+            :style="{ animationDelay: `${index * 0.1}s` }"
+          >
+            <span class="font-black text-white flex items-center gap-2">
+              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
+              <Gamepad2 v-else :size="20" />
+              {{ player.name }}
+            </span>
+            <span
+              v-if="player.id === playerId"
+              class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
+            >
+              YO
+            </span>
+          </div>
+        </div>
       </div>
       
       <!-- Back button -->

@@ -79,6 +79,13 @@ onMounted(async () => {
     return
   }
 
+  // Initialize impostor count from session data
+  impostorCount.value = sessionData.impostor_count || 1
+
+  // Check if host player still exists in database (might have been removed on refresh)
+  // and re-add them if necessary
+  await ensurePlayerExists()
+
   // Load initial players
   await loadPlayers()
 
@@ -186,6 +193,38 @@ async function shareInvite() {
     } catch (err) {
       console.error('Error copying link:', err)
     }
+async function ensurePlayerExists() {
+  // Check if host player exists in database
+  const playerIdValue = playerId.value
+  const playerNameValue = localStorage.getItem('playerName') || 'Host'
+  
+  const { data: existingPlayer, error: checkError } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', playerIdValue)
+    .eq('session_id', sessionCode.value)
+    .single()
+  
+  // If player doesn't exist (e.g., removed on page refresh), re-add them
+  if (checkError && checkError.code === 'PGRST116') {
+    console.log('Host player not found in database, re-adding:', playerIdValue)
+    const { error: insertError } = await supabase
+      .from('players')
+      .insert({
+        id: playerIdValue,
+        name: playerNameValue,
+        session_id: sessionCode.value,
+      })
+    
+    if (insertError) {
+      console.error('Error re-adding host player:', insertError)
+    } else {
+      console.log('Host player successfully re-added to session')
+    }
+  } else if (!checkError && existingPlayer) {
+    console.log('Host player already exists in database')
+  } else if (checkError) {
+    console.error('Error checking host player existence:', checkError)
   }
 }
 
@@ -235,15 +274,48 @@ async function goBack() {
   router.push('/')
 }
 
-function incrementImpostors() {
+async function incrementImpostors() {
   if (impostorCount.value < Math.floor(players.value.length / 2)) {
+    const previousValue = impostorCount.value
     impostorCount.value++
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
   }
 }
 
-function decrementImpostors() {
+async function decrementImpostors() {
   if (impostorCount.value > 1) {
+    const previousValue = impostorCount.value
     impostorCount.value--
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
+  }
+}
+
+async function updateImpostorCount(): Promise<boolean> {
+  try {
+    if (!sessionCode.value) {
+      console.error('Session code is empty, cannot update impostor count')
+      return false
+    }
+    
+    const { error } = await supabase
+      .from('sessions')
+      .update({ impostor_count: impostorCount.value })
+      .eq('code', sessionCode.value)
+    
+    if (error) {
+      console.error('Database error updating impostor count:', error)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('Unexpected error updating impostor count:', err)
+    return false
   }
 }
 </script>
