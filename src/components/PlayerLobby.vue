@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Loader2, Gamepad2, Sparkles, Drama, Users, Crown } from 'lucide-vue-next'
+import { Gamepad2, Sparkles, Drama, Users, Crown } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -248,29 +248,29 @@ async function goBack() {
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
       <div class="text-center mb-6">
-        <div class="flex justify-center mb-4">
-          <Loader2 :size="64" class="animate-spin text-purple-400" />
-        </div>
         <h2 class="text-4xl font-black impostor-title mb-4">
-          ¡ESPERANDO!
+          Hola, <span class="font-black text-fuchsia-400">{{ playerName }}</span>! 👋
         </h2>
         
         <!-- Session Code Card Component -->
         <SessionCodeCard :session-code="sessionCode" :show-share-button="true" />
         
-        <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border-2 border-fuchsia-500/50">
-          <p class="text-lg font-semibold text-gray-300">
-            Hola, <span class="font-black text-fuchsia-400 text-xl">{{ playerName }}</span>! 👋
+        <!-- Combined Waiting animation and message -->
+        <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border-2 border-amber-500/50">
+          <div class="flex justify-center mb-4">
+            <div class="flex gap-3">
+              <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
+              <Sparkles :size="48" class="animate-pulse text-yellow-400" style="animation-delay: 0.3s;" />
+              <Drama :size="48" class="animate-pulse text-red-400" style="animation-delay: 0.6s;" />
+            </div>
+          </div>
+          <p class="text-lg font-black text-amber-400 flex items-center justify-center gap-2">
+            <span class="text-3xl">⏰</span>
+            <span>Esperando al host...</span>
           </p>
-        </div>
-      </div>
-      
-      <!-- Waiting animation -->
-      <div class="flex justify-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl py-8 border-2 border-amber-500/50">
-        <div class="flex gap-3">
-          <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
-          <Sparkles :size="48" class="animate-pulse text-yellow-400" style="animation-delay: 0.3s;" />
-          <Drama :size="48" class="animate-pulse text-red-400" style="animation-delay: 0.6s;" />
+          <p class="text-sm font-semibold text-gray-400 mt-2">
+            ¡El juego comenzará pronto! 🎊
+          </p>
         </div>
       </div>
       
@@ -308,17 +308,6 @@ async function goBack() {
             </span>
           </div>
         </div>
-      </div>
-      
-      <!-- Waiting message -->
-      <div class="text-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-500/50">
-        <p class="text-lg font-black text-amber-400 flex items-center justify-center gap-2">
-          <span class="text-3xl">⏰</span>
-          <span>Esperando al host...</span>
-        </p>
-        <p class="text-sm font-semibold text-gray-400 mt-2">
-          ¡El juego comenzará pronto! 🎊
-        </p>
       </div>
       
       <!-- Back button -->
