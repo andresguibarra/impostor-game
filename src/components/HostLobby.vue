@@ -193,6 +193,9 @@ async function shareInvite() {
     } catch (err) {
       console.error('Error copying link:', err)
     }
+  }
+}
+
 async function ensurePlayerExists() {
   // Check if host player exists in database
   const playerIdValue = playerId.value

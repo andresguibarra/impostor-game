@@ -5,8 +5,7 @@ import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import ShareModal from './ShareModal.vue'
 import PlayerListModal from './PlayerListModal.vue'
-import { Loader2, Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick, Crown } from 'lucide-vue-next'
-import SessionCodeCard from './SessionCodeCard.vue'
+import { Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick, Crown } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -246,6 +245,9 @@ async function shareInvite() {
     } catch (err) {
       console.error('Error copying link:', err)
     }
+  }
+}
+
 async function ensurePlayerExists() {
   // Check if player exists in database
   const { data: existingPlayer, error: checkError } = await supabase
@@ -366,6 +368,8 @@ async function goBack() {
         <p class="text-sm font-semibold text-gray-400 mt-2">
           ¡El juego comenzará pronto! 🎊
         </p>
+      </div>
+      
       <!-- Players list -->
       <div class="mb-6">
         <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
