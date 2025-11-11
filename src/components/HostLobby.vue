@@ -4,8 +4,9 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player } from '../lib/supabase'
 import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 import NeonButton from './NeonButton.vue'
-import SessionCodeCard from './SessionCodeCard.vue'
-import { Gamepad2, Drama, Users, Crown, AlertTriangle, Rocket, Loader2, ArrowLeft } from 'lucide-vue-next'
+import ShareModal from './ShareModal.vue'
+import PlayerListModal from './PlayerListModal.vue'
+import { Gamepad2, Drama, Users, AlertTriangle, Rocket, Loader2, ArrowLeft, MapPin, MousePointerClick } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -17,6 +18,9 @@ const players = ref<Player[]>([])
 const impostorCount = ref(1)
 const loading = ref(false)
 const isStartingGame = ref(false) // Flag to prevent cleanup when starting game
+const showShareModal = ref(false)
+const showPlayerListModal = ref(false)
+const qrCode = ref<string>('')
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -140,6 +144,55 @@ async function loadPlayers() {
   }
 }
 
+async function openShareModal() {
+  showShareModal.value = true
+
+  // Generate QR code
+  const QRCode = (await import('qrcode')).default
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+  qrCode.value = await QRCode.toDataURL(gameUrl, {
+    width: 300,
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF',
+    },
+  })
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+function openPlayerListModal() {
+  showPlayerListModal.value = true
+}
+
+function closePlayerListModal() {
+  showPlayerListModal.value = false
+}
+
+async function shareInvite() {
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '¡Unite al juego del Impostor!',
+        text: `Unite a mi partida con el código: ${sessionCode.value}`,
+        url: gameUrl,
+      })
+    } catch (err) {
+      console.error('Error sharing:', err)
+    }
+  } else {
+    // Fallback: copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(gameUrl)
+      alert('Link copiado al portapapeles')
+    } catch (err) {
+      console.error('Error copying link:', err)
+    }
 async function ensurePlayerExists() {
   // Check if host player exists in database
   const playerIdValue = playerId.value
@@ -273,7 +326,6 @@ async function updateImpostorCount(): Promise<boolean> {
 
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
-            <!-- Header -->
       <div class="text-center mb-6">
         <div class="flex mb-4 justify-center items-center gap-3">
           <Gamepad2 :size="32" class="text-orange-500" />
@@ -282,8 +334,29 @@ async function updateImpostorCount(): Promise<boolean> {
           </h2>
         </div>
         
-        <!-- Session Code Card Component -->
-        <SessionCodeCard :session-code="sessionCode" />
+        <!-- Session Code and Players Cards Side by Side -->
+        <div class="flex justify-between items-stretch mb-3 gap-3">
+          <div @click="openShareModal"
+            class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1">
+              <MapPin :size="14" /> SESIÓN
+            </span>
+            <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Compartir
+            </p>
+          </div>
+          <div @click="openPlayerListModal"
+            class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1">
+              <Users :size="14" /> JUGADORES
+            </span>
+            <p class="text-lg font-black text-white">{{ players.length }}</p>
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Ver lista
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Impostor count -->
@@ -307,29 +380,9 @@ async function updateImpostorCount(): Promise<boolean> {
         </div>
       </div>
 
-      <!-- Players list -->
-      <div class="mb-6">
-        <h3 class="text-lg font-black text-cyan-400 mb-3 flex items-center justify-center gap-2">
-          <Users :size="24" />
-          JUGADORES CONECTADOS ({{ players.length }})
-        </h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-          <div v-for="(player, index) in players" :key="player.id"
-            class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-cyan-500/40 shadow-md hover:border-cyan-400/60 transition-all">
-            <span class="font-black text-white flex items-center gap-2">
-              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
-              <Gamepad2 v-else :size="20" />
-              {{ player.name }}
-            </span>
-            <span v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-br from-fuchsia-500 to-pink-600 text-white px-3 py-1 rounded-full font-black shadow-lg">
-              YO
-            </span>
-          </div>
-        </div>
-
-        <p v-if="players.length < 2"
-          class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl p-4 border-2 border-dashed border-amber-500/50 gap-2">
+      <!-- Warning message if not enough players -->
+      <div v-if="players.length < 2" class="mb-6">
+        <p class="text-sm text-amber-400 font-black flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl p-4 border-2 border-dashed border-amber-500/50 gap-2">
           <AlertTriangle :size="20" />
           Necesitás al menos 2 jugadores
         </p>
@@ -350,6 +403,18 @@ async function updateImpostorCount(): Promise<boolean> {
         </NeonButton>
       </div>
     </div>
+
+    <!-- Share Modal with Teleport -->
+    <Teleport to="body">
+      <ShareModal :show="showShareModal" :session-code="sessionCode" :qr-code="qrCode" @close="closeShareModal"
+        @share="shareInvite" />
+    </Teleport>
+
+    <!-- Player List Modal with Teleport -->
+    <Teleport to="body">
+      <PlayerListModal :show="showPlayerListModal" :players="players" :current-player-id="playerId"
+        :host-id="playerId" @close="closePlayerListModal" />
+    </Teleport>
   </div>
 </template>
 

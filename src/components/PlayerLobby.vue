@@ -3,8 +3,10 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
+import ShareModal from './ShareModal.vue'
+import PlayerListModal from './PlayerListModal.vue'
+import { Loader2, Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick, Crown } from 'lucide-vue-next'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Gamepad2, Sparkles, Drama, Users, Crown } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -15,6 +17,9 @@ const router = useRouter()
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
 const isJoiningGame = ref(false) // Flag to prevent cleanup when joining game
+const showShareModal = ref(false)
+const showPlayerListModal = ref(false)
+const qrCode = ref<string>('')
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -192,6 +197,55 @@ async function loadSession() {
   }
 }
 
+async function openShareModal() {
+  showShareModal.value = true
+
+  // Generate QR code
+  const QRCode = (await import('qrcode')).default
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+  qrCode.value = await QRCode.toDataURL(gameUrl, {
+    width: 300,
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF',
+    },
+  })
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+function openPlayerListModal() {
+  showPlayerListModal.value = true
+}
+
+function closePlayerListModal() {
+  showPlayerListModal.value = false
+}
+
+async function shareInvite() {
+  const gameUrl = `${window.location.origin}?join=${sessionCode.value}`
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '¡Unite al juego del Impostor!',
+        text: `Unite a mi partida con el código: ${sessionCode.value}`,
+        url: gameUrl,
+      })
+    } catch (err) {
+      console.error('Error sharing:', err)
+    }
+  } else {
+    // Fallback: copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(gameUrl)
+      alert('Link copiado al portapapeles')
+    } catch (err) {
+      console.error('Error copying link:', err)
+    }
 async function ensurePlayerExists() {
   // Check if player exists in database
   const { data: existingPlayer, error: checkError } = await supabase
@@ -252,8 +306,29 @@ async function goBack() {
           Hola, <span class="font-black text-fuchsia-400">{{ playerName }}</span>! 👋
         </h2>
         
-        <!-- Session Code Card Component -->
-        <SessionCodeCard :session-code="sessionCode" :show-share-button="true" />
+        <!-- Session Code and Players Cards Side by Side -->
+        <div class="flex justify-between items-stretch mb-3 gap-3">
+          <div @click="openShareModal"
+            class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1">
+              <MapPin :size="14" /> SESIÓN
+            </span>
+            <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Compartir
+            </p>
+          </div>
+          <div @click="openPlayerListModal"
+            class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
+            <span class="text-xs font-bold text-white/80 flex items-center gap-1">
+              <Users :size="14" /> JUGADORES
+            </span>
+            <p class="text-lg font-black text-white">{{ players.length }}</p>
+            <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
+              <MousePointerClick :size="12" /> Ver lista
+            </p>
+          </div>
+        </div>
         
         <!-- Combined Waiting animation and message -->
         <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border-2 border-amber-500/50">
@@ -282,6 +357,15 @@ async function goBack() {
         </p>
       </div>
       
+      <!-- Waiting message -->
+      <div class="text-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-500/50">
+        <p class="text-lg font-black text-amber-400 flex items-center justify-center gap-2">
+          <span class="text-3xl">⏰</span>
+          <span>Esperando al host...</span>
+        </p>
+        <p class="text-sm font-semibold text-gray-400 mt-2">
+          ¡El juego comenzará pronto! 🎊
+        </p>
       <!-- Players list -->
       <div class="mb-6">
         <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
@@ -321,6 +405,18 @@ async function goBack() {
         SALIR
       </NeonButton>
     </div>
+
+    <!-- Share Modal with Teleport -->
+    <Teleport to="body">
+      <ShareModal :show="showShareModal" :session-code="sessionCode" :qr-code="qrCode" @close="closeShareModal"
+        @share="shareInvite" />
+    </Teleport>
+
+    <!-- Player List Modal with Teleport -->
+    <Teleport to="body">
+      <PlayerListModal :show="showPlayerListModal" :players="players" :current-player-id="playerId"
+        :host-id="session?.host_id" @close="closePlayerListModal" />
+    </Teleport>
   </div>
 </template>
 
