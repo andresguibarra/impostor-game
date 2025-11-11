@@ -5,7 +5,8 @@ import { supabase, type Player } from '../lib/supabase'
 import { GAME_SETTINGS, UI_STRINGS } from '../lib/constants'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Gamepad2, Drama, Users, Crown, AlertTriangle, Rocket, Loader2, ArrowLeft } from 'lucide-vue-next'
+import PlayerList from './PlayerList.vue'
+import { Gamepad2, Drama, Users, AlertTriangle, Rocket, Loader2, ArrowLeft } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -238,20 +239,7 @@ function decrementImpostors() {
           <Users :size="24" />
           JUGADORES CONECTADOS ({{ players.length }})
         </h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-          <div v-for="(player, index) in players" :key="player.id"
-            class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-cyan-500/40 shadow-md hover:border-cyan-400/60 transition-all">
-            <span class="font-black text-white flex items-center gap-2">
-              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
-              <Gamepad2 v-else :size="20" />
-              {{ player.name }}
-            </span>
-            <span v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-br from-fuchsia-500 to-pink-600 text-white px-3 py-1 rounded-full font-black shadow-lg">
-              YO
-            </span>
-          </div>
-        </div>
+        <PlayerList :players="players" :current-player-id="playerId" />
 
         <p v-if="players.length < 2"
           class="text-sm text-amber-400 font-black mt-3 flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl p-4 border-2 border-dashed border-amber-500/50 gap-2">

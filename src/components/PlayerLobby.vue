@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import SessionCodeCard from './SessionCodeCard.vue'
-import { Loader2, Gamepad2, Sparkles, Drama, Users, Crown } from 'lucide-vue-next'
+import PlayerList from './PlayerList.vue'
+import { Loader2, Gamepad2, Sparkles, Drama, Users } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -250,26 +251,7 @@ async function goBack() {
           <Users :size="24" />
           JUGADORES ({{ players.length }}):
         </h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-          <div
-            v-for="(player, index) in players"
-            :key="player.id"
-            class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-lime-500/40 shadow-md hover:border-lime-400/60 transition-all slide-in-up"
-            :style="{ animationDelay: `${index * 0.1}s` }"
-          >
-            <span class="font-black text-white flex items-center gap-2">
-              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
-              <Gamepad2 v-else :size="20" />
-              {{ player.name }}
-            </span>
-            <span
-              v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
-            >
-              YO
-            </span>
-          </div>
-        </div>
+        <PlayerList :players="players" :current-player-id="playerId" />
       </div>
       
       <!-- Waiting message -->
