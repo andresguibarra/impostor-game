@@ -34,7 +34,7 @@ const router = createRouter({
 })
 
 // Navigation guard to restore session
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const savedGameCode = localStorage.getItem('gameCode')
   const savedIsHost = localStorage.getItem('isHost') === 'true'
   
@@ -42,6 +42,21 @@ router.beforeEach((to, _from, next) => {
   if (to.path === '/' && savedGameCode) {
     // Don't redirect if there's a join query parameter (QR code scan)
     if (!to.query.join) {
+      // Check if the session has a game in progress
+      const { supabase } = await import('../lib/supabase')
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('round_number')
+        .eq('code', savedGameCode)
+        .single()
+      
+      // If game is in progress (round_number > 0), redirect to game screen
+      if (session && session.round_number > 0) {
+        next(`/game/${savedGameCode}`)
+        return
+      }
+      
+      // Otherwise, redirect to appropriate lobby
       if (savedIsHost) {
         next(`/host/${savedGameCode}`)
         return
@@ -49,6 +64,21 @@ router.beforeEach((to, _from, next) => {
         next(`/join/${savedGameCode}`)
         return
       }
+    }
+  }
+  
+  // If accessing a player lobby but game is in progress, redirect to game
+  if (to.name === 'player' && savedGameCode) {
+    const { supabase } = await import('../lib/supabase')
+    const { data: session } = await supabase
+      .from('sessions')
+      .select('round_number')
+      .eq('code', savedGameCode)
+      .single()
+    
+    if (session && session.round_number > 0) {
+      next(`/game/${savedGameCode}`)
+      return
     }
   }
   

@@ -5,7 +5,7 @@ import { supabase, type Player, type Session } from '../lib/supabase'
 import NeonButton from './NeonButton.vue'
 import ShareModal from './ShareModal.vue'
 import PlayerListModal from './PlayerListModal.vue'
-import { Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick, Crown } from 'lucide-vue-next'
+import { Gamepad2, Sparkles, Drama, Users, MapPin, MousePointerClick } from 'lucide-vue-next'
 
 const props = defineProps<{
   gameCode: string
@@ -60,6 +60,15 @@ onMounted(async () => {
     return
   }
   
+  // Check if game is already in progress (round_number > 0)
+  // This handles the case when a player joins a session that's already started
+  if (session.value.round_number > 0) {
+    console.log('Game already in progress, redirecting to game screen')
+    isJoiningGame.value = true
+    router.push(`/game/${sessionCode.value}`)
+    return
+  }
+  
   // Check if player still exists in database (might have been removed on refresh)
   // and re-add them if necessary
   await ensurePlayerExists()
@@ -96,8 +105,11 @@ onMounted(async () => {
         filter: `code=eq.${sessionCode.value}`,
       },
       async (payload: any) => {
-        console.log('Session change detected in player lobby')
+        console.log('Session change detected in player lobby:', payload.new)
+        // Redirect to game if round_number is greater than 0
+        // This handles both first round start and subsequent rounds
         if (payload.new.round_number > 0) {
+          console.log('Game started, redirecting to game screen')
           isJoiningGame.value = true // Mark that we're joining the game
           router.push(`/game/${sessionCode.value}`)
         }
