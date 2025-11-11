@@ -184,19 +184,27 @@ async function goBack() {
 
 async function incrementImpostors() {
   if (impostorCount.value < Math.floor(players.value.length / 2)) {
+    const previousValue = impostorCount.value
     impostorCount.value++
-    await updateImpostorCount()
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
   }
 }
 
 async function decrementImpostors() {
   if (impostorCount.value > 1) {
+    const previousValue = impostorCount.value
     impostorCount.value--
-    await updateImpostorCount()
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
   }
 }
 
-async function updateImpostorCount() {
+async function updateImpostorCount(): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('sessions')
@@ -204,10 +212,13 @@ async function updateImpostorCount() {
       .eq('code', sessionCode.value)
     
     if (error) {
-      console.error('Error updating impostor count:', error)
+      console.error('Database error updating impostor count:', error)
+      return false
     }
+    return true
   } catch (err) {
-    console.error('Error updating impostor count:', err)
+    console.error('Unexpected error updating impostor count:', err)
+    return false
   }
 }
 </script>
