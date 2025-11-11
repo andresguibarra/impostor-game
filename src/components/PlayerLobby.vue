@@ -358,46 +358,7 @@ async function goBack() {
           <span>IMPOSTORES EN JUEGO: <span class="text-2xl impostor-title">{{ session.impostor_count }}</span></span>
         </p>
       </div>
-      
-      <!-- Waiting message -->
-      <div class="text-center mb-6 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-500/50">
-        <p class="text-lg font-black text-amber-400 flex items-center justify-center gap-2">
-          <span class="text-3xl">⏰</span>
-          <span>Esperando al host...</span>
-        </p>
-        <p class="text-sm font-semibold text-gray-400 mt-2">
-          ¡El juego comenzará pronto! 🎊
-        </p>
-      </div>
-      
-      <!-- Players list -->
-      <div class="mb-6">
-        <h3 class="text-xl font-black text-cyan-400 mb-3 flex items-center gap-2">
-          <Users :size="24" />
-          JUGADORES ({{ players.length }}):
-        </h3>
-        <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-          <div
-            v-for="(player, index) in players"
-            :key="player.id"
-            class="flex items-center justify-between p-4 bg-slate-800/60 backdrop-blur-md rounded-xl border-2 border-lime-500/40 shadow-md hover:border-lime-400/60 transition-all slide-in-up"
-            :style="{ animationDelay: `${index * 0.1}s` }"
-          >
-            <span class="font-black text-white flex items-center gap-2">
-              <Crown v-if="index === 0" :size="20" class="text-yellow-400" />
-              <Gamepad2 v-else :size="20" />
-              {{ player.name }}
-            </span>
-            <span
-              v-if="player.id === playerId"
-              class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
-            >
-              YO
-            </span>
-          </div>
-        </div>
-      </div>
-      
+   
       <!-- Back button -->
       <NeonButton
         variant="back"
