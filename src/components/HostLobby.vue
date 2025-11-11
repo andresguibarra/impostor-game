@@ -206,6 +206,11 @@ async function decrementImpostors() {
 
 async function updateImpostorCount(): Promise<boolean> {
   try {
+    if (!sessionCode.value) {
+      console.error('Session code is empty, cannot update impostor count')
+      return false
+    }
+    
     const { error } = await supabase
       .from('sessions')
       .update({ impostor_count: impostorCount.value })
