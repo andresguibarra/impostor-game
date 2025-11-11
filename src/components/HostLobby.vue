@@ -75,6 +75,9 @@ onMounted(async () => {
     return
   }
 
+  // Initialize impostor count from session data
+  impostorCount.value = sessionData.impostor_count || 1
+
   // Load initial players
   await loadPlayers()
 
@@ -179,15 +182,48 @@ async function goBack() {
   router.push('/')
 }
 
-function incrementImpostors() {
+async function incrementImpostors() {
   if (impostorCount.value < Math.floor(players.value.length / 2)) {
+    const previousValue = impostorCount.value
     impostorCount.value++
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
   }
 }
 
-function decrementImpostors() {
+async function decrementImpostors() {
   if (impostorCount.value > 1) {
+    const previousValue = impostorCount.value
     impostorCount.value--
+    const success = await updateImpostorCount()
+    if (!success) {
+      impostorCount.value = previousValue // Revert on error
+    }
+  }
+}
+
+async function updateImpostorCount(): Promise<boolean> {
+  try {
+    if (!sessionCode.value) {
+      console.error('Session code is empty, cannot update impostor count')
+      return false
+    }
+    
+    const { error } = await supabase
+      .from('sessions')
+      .update({ impostor_count: impostorCount.value })
+      .eq('code', sessionCode.value)
+    
+    if (error) {
+      console.error('Database error updating impostor count:', error)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('Unexpected error updating impostor count:', err)
+    return false
   }
 }
 </script>
