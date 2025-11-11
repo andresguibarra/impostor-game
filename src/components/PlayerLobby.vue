@@ -56,6 +56,10 @@ onMounted(async () => {
     return
   }
   
+  // Check if player still exists in database (might have been removed on refresh)
+  // and re-add them if necessary
+  await ensurePlayerExists()
+  
   // Subscribe to player changes with unique channel name
   playersSubscription = supabase
     .channel(`player-lobby-players-${sessionCode.value}-${Date.now()}`)
@@ -185,6 +189,40 @@ async function loadSession() {
     localStorage.removeItem('playerName')
     localStorage.removeItem('isHost')
     router.push('/')
+  }
+}
+
+async function ensurePlayerExists() {
+  // Check if player exists in database
+  const { data: existingPlayer, error: checkError } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', playerId.value)
+    .eq('session_id', sessionCode.value)
+    .single()
+  
+  // If player doesn't exist (e.g., removed on page refresh), re-add them
+  if (checkError && checkError.code === 'PGRST116') {
+    console.log('Player not found in database, re-adding:', playerId.value)
+    const { error: insertError } = await supabase
+      .from('players')
+      .insert({
+        id: playerId.value,
+        name: playerName.value,
+        session_id: sessionCode.value,
+      })
+    
+    if (insertError) {
+      console.error('Error re-adding player:', insertError)
+    } else {
+      console.log('Player successfully re-added to session')
+      // Reload players to update the UI
+      await loadPlayers()
+    }
+  } else if (!checkError && existingPlayer) {
+    console.log('Player already exists in database')
+  } else if (checkError) {
+    console.error('Error checking player existence:', checkError)
   }
 }
 
