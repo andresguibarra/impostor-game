@@ -133,8 +133,12 @@ async function joinSession() {
     localStorage.setItem('playerName', playerName)
     localStorage.setItem('isHost', 'false')
     
-    // Clear QR code from URL
-    router.replace(`/join/${code}`)
+    // Redirect to game if session has already started, otherwise go to lobby
+    if (session.round_number > 0) {
+      router.replace(`/game/${code}`)
+    } else {
+      router.replace(`/join/${code}`)
+    }
   } catch (err: any) {
     error.value = err.message || 'Error al unirse a sesión'
     console.error('Error joining session:', err)

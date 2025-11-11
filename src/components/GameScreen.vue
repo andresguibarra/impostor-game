@@ -26,7 +26,6 @@ const countdown = ref(3)
 const showShareModal = ref(false)
 const showPlayerListModal = ref(false)
 const qrCode = ref<string>('')
-const isInitialLoad = ref(true) // Track if this is the first load
 
 // Get session data from localStorage or props
 const sessionCode = computed(() => props.gameCode || localStorage.getItem('gameCode') || '')
@@ -303,10 +302,6 @@ async function loadGameState() {
     if (isNewRound) {
       wordRevealed.value = false
       await startCountdown()
-    } else if (isInitialLoad.value) {
-      // Auto-reveal word for late-joining players on initial load
-      wordRevealed.value = true
-      isInitialLoad.value = false
     }
   }
 }
