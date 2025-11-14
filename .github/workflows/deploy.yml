@@ -82,4 +82,4 @@ jobs:
           git config --local user.name "GitHub Action"
           git add public/version.json
           git commit -m "chore: bump version [skip ci]" || true
-          git push
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
