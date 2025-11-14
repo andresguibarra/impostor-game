@@ -12,6 +12,7 @@ Mobile-first impostor game built with Vue 3, Vite, Tailwind CSS, and Supabase.
 - **Word Bank**: Large collection of Argentine folklore words
 - **Real-time Updates**: Using Supabase Realtime
 - **Mobile-First Design**: Responsive UI with Tailwind CSS
+- **Auto-Versioning**: Automatic version management with update notifications
 
 ## 🚀 Setup
 
@@ -135,6 +136,34 @@ The Firebase configuration is in `firebase.json`:
 - Public directory: `dist`
 - Single Page App: All routes redirect to `index.html`
 - Cache control headers for static assets
+
+## 🔄 Version Management
+
+The app includes an automatic versioning system:
+
+### How It Works
+
+1. **Automatic Version Bumping**: On each deployment to master, the GitHub Actions workflow automatically:
+   - Increments the patch version (e.g., 1.0.0 → 1.0.1)
+   - Updates `package.json` with the new version
+   - Generates a `public/version.json` file with version and build date
+
+2. **Version Display**: A small footer at the bottom of every page displays the current version (e.g., "v1.0.0")
+
+3. **Auto-Update Notification**: The app checks for new versions every 5 minutes:
+   - When a new version is detected, a prominent notification banner appears
+   - Users can click the banner to reload and get the latest version
+   - This ensures users always have the most up-to-date features and fixes
+
+### Manual Version Bump
+
+To manually bump the version:
+
+```bash
+node scripts/bump-version.js
+```
+
+This will increment the patch version and update both `package.json` and `public/version.json`.
 
 ## 🎯 How to Play
 

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import VersionFooter from './components/VersionFooter.vue'
 </script>
 
 <template>
   <div class="min-h-screen dark-impostor-bg-main relative overflow-hidden">
     <router-view />
+    <VersionFooter />
   </div>
 </template>
 
