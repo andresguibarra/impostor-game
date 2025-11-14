@@ -59,6 +59,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       
+      - name: Bump version
+        run: node scripts/bump-version.js
+      
       - name: Build (dev)
         run: yarn build:dev
         env:
@@ -72,3 +75,11 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           target: dev
+      
+      - name: Commit version bump
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/version.json
+          git commit -m "chore: bump version [skip ci]" || true
+          git push
