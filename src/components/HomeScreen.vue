@@ -170,7 +170,7 @@ function generateName() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden dark-impostor-bg">
+  <div class="w-full max-w-lg dark-impostor-bg">
     <!-- Configuration warning banner -->
     <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">

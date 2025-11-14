@@ -447,7 +447,7 @@ async function goBack() {
 
 <template>
   <div
-    class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    class="rounded-4xl w-full max-w-lg bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
 
     <!-- Countdown Modal -->
     <Transition name="countdown-fade">
