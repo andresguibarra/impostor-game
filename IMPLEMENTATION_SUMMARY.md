@@ -39,7 +39,9 @@ impostor-game/
 │   ├── App.vue                 # Root component
 │   ├── main.ts                 # App entry point
 │   └── style.css               # Tailwind directives
-├── .env.example                # Environment template
+├── .env.example                # Shared environment template
+├── .env.dev.example            # Dev-specific credentials template
+├── .env.prod.example           # Prod-specific credentials template
 ├── .gitignore                  # Git ignore rules
 ├── index.html                  # HTML template
 ├── package.json                # Dependencies & scripts
@@ -134,17 +136,20 @@ Total bundle size: ~85 KB gzipped ✨
 1. **README.md** - Complete setup and usage guide
 2. **SUPABASE_SETUP.md** - Step-by-step database configuration
 3. **SECURITY_SUMMARY.md** - Security analysis and recommendations
-4. **.env.example** - Environment variable template
+4. **.env*.example** - Templates for shared/dev/prod environment variables
 5. **Inline comments** - Code documentation throughout
 
 ## 🚀 Deployment Ready
 
 ### Local Development
 ```bash
-yarn dev          # Start dev server
-yarn build        # Production build
+yarn dev          # Start dev server (.env.dev)
+yarn dev:prod     # Dev server but using production credentials
+yarn build        # Production build (.env.prod)
+yarn build:dev    # Build using dev credentials
 yarn preview      # Preview production build
-yarn deploy       # Build with .nojekyll
+yarn preview:dev  # Preview dev build
+yarn deploy       # Build (prod) + firebase deploy
 ```
 
 ### GitHub Pages

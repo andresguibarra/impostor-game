@@ -2,11 +2,14 @@ name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - dev
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-prod:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,15 +27,46 @@ jobs:
       - name: Bump version
         run: node scripts/bump-version.js
       
-      - name: Build
+      - name: Build (prod)
         run: yarn build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       
-      - name: Deploy to Firebase Hosting
+      - name: Deploy to Firebase Hosting (prod)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
+
+  build-and-deploy-dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Build (dev)
+        run: yarn build:dev
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      
+      - name: Deploy to Firebase Hosting (dev)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: impostor-game-dev
+          target: dev

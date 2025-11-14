@@ -61,19 +61,32 @@ CREATE POLICY "Allow all operations on players" ON players
 
 ## Step 4: Configure Your Local Project
 
-1. Create a `.env` file in the root of your project:
+1. Duplicá `.env.example` en los archivos según el entorno:
+
+```
+.env.dev    # credenciales de desarrollo (usadas por `yarn dev`)
+.env.prod   # credenciales de producción (usadas por `yarn build`, `yarn preview`, `yarn dev:prod`)
+```
+
+2. Si necesitás overrides locales, también podés crear `.env.dev.local` o `.env.prod.local` (los `.local` quedan fuera del control de versiones por defecto).
+
+3. Cada archivo debe contener:
 
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-2. Replace the placeholder values with your actual Supabase credentials
+4. Reemplazá los placeholders con tus credenciales reales desde el panel de Supabase.
 
 ## Step 5: Test Locally
 
 ```bash
+# Usa las credenciales de .env.dev
 yarn dev
+
+# Opcional: correr el dev server con credenciales de producción (.env.prod)
+yarn dev:prod
 ```
 
 Open http://localhost:5173/impostor-game/ and try:
@@ -89,9 +102,11 @@ Open http://localhost:5173/impostor-game/ and try:
 
 1. Go to your GitHub repository
 2. Navigate to Settings → Secrets and variables → Actions
-3. Add two new secrets:
-   - `VITE_SUPABASE_URL`: Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anon key
+3. Add the following secrets for each environment that deploys via GitHub Actions (using the **same names** in cada environment):
+  - `VITE_SUPABASE_URL`
+  - `VITE_SUPABASE_ANON_KEY`
+  - `FIREBASE_SERVICE_ACCOUNT` (si también desplegás con Firebase Hosting)
+  Configurá el environment `prod` con los valores de producción y el environment `dev` con los valores de sandbox.
 
 ### Enable GitHub Pages
 
