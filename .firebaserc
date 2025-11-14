@@ -4,6 +4,17 @@
     "prod": "impostor-game-c70dd",
     "dev": "impostor-game-dev"
   },
-  "targets": {},
+  "targets": {
+    "impostor-game-c70dd": {
+      "hosting": {
+        "dev": [
+          "impostor-game-dev"
+        ],
+        "prod": [
+          "impostor-game-c70dd"
+        ]
+      }
+    }
+  },
   "etags": {}
 }
