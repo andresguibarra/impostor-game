@@ -325,7 +325,7 @@ async function updateImpostorCount(): Promise<boolean> {
 
 <template>
   <div
-    class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    class="bg-gradient-to-br rounded-4xl w-full max-w-lg  from-slate-900 via-slate-800 to-slate-900">
 
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->

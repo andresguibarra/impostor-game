@@ -24,7 +24,6 @@ Mobile-first impostor game built with Vue 3, Vite, Tailwind CSS, and Supabase.
 
 ### Supabase Setup
 
-1. Create a new Supabase project at https://supabase.com
 2. Run these SQL commands in your Supabase SQL editor:
 
 ```sql
@@ -36,7 +35,6 @@ CREATE TABLE sessions (
   impostor_count INTEGER DEFAULT 1,
   current_word TEXT,
   impostors JSONB,
-  round_number INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -44,15 +42,12 @@ CREATE TABLE sessions (
 CREATE TABLE players (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  session_id TEXT NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable realtime for both tables
 ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
 ALTER PUBLICATION supabase_realtime ADD TABLE players;
 
--- Enable row level security
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 
@@ -77,19 +72,33 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 # Install dependencies
 yarn
 
-# Run development server
+# Run development server with dev credentials (.env.dev)
 yarn dev
 
-# Build for production
+# Run dev server but pointing to production Supabase (.env.prod)
+yarn dev:prod
+
+# Build for production (uses .env.prod)
 yarn build
+
+# Optional build against dev env
+yarn build:dev
 
 # Preview production build
 yarn preview
+
+# Preview build using dev env
+yarn preview:dev
 ```
 
 ## 📦 Deployment to Firebase Hosting
 
-The project is configured to deploy automatically to Firebase Hosting via GitHub Actions.
+The project is configured to deploy automatically to Firebase Hosting via GitHub Actions for both `master` (prod) and `dev` branches.
+
+| Branch | Build Script | Firebase Project | Secrets Required |
+| ------ | ------------ | ---------------- | ---------------- |
+| `master` | `yarn build` | `impostor-game-c70dd` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `FIREBASE_SERVICE_ACCOUNT` |
+| `dev` | `yarn build:dev` | `impostor-game-dev` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `FIREBASE_SERVICE_ACCOUNT` *(definidos en el environment `dev` de GitHub)* |
 
 ### Automatic Deployment (Recommended)
 
@@ -102,15 +111,13 @@ The project is configured to deploy automatically to Firebase Hosting via GitHub
    - Go to Firebase Console → Project Settings → Service Accounts
    - Click "Generate New Private Key"
    - Save the JSON file securely
-6. Add the service account JSON as a GitHub secret:
-   - Go to your GitHub repository → Settings → Secrets and Variables → Actions
-   - Create a new secret named `FIREBASE_SERVICE_ACCOUNT`
-   - Paste the entire JSON content as the value
-7. Push to main branch - GitHub Actions will automatically build and deploy
+6. Add the service account JSON como secreto de GitHub llamado `FIREBASE_SERVICE_ACCOUNT`. Si usás environments (recomendado), definí el mismo nombre en cada environment (`prod`, `dev`, etc.) con el JSON correspondiente.
+7. Definí también los secretos de Supabase usando siempre los nombres `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. Cargá los valores específicos de cada ambiente en los environment secrets que correspondan.
+8. Hacé push a la branch correspondiente y GitHub Actions construirá y desplegará al proyecto indicado
 
 The deployment workflow is defined in `.github/workflows/deploy.yml` and will:
-- Build the project with your Supabase environment variables
-- Deploy to Firebase Hosting automatically on every push to main
+- Build the project with the Supabase environment variables del entorno actual
+- Deploy to Firebase Hosting automatically on every push to `master` (prod) o `dev` (sandbox)
 
 ### Manual Deployment
 

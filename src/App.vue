@@ -3,7 +3,7 @@ import VersionFooter from './components/VersionFooter.vue'
 </script>
 
 <template>
-  <div class="min-h-screen dark-impostor-bg-main relative overflow-hidden">
+  <div class="flex flex-col justify-center items-center min-h-screen dark-impostor-bg-main px-4 pt-10 pb-0 relative overflow-hidden">
     <router-view />
     <VersionFooter />
   </div>

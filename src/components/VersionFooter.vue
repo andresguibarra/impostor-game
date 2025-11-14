@@ -60,7 +60,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-50">
+  <div class="">
     <!-- Update notification -->
     <div 
       v-if="hasNewVersion"
@@ -116,11 +116,11 @@ onUnmounted(() => {
 }
 
 .version-footer {
-  background: rgba(10, 10, 21, 0.8);
-  backdrop-filter: blur(8px);
+  /* background: rgba(10, 10, 21, 0.8); */
+  /* backdrop-filter: blur(8px); */
   padding: 6px 12px;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
 }
 
 .version-text {
