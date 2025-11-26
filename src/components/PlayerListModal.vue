@@ -8,6 +8,7 @@ defineProps<{
   players: Player[]
   currentPlayerId: string
   hostId?: string
+  firstPlayerId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -37,6 +38,7 @@ const emit = defineEmits<{
           :players="players"
           :current-player-id="currentPlayerId"
           :host-id="hostId"
+          :first-player-id="firstPlayerId"
         />
       </div>
     </div>
