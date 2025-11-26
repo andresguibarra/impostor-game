@@ -31,29 +31,27 @@ export function selectFirstPlayer(players: Player[], impostorIds: string[]): str
   const impostors = players.filter(p => impostorIds.includes(p.id))
   
   // If everyone is an impostor, randomly select one
-  if (nonImpostors.length === 0 && impostors.length > 0) {
-    const selectedImpostor = impostors[Math.floor(Math.random() * impostors.length)]
-    return selectedImpostor?.id ?? ''
+  if (nonImpostors.length === 0) {
+    return selectRandomFromArray(impostors)
   }
   
   // If there are no impostors, randomly select a non-impostor
-  if (impostors.length === 0 && nonImpostors.length > 0) {
-    const selectedNonImpostor = nonImpostors[Math.floor(Math.random() * nonImpostors.length)]
-    return selectedNonImpostor?.id ?? ''
+  if (impostors.length === 0) {
+    return selectRandomFromArray(nonImpostors)
   }
   
-  // 5% chance that an impostor starts
+  // 5% chance that an impostor starts, 95% chance a non-impostor starts
   const impostorStarts = Math.random() < IMPOSTOR_START_PROBABILITY
   
-  if (impostorStarts && impostors.length > 0) {
-    const selectedImpostor = impostors[Math.floor(Math.random() * impostors.length)]
-    return selectedImpostor?.id ?? ''
-  } else if (nonImpostors.length > 0) {
-    const selectedNonImpostor = nonImpostors[Math.floor(Math.random() * nonImpostors.length)]
-    return selectedNonImpostor?.id ?? ''
-  }
-  
-  return ''
+  return impostorStarts 
+    ? selectRandomFromArray(impostors) 
+    : selectRandomFromArray(nonImpostors)
+}
+
+function selectRandomFromArray(players: Player[]): string {
+  if (players.length === 0) return ''
+  const selected = players[Math.floor(Math.random() * players.length)]
+  return selected?.id ?? ''
 }
 
 export function selectRandomImpostors(players: Player[], count: number): string[] {
