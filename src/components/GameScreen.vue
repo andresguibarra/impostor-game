@@ -621,7 +621,7 @@ async function goBack() {
     <!-- Player List Modal with Teleport -->
     <Teleport to="body">
       <PlayerListModal :show="showPlayerListModal" :players="players" :current-player-id="playerId"
-        :host-id="session?.host_id" @close="closePlayerListModal" />
+        :host-id="session?.host_id" :first-player-id="session?.first_player_id" @close="closePlayerListModal" />
     </Teleport>
   </div>
 </template>
