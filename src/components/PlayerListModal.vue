@@ -23,7 +23,7 @@ const emit = defineEmits<{
         <!-- Close button -->
         <button
           @click="emit('close')"
-          class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+          class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors cursor-pointer"
         >
           <X :size="24" />
         </button>
