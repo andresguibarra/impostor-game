@@ -50,6 +50,7 @@ export interface Session {
   round_number: number
   created_at: string
   impostors?: string[]
+  first_player_id?: string | null
 }
 
 export interface GameState {

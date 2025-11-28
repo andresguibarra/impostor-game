@@ -13,10 +13,17 @@ const router = createRouter({
       component: HomeScreen
     },
     {
-      path: '/host/:gameCode',
-      name: 'host',
+      // Shareable lobby URL - shows HostLobby for hosts, redirects others to join
+      path: '/lobby/:gameCode',
+      name: 'lobby',
       component: HostLobby,
       props: true
+    },
+    {
+      // Legacy host URL - redirects to /lobby for consistency
+      path: '/host/:gameCode',
+      name: 'host',
+      redirect: (to) => `/lobby/${to.params.gameCode}`
     },
     {
       path: '/join/:gameCode',
@@ -38,6 +45,28 @@ router.beforeEach(async (to, _from, next) => {
   const savedGameCode = localStorage.getItem('gameCode')
   const savedIsHost = localStorage.getItem('isHost') === 'true'
   
+  // Handle shareable /lobby/:gameCode URL
+  if (to.name === 'lobby') {
+    const gameCodeFromUrl = to.params.gameCode as string
+    
+    // If user has a session for this game
+    if (savedGameCode === gameCodeFromUrl) {
+      if (savedIsHost) {
+        // Host can access the lobby - continue to HostLobby component
+        next()
+        return
+      } else {
+        // Player should go to their own lobby view
+        next(`/join/${gameCodeFromUrl}`)
+        return
+      }
+    }
+    
+    // User doesn't have a session for this game - redirect to join flow
+    next({ path: '/', query: { join: gameCodeFromUrl } })
+    return
+  }
+  
   // If going to home but have a saved session, restore it
   if (to.path === '/' && savedGameCode) {
     // Don't redirect if there's a join query parameter (QR code scan)
@@ -58,7 +87,7 @@ router.beforeEach(async (to, _from, next) => {
       
       // Otherwise, redirect to appropriate lobby
       if (savedIsHost) {
-        next(`/host/${savedGameCode}`)
+        next(`/lobby/${savedGameCode}`)
         return
       } else {
         next(`/join/${savedGameCode}`)
@@ -82,12 +111,20 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
   
-  // If accessing a game route without saved session, clear localStorage and go home
-  if ((to.name === 'host' || to.name === 'player' || to.name === 'game') && !savedGameCode) {
+  // If accessing a game route without saved session, clear localStorage and handle appropriately
+  if ((to.name === 'player' || to.name === 'game') && !savedGameCode) {
     localStorage.removeItem('gameCode')
     localStorage.removeItem('playerId')
     localStorage.removeItem('playerName')
     localStorage.removeItem('isHost')
+    
+    // If accessing player route with a game code, redirect to home with join parameter
+    const gameCodeFromUrl = to.params.gameCode as string | undefined
+    if (to.name === 'player' && gameCodeFromUrl) {
+      next({ path: '/', query: { join: gameCodeFromUrl } })
+      return
+    }
+    
     next('/')
     return
   }

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Gamepad2, Crown } from 'lucide-vue-next'
+import { Gamepad2, Crown, Play } from 'lucide-vue-next'
 import type { Player } from '../lib/supabase'
 
 const props = defineProps<{
   players: Player[]
   currentPlayerId: string
   hostId?: string
+  firstPlayerId?: string | null
 }>()
 
 // Determine host based on hostId prop or first player
@@ -17,6 +18,11 @@ const getIsHost = (player: Player) => {
   }
   // First player is host by default (players are sorted by joined_at ascending)
   return props.players.length > 0 && props.players[0]?.id === player.id
+}
+
+// Check if player is the first player to start the round
+const getIsFirstPlayer = (player: Player) => {
+  return props.firstPlayerId && player.id === props.firstPlayerId
 }
 </script>
 
@@ -33,12 +39,21 @@ const getIsHost = (player: Player) => {
         <Gamepad2 v-else :size="20" />
         {{ player.name }}
       </span>
-      <span
-        v-if="player.id === currentPlayerId"
-        class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
-      >
-        YO
-      </span>
+      <div class="flex items-center gap-2">
+        <span
+          v-if="getIsFirstPlayer(player)"
+          class="text-xs bg-gradient-to-br from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full font-black shadow-lg flex items-center gap-1"
+        >
+          <Play :size="12" />
+          EMPIEZA
+        </span>
+        <span
+          v-if="player.id === currentPlayerId"
+          class="text-xs bg-gradient-to-br from-cyan-500 to-blue-600 text-white px-3 py-1 rounded-full font-black shadow-lg"
+        >
+          YO
+        </span>
+      </div>
     </div>
   </div>
 </template>

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
 import { UI_STRINGS } from '../lib/constants'
-import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users } from 'lucide-vue-next'
+import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users, Play } from 'lucide-vue-next'
 import ShareModal from './ShareModal.vue'
 import PlayerListModal from './PlayerListModal.vue'
 import NeonButton from './NeonButton.vue'
@@ -42,6 +42,18 @@ const canStartNewRound = computed(() => {
 // Check if it's the first round (round 1 with no current word assigned yet)
 const isFirstRound = computed(() => {
   return session.value?.round_number === 1 && !session.value?.current_word
+})
+
+// Get the name of the first player who should start
+const firstPlayerName = computed(() => {
+  if (!session.value?.first_player_id) return null
+  const firstPlayer = players.value.find(p => p.id === session.value?.first_player_id)
+  return firstPlayer?.name || null
+})
+
+// Check if the current player is the first player
+const isFirstPlayer = computed(() => {
+  return session.value?.first_player_id === playerId.value
 })
 
 // Cleanup function to remove player from database
@@ -329,7 +341,11 @@ async function loadGameState() {
   }
 
   // Detect if it's a new round by comparing round numbers
+  // Also trigger countdown when this is the first load and game has already started (first round)
   const isNewRound = session.value && data.round_number > session.value.round_number
+  // First load is either when session is null OR when the previous session had no word (first round just started)
+  const hasNoPreviousWord = !session.value?.current_word
+  const isFirstLoad = data.current_word && data.impostors && hasNoPreviousWord
 
   session.value = data
 
@@ -339,8 +355,8 @@ async function loadGameState() {
     isImpostor.value = impostorIds.includes(playerId.value)
     currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
 
-    // Hide word and show countdown if it's a new round
-    if (isNewRound) {
+    // Hide word and show countdown if it's a new round or first load with game started
+    if (isNewRound || isFirstLoad) {
       wordRevealed.value = false
       await startCountdown()
     }
@@ -369,6 +385,7 @@ async function newRound() {
         current_word: round.word,
         impostors: round.impostorIds,
         round_number: newRoundNumber,
+        first_player_id: round.firstPlayerId,
       })
       .eq('code', sessionCode.value)
 
@@ -514,7 +531,7 @@ async function goBack() {
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
             <button @click="revealWord"
-              class="w-full p-8 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50">
+              class="w-full p-8 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50 cursor-pointer">
               <div class="flex justify-center mb-2">
                 <Eye :size="64" class="animate-bounce" />
               </div>
@@ -555,6 +572,17 @@ async function goBack() {
 
             <div
               class="text-sm font-semibold text-gray-300 bg-slate-800/60 backdrop-blur-md rounded-2xl p-5 border-2 border-slate-600/50 space-y-3">
+              <!-- First player indicator -->
+              <div v-if="firstPlayerName"
+                class="flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-green-600/30 to-emerald-600/30 border border-green-400/50">
+                <Play :size="24" class="flex-shrink-0 text-green-400" />
+                <span v-if="isFirstPlayer" class="text-green-300">
+                  <span class="font-black">¡Te toca empezar!</span>
+                </span>
+                <span v-else>
+                  Empieza: <span class="font-black text-green-300">{{ firstPlayerName }}</span>
+                </span>
+              </div>
               <p v-if="isImpostor" class="flex items-start gap-2">
                 <Drama :size="24" class="flex-shrink-0" />
                 <span>¡Adiviná la palabra sin que te descubran!</span>
@@ -597,7 +625,7 @@ async function goBack() {
     <!-- Player List Modal with Teleport -->
     <Teleport to="body">
       <PlayerListModal :show="showPlayerListModal" :players="players" :current-player-id="playerId"
-        :host-id="session?.host_id" @close="closePlayerListModal" />
+        :host-id="session?.host_id" :first-player-id="session?.first_player_id" @close="closePlayerListModal" />
     </Teleport>
   </div>
 </template>

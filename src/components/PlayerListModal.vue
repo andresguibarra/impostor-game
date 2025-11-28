@@ -8,6 +8,7 @@ defineProps<{
   players: Player[]
   currentPlayerId: string
   hostId?: string
+  firstPlayerId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -22,7 +23,7 @@ const emit = defineEmits<{
         <!-- Close button -->
         <button
           @click="emit('close')"
-          class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+          class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors cursor-pointer"
         >
           <X :size="24" />
         </button>
@@ -37,6 +38,7 @@ const emit = defineEmits<{
           :players="players"
           :current-player-id="currentPlayerId"
           :host-id="hostId"
+          :first-player-id="firstPlayerId"
         />
       </div>
     </div>
