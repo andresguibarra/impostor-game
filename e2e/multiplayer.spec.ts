@@ -16,7 +16,7 @@ async function createPlayerContext(browser: Browser): Promise<BrowserContext> {
 // Helper to check if Supabase is configured
 async function isSupabaseConfigured(page: Page): Promise<boolean> {
   // Check for configuration warning banner
-  const configWarning = page.locator('text=Configuración requerida')
+  const configWarning = page.locator('[data-automation-id="config-warning"]')
   const isNotConfigured = await configWarning.isVisible({ timeout: 2000 }).catch(() => false)
   return !isNotConfigured
 }
@@ -29,9 +29,7 @@ async function waitForSessionCreated(page: Page, timeout = 15000): Promise<boole
       // Success case: URL contains /lobby/
       page.waitForURL(/\/lobby\/\d+/, { timeout }).then(() => 'success'),
       // Error case: Error message appears
-      page.locator('text=Error al crear sesión').waitFor({ state: 'visible', timeout }).then(() => 'error'),
-      // Error case: Fetch error appears
-      page.locator('text=Failed to fetch').waitFor({ state: 'visible', timeout }).then(() => 'error')
+      page.locator('[data-automation-id="error-message"]').waitFor({ state: 'visible', timeout }).then(() => 'error')
     ])
     
     return result === 'success'
@@ -77,7 +75,7 @@ test.describe('Multiplayer Game Flow', () => {
     await hostPage.goto('/')
     
     // Wait for the page to load
-    await expect(hostPage.locator('h1')).toContainText('IMPOSTOR')
+    await expect(hostPage.locator('[data-automation-id="app-title"]')).toBeVisible()
     
     // Check if Supabase is configured
     const configured = await isSupabaseConfigured(hostPage)
@@ -87,12 +85,12 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Enter a custom name for the host
-    const nameInput = hostPage.locator('input[name="no-autofill"]')
+    const nameInput = hostPage.locator('[data-automation-id="player-name-input"]')
     await nameInput.clear()
     await nameInput.fill('HostPlayer')
     
     // Click "Nueva Partida" button
-    await hostPage.click('button:has-text("NUEVA PARTIDA")')
+    await hostPage.locator('[data-automation-id="new-game-button"]').click()
     
     // Wait for navigation to lobby (with error checking)
     const success = await waitForSessionCreated(hostPage, 20000)
@@ -109,13 +107,13 @@ test.describe('Multiplayer Game Flow', () => {
     gameCode = extractedCode
     
     // Verify we're in the host lobby
-    await expect(hostPage.locator('text=Creando Partida')).toBeVisible()
+    await expect(hostPage.locator('[data-automation-id="host-lobby-title"]')).toBeVisible()
     
     // Verify the session code is displayed
-    await expect(hostPage.locator(`text=${gameCode}`)).toBeVisible()
+    await expect(hostPage.locator('[data-automation-id="session-code"]')).toContainText(gameCode)
     
     // Verify player count shows 1 (the host)
-    await expect(hostPage.locator('text=JUGADORES').locator('..').locator('p.text-lg')).toContainText('1')
+    await expect(hostPage.locator('[data-automation-id="player-count"]')).toContainText('1')
   })
 
   test('Player can join the game using the session code', async () => {
@@ -129,23 +127,23 @@ test.describe('Multiplayer Game Flow', () => {
     await playerPage.goto(`/?join=${gameCode}`)
     
     // Wait for page to load and auto-fill the join code
-    await expect(playerPage.locator('h1')).toContainText('IMPOSTOR')
+    await expect(playerPage.locator('[data-automation-id="app-title"]')).toBeVisible()
     
     // The join code should be pre-filled from the URL
     // Enter a custom name for the player
-    const nameInput = playerPage.locator('input[name="no-autofill"]')
+    const nameInput = playerPage.locator('[data-automation-id="player-name-input"]')
     await nameInput.clear()
     await nameInput.fill('JoinedPlayer')
     
     // Click "Unirse" button
-    await playerPage.click('button:has-text("UNIRSE")')
+    await playerPage.locator('[data-automation-id="submit-join-button"]').click()
     
     // Wait for navigation to player lobby with error handling
     try {
       await playerPage.waitForURL(/\/join\/\d+/, { timeout: 15000 })
     } catch {
       // Check if there's an error message
-      const hasError = await playerPage.locator('text=Error').isVisible({ timeout: 1000 }).catch(() => false)
+      const hasError = await playerPage.locator('[data-automation-id="error-message"]').isVisible({ timeout: 1000 }).catch(() => false)
       if (hasError) {
         test.skip(true, 'Could not join session - database may be unreachable')
         return
@@ -154,11 +152,11 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Verify we're in the player lobby
-    await expect(playerPage.locator('text=Hola,')).toBeVisible()
-    await expect(playerPage.locator('text=JoinedPlayer')).toBeVisible()
+    await expect(playerPage.locator('[data-automation-id="player-lobby-greeting"]')).toBeVisible()
+    await expect(playerPage.locator('[data-automation-id="player-name-display"]')).toContainText('JoinedPlayer')
     
     // Verify waiting message
-    await expect(playerPage.locator('text=Esperando al host')).toBeVisible()
+    await expect(playerPage.locator('[data-automation-id="waiting-message"]')).toBeVisible()
   })
 
   test('Host sees the player count update when a player joins', async () => {
@@ -171,7 +169,7 @@ test.describe('Multiplayer Game Flow', () => {
     // Wait for the player count to update on the host's page
     // This tests the real-time subscription functionality
     await expect(async () => {
-      const playerCountElement = hostPage.locator('text=JUGADORES').locator('..').locator('p.text-lg')
+      const playerCountElement = hostPage.locator('[data-automation-id="player-count"]')
       await expect(playerCountElement).toContainText('2', { timeout: 10000 })
     }).toPass({ timeout: 15000 })
   })
@@ -184,7 +182,7 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Verify the "Start Game" button is enabled (since we have 2 players)
-    const startButton = hostPage.locator('button:has-text("¡INICIAR JUEGO!")')
+    const startButton = hostPage.locator('[data-automation-id="start-game-button"]')
     await expect(startButton).toBeEnabled()
     
     // Click to start the game
@@ -194,7 +192,7 @@ test.describe('Multiplayer Game Flow', () => {
     await hostPage.waitForURL(/\/game\/\d+/, { timeout: 15000 })
     
     // Verify we're on the game screen
-    await expect(hostPage.locator('text=RONDA #1')).toBeVisible({ timeout: 10000 })
+    await expect(hostPage.locator('[data-automation-id="round-number"]')).toBeVisible({ timeout: 10000 })
   })
 
   test('Player is automatically redirected to game when host starts', async () => {
@@ -209,7 +207,7 @@ test.describe('Multiplayer Game Flow', () => {
     await playerPage.waitForURL(/\/game\/\d+/, { timeout: 15000 })
     
     // Verify we're on the game screen
-    await expect(playerPage.locator('text=RONDA #1')).toBeVisible({ timeout: 10000 })
+    await expect(playerPage.locator('[data-automation-id="round-number"]')).toBeVisible({ timeout: 10000 })
   })
 
   test('Host can start the first round', async () => {
@@ -220,18 +218,18 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Click "¡INICIAR RONDA!" button
-    const startRoundButton = hostPage.locator('button:has-text("¡INICIAR RONDA!")')
+    const startRoundButton = hostPage.locator('[data-automation-id="new-round-button"]')
     await expect(startRoundButton).toBeVisible()
     await startRoundButton.click()
     
     // Wait for countdown modal to appear and complete (3 seconds)
-    await expect(hostPage.locator('text=¡NUEVA RONDA!')).toBeVisible({ timeout: 5000 })
+    await expect(hostPage.locator('[data-automation-id="countdown-modal"]')).toBeVisible({ timeout: 5000 })
     
     // Wait for countdown to finish
-    await hostPage.waitForSelector('text=¡NUEVA RONDA!', { state: 'hidden', timeout: 10000 })
+    await hostPage.locator('[data-automation-id="countdown-modal"]').waitFor({ state: 'hidden', timeout: 10000 })
     
     // After countdown, the "Revelar" button should appear
-    await expect(hostPage.locator('button:has-text("¡REVELAR!")')).toBeVisible({ timeout: 5000 })
+    await expect(hostPage.locator('[data-automation-id="reveal-button"]')).toBeVisible({ timeout: 5000 })
   })
 
   test('Player sees countdown and reveal button', async () => {
@@ -242,10 +240,10 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Wait for countdown to complete on player's side
-    await playerPage.waitForSelector('text=¡NUEVA RONDA!', { state: 'hidden', timeout: 10000 })
+    await playerPage.locator('[data-automation-id="countdown-modal"]').waitFor({ state: 'hidden', timeout: 10000 })
     
     // The "Revelar" button should appear
-    await expect(playerPage.locator('button:has-text("¡REVELAR!")')).toBeVisible({ timeout: 5000 })
+    await expect(playerPage.locator('[data-automation-id="reveal-button"]')).toBeVisible({ timeout: 5000 })
   })
 
   test('Host can reveal their word/impostor card', async () => {
@@ -256,14 +254,11 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Click reveal button
-    await hostPage.click('button:has-text("¡REVELAR!")')
+    await hostPage.locator('[data-automation-id="reveal-button"]').click()
     
     // After revealing, the card should show either a word or "¡IMPOSTOR!"
     // Wait for the word card to appear
-    const wordCard = hostPage.locator('[class*="bg-gradient-to-br"]').filter({
-      hasText: /TU PALABRA:|¡IMPOSTOR!/
-    })
-    await expect(wordCard).toBeVisible({ timeout: 5000 })
+    await expect(hostPage.locator('[data-automation-id="word-card"]')).toBeVisible({ timeout: 5000 })
   })
 
   test('Player can reveal their word/impostor card', async () => {
@@ -274,13 +269,10 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Click reveal button
-    await playerPage.click('button:has-text("¡REVELAR!")')
+    await playerPage.locator('[data-automation-id="reveal-button"]').click()
     
     // After revealing, the card should show either a word or "¡IMPOSTOR!"
-    const wordCard = playerPage.locator('[class*="bg-gradient-to-br"]').filter({
-      hasText: /TU PALABRA:|¡IMPOSTOR!/
-    })
-    await expect(wordCard).toBeVisible({ timeout: 5000 })
+    await expect(playerPage.locator('[data-automation-id="word-card"]')).toBeVisible({ timeout: 5000 })
   })
 
   test('Exactly one player should be the impostor', async () => {
@@ -290,13 +282,13 @@ test.describe('Multiplayer Game Flow', () => {
       return
     }
     
-    // Get the content from both pages
-    const hostPageContent = await hostPage.content()
-    const playerPageContent = await playerPage.content()
+    // Get the word content from both pages
+    const hostWordContent = await hostPage.locator('[data-automation-id="word-content"]').textContent()
+    const playerWordContent = await playerPage.locator('[data-automation-id="word-content"]').textContent()
     
     // Check if each player is an impostor
-    const hostIsImpostor = hostPageContent.includes('¡IMPOSTOR!')
-    const playerIsImpostor = playerPageContent.includes('¡IMPOSTOR!')
+    const hostIsImpostor = hostWordContent?.includes('¡IMPOSTOR!') ?? false
+    const playerIsImpostor = playerWordContent?.includes('¡IMPOSTOR!') ?? false
     
     // With 2 players and 1 impostor setting, exactly one should be the impostor
     // The other should see a word
@@ -305,10 +297,10 @@ test.describe('Multiplayer Game Flow', () => {
     
     // Verify the non-impostor sees "TU PALABRA:"
     if (!hostIsImpostor) {
-      await expect(hostPage.locator('text=TU PALABRA:')).toBeVisible()
+      await expect(hostPage.locator('[data-automation-id="word-label"]')).toContainText('TU PALABRA:')
     }
     if (!playerIsImpostor) {
-      await expect(playerPage.locator('text=TU PALABRA:')).toBeVisible()
+      await expect(playerPage.locator('[data-automation-id="word-label"]')).toContainText('TU PALABRA:')
     }
   })
 
@@ -320,18 +312,18 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // The host should see "¡NUEVA RONDA!" button
-    const newRoundButton = hostPage.locator('button:has-text("¡NUEVA RONDA!")')
+    const newRoundButton = hostPage.locator('[data-automation-id="new-round-button"]')
     await expect(newRoundButton).toBeVisible()
     await newRoundButton.click()
     
     // Wait for countdown to appear
-    await expect(hostPage.locator('text=¡NUEVA RONDA!')).toBeVisible({ timeout: 5000 })
+    await expect(hostPage.locator('[data-automation-id="countdown-modal"]')).toBeVisible({ timeout: 5000 })
     
     // Wait for countdown to finish
-    await hostPage.waitForSelector('text=¡NUEVA RONDA!', { state: 'hidden', timeout: 10000 })
+    await hostPage.locator('[data-automation-id="countdown-modal"]').waitFor({ state: 'hidden', timeout: 10000 })
     
     // Verify we're now on round 2
-    await expect(hostPage.locator('text=RONDA #2')).toBeVisible({ timeout: 5000 })
+    await expect(hostPage.locator('[data-automation-id="round-number"]')).toContainText('2', { timeout: 5000 })
   })
 
   test('Host can exit the game', async () => {
@@ -342,13 +334,13 @@ test.describe('Multiplayer Game Flow', () => {
     }
     
     // Click "Salir del juego" button
-    await hostPage.click('button:has-text("SALIR DEL JUEGO")')
+    await hostPage.locator('[data-automation-id="exit-game-button"]').click()
     
     // Wait for navigation to home
     await hostPage.waitForURL('/')
     
     // Verify we're back on the home screen
-    await expect(hostPage.locator('h1')).toContainText('IMPOSTOR')
+    await expect(hostPage.locator('[data-automation-id="app-title"]')).toBeVisible()
   })
 })
 
@@ -371,7 +363,7 @@ test.describe('Session Code Join Flow', () => {
         return
       }
       
-      await hostPage.click('button:has-text("NUEVA PARTIDA")')
+      await hostPage.locator('[data-automation-id="new-game-button"]').click()
       
       // Wait for session creation
       const success = await waitForSessionCreated(hostPage, 20000)
@@ -390,23 +382,23 @@ test.describe('Session Code Join Flow', () => {
       await playerPage.goto('/')
       
       // Click "Unirse a partida"
-      await playerPage.click('button:has-text("UNIRSE A PARTIDA")')
+      await playerPage.locator('[data-automation-id="join-game-button"]').click()
       
       // Wait for the join code input to appear
-      const codeInput = playerPage.locator('input[type="tel"]')
+      const codeInput = playerPage.locator('[data-automation-id="join-code-input"]')
       await expect(codeInput).toBeVisible()
       
       // Enter the game code
       await codeInput.fill(gameCode)
       
       // Click join button
-      await playerPage.click('button:has-text("UNIRSE"):not(:has-text("PARTIDA"))')
+      await playerPage.locator('[data-automation-id="submit-join-button"]').click()
       
       // Wait for navigation to player lobby
       await playerPage.waitForURL(/\/join\/\d+/, { timeout: 15000 })
       
       // Verify player is in the lobby
-      await expect(playerPage.locator('text=Esperando al host')).toBeVisible()
+      await expect(playerPage.locator('[data-automation-id="waiting-message"]')).toBeVisible()
     } finally {
       await hostContext.close()
       await playerContext.close()
@@ -426,20 +418,16 @@ test.describe('Error Handling', () => {
     }
     
     // Click "Unirse a partida"
-    await page.click('button:has-text("UNIRSE A PARTIDA")')
+    await page.locator('[data-automation-id="join-game-button"]').click()
     
     // Enter an invalid code
-    const codeInput = page.locator('input[type="tel"]')
+    const codeInput = page.locator('[data-automation-id="join-code-input"]')
     await codeInput.fill('999')
     
     // Click join button
-    await page.click('button:has-text("UNIRSE"):not(:has-text("PARTIDA"))')
+    await page.locator('[data-automation-id="submit-join-button"]').click()
     
-    // Should show error message (either session not found or fetch error)
-    const sessionNotFound = page.locator('text=Sesión no encontrada')
-    const fetchError = page.locator('text=Failed to fetch')
-    
-    // Wait for either error message
-    await expect(sessionNotFound.or(fetchError)).toBeVisible({ timeout: 15000 })
+    // Should show error message
+    await expect(page.locator('[data-automation-id="error-message"]')).toBeVisible({ timeout: 15000 })
   })
 })

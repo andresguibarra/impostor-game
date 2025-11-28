@@ -26,3 +26,47 @@ This project uses **yarn** as the package manager. Do not use npm.
 ### Lock file
 
 Only `yarn.lock` should be committed. Do not commit `package-lock.json`.
+
+## Testing Guidelines
+
+### Element Selection with data-automation-id
+
+When adding new interactive elements or elements that need to be tested, always include a `data-automation-id` attribute. This is the preferred method for selecting elements in E2E tests.
+
+#### Rules:
+- **Always** add `data-automation-id` to elements that will be interacted with in tests (buttons, inputs, links, etc.)
+- **Always** add `data-automation-id` to elements whose content needs to be verified (titles, status displays, counters, etc.)
+- Use kebab-case for naming (e.g., `data-automation-id="new-game-button"`)
+- Make IDs descriptive and unique within the component context
+- Never select elements by text content in tests - always use `data-automation-id`
+
+#### Examples:
+```vue
+<!-- Good: Using data-automation-id -->
+<button data-automation-id="new-game-button" @click="createGame">
+  Nueva Partida
+</button>
+
+<h1 data-automation-id="app-title">IMPOSTOR</h1>
+
+<input data-automation-id="player-name-input" v-model="playerName" />
+
+<p data-automation-id="player-count">{{ players.length }}</p>
+```
+
+```typescript
+// Good: Selecting by data-automation-id in tests
+await page.locator('[data-automation-id="new-game-button"]').click()
+await expect(page.locator('[data-automation-id="app-title"]')).toBeVisible()
+
+// Bad: Selecting by text content (avoid this)
+await page.click('button:has-text("Nueva Partida")') // ❌
+await expect(page.locator('text=IMPOSTOR')).toBeVisible() // ❌
+```
+
+#### Naming conventions:
+- Buttons: `{action}-button` (e.g., `new-game-button`, `submit-join-button`)
+- Inputs: `{field}-input` (e.g., `player-name-input`, `join-code-input`)
+- Displays: `{content}-display` or just the content name (e.g., `player-count`, `session-code`)
+- Cards/Sections: `{name}-card` or `{name}-section` (e.g., `session-card`, `waiting-message`)
+- Modals: `{name}-modal` (e.g., `countdown-modal`)

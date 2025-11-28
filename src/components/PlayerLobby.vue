@@ -316,8 +316,8 @@ async function goBack() {
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header -->
       <div class="text-center mb-6">
-        <h2 class="text-4xl font-black impostor-title mb-4">
-          Hola, <span class="font-black text-fuchsia-400">{{ playerName }}</span>! 👋
+        <h2 data-automation-id="player-lobby-greeting" class="text-4xl font-black impostor-title mb-4">
+          Hola, <span data-automation-id="player-name-display" class="font-black text-fuchsia-400">{{ playerName }}</span>! 👋
         </h2>
         
         <!-- Session Code and Players Cards Side by Side -->
@@ -345,7 +345,7 @@ async function goBack() {
         </div>
         
         <!-- Combined Waiting animation and message -->
-        <div class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border-2 border-amber-500/50">
+        <div data-automation-id="waiting-message" class="bg-slate-800/60 backdrop-blur-md rounded-2xl p-6 border-2 border-amber-500/50">
           <div class="flex justify-center mb-4">
             <div class="flex gap-3">
               <Gamepad2 :size="48" class="animate-pulse text-purple-400" style="animation-delay: 0s;" />
@@ -378,6 +378,7 @@ async function goBack() {
         size="md"
         @click="goBack"
         class="w-full"
+        data-automation-id="player-exit-button"
       >
         SALIR
       </NeonButton>
