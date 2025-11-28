@@ -93,6 +93,8 @@ async function applyMigration(migrationName) {
   // Execute the migration in a transaction
   await sql.begin(async (tx) => {
     // Run the migration SQL
+    // Note: tx.unsafe() is used here because we're executing trusted SQL files from the repository.
+    // Migration files are version-controlled and reviewed, not user input.
     await tx.unsafe(migrationSql)
     
     // Record the migration as applied

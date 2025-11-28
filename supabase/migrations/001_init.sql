@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Create players table
+-- Note: session_id references sessions(code) by design. The code is a human-readable
+-- session identifier used throughout the application for joining games.
 CREATE TABLE IF NOT EXISTS players (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -22,6 +24,7 @@ CREATE TABLE IF NOT EXISTS players (
 );
 
 -- Create round_history table for statistics
+-- Note: session_id references sessions(code) for consistency with the players table.
 CREATE TABLE IF NOT EXISTS round_history (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   session_id TEXT NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
