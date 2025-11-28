@@ -411,13 +411,13 @@ async function goBack() {
 
     <!-- Countdown Modal -->
     <Transition name="countdown-fade">
-      <div v-if="showCountdown"
+      <div v-if="showCountdown" data-automation-id="countdown-modal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-lg">
         <div class="text-center">
-          <div class="text-8xl md:text-9xl font-black mb-4 countdown-number">
+          <div data-automation-id="countdown-number" class="text-8xl md:text-9xl font-black mb-4 countdown-number">
             {{ countdown }}
           </div>
-          <p class="text-3xl md:text-4xl font-black text-white mb-2">
+          <p data-automation-id="countdown-text" class="text-3xl md:text-4xl font-black text-white mb-2">
             ¡NUEVA RONDA!
           </p>
           <p class="text-xl text-gray-300 font-bold flex items-center justify-center gap-2">
@@ -431,7 +431,7 @@ async function goBack() {
     <div class="neon-card-impostor shadow-2xl p-8 max-w-lg w-full relative z-10">
       <!-- Header with game info -->
       <div class="text-center mb-6">
-        <h2 class="text-4xl font-black impostor-title mb-4">
+        <h2 data-automation-id="round-number" class="text-4xl font-black impostor-title mb-4">
           RONDA #{{ session?.round_number || 0 }}
         </h2>
         <div class="flex justify-between items-stretch mb-3 gap-3">
@@ -473,7 +473,7 @@ async function goBack() {
 
         <div v-else>
           <div v-if="!wordRevealed" class="text-center">
-            <button @click="revealWord"
+            <button @click="revealWord" data-automation-id="reveal-button"
               class="w-full p-8 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 rounded-3xl text-white text-3xl font-black hover:from-fuchsia-700 hover:via-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.6)] border-2 border-purple-400/50 cursor-pointer">
               <div class="flex justify-center mb-2">
                 <Eye :size="64" class="animate-bounce" />
@@ -489,7 +489,7 @@ async function goBack() {
           </div>
 
           <div v-else class="text-center slide-in-up">
-            <div @click="toggleWordVisibility" :class="[
+            <div @click="toggleWordVisibility" data-automation-id="word-card" :class="[
               'p-8 rounded-3xl mb-4 shadow-2xl border-4 cursor-pointer hover:scale-105 active:scale-95 transition-all',
               isImpostor
                 ? 'bg-gradient-to-br from-red-600 via-orange-600 to-red-700 text-white border-red-400 shadow-[0_0_40px_rgba(239,68,68,0.6)]'
@@ -499,10 +499,10 @@ async function goBack() {
                 <Drama v-if="isImpostor" :size="48" class="animate-pulse" />
                 <FileText v-else :size="48" class="animate-pulse" />
               </div>
-              <p class="text-base font-bold mb-2 opacity-90">
+              <p data-automation-id="word-label" class="text-base font-bold mb-2 opacity-90">
                 {{ isImpostor ? '' : 'TU PALABRA:' }}
               </p>
-              <p class="text-4xl md:text-5xl font-black tracking-wide [text-shadow:0_0_20px_rgba(255,255,255,0.5)]">
+              <p data-automation-id="word-content" class="text-4xl md:text-5xl font-black tracking-wide [text-shadow:0_0_20px_rgba(255,255,255,0.5)]">
                 {{ currentWord }}
               </p>
               <div class="mt-6 pt-4 border-t-2 border-white/20">
@@ -546,13 +546,13 @@ async function goBack() {
 
       <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
-        <NeonButton v-if="isHost" @click="newRound" :disabled="!canStartNewRound" variant="success" class="w-full">
+        <NeonButton v-if="isHost" @click="newRound" :disabled="!canStartNewRound" variant="success" class="w-full" data-automation-id="new-round-button">
           <Loader2 v-if="loading" :size="24" class="animate-spin mr-2" />
           <RefreshCw v-else :size="24" class="mr-2" />
           {{ loading ? 'GENERANDO...' : (isFirstRound ? '¡INICIAR RONDA!' : '¡NUEVA RONDA!') }}
         </NeonButton>
 
-        <NeonButton @click="goBack" variant="back" class="w-full">
+        <NeonButton @click="goBack" variant="back" class="w-full" data-automation-id="exit-game-button">
           <ArrowLeft :size="20" class="mr-2" />
           SALIR DEL JUEGO
         </NeonButton>

@@ -1,0 +1,131 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      
+      - name: Run E2E tests
+        id: e2e-tests
+        run: yarn test:e2e
+        continue-on-error: true
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+      
+      - name: Upload test screenshots
+        uses: actions/upload-artifact@v4
+        if: failure() || steps.e2e-tests.outcome == 'failure'
+        with:
+          name: test-screenshots
+          path: test-results/
+          retention-days: 30
+      
+      - name: Find and post screenshots on failure
+        if: failure() || steps.e2e-tests.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Find all screenshot files in test-results
+            const testResultsDir = 'test-results';
+            let screenshots = [];
+            
+            function findScreenshots(dir) {
+              if (!fs.existsSync(dir)) return;
+              const files = fs.readdirSync(dir);
+              for (const file of files) {
+                const filePath = path.join(dir, file);
+                const stat = fs.statSync(filePath);
+                if (stat.isDirectory()) {
+                  findScreenshots(filePath);
+                } else if (file.endsWith('.png') || file.endsWith('.jpg')) {
+                  screenshots.push(filePath);
+                }
+              }
+            }
+            
+            findScreenshots(testResultsDir);
+            
+            if (screenshots.length === 0) {
+              console.log('No screenshots found');
+              return;
+            }
+            
+            // Get artifact URL
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            // Create comment body with embedded images (using workflow artifact)
+            let body = '## ❌ E2E Tests Failed\n\n';
+            body += `📦 **${screenshots.length} screenshot(s)** captured during test failures.\n\n`;
+            body += `🔗 **[View full test results and download screenshots](${artifactUrl})**\n\n`;
+            body += '### Screenshot previews:\n\n';
+            body += '_Note: Download the `test-screenshots` artifact from the Actions run to view full-resolution images._\n\n';
+            
+            // List screenshot file names with their test context
+            for (const screenshot of screenshots.slice(0, 10)) {
+              const relativePath = screenshot.replace(testResultsDir + '/', '');
+              // Extract test name from path
+              const testName = relativePath.split('/')[0] || relativePath;
+              body += `📸 **${testName}**\n`;
+              body += `   - File: \`${relativePath}\`\n\n`;
+            }
+            
+            if (screenshots.length > 10) {
+              body += `\n_...and ${screenshots.length - 10} more screenshot(s) in the artifact_\n`;
+            }
+            
+            body += '\n---\n';
+            body += `_Workflow run: [#${context.runId}](${artifactUrl})_`;
+            
+            // Post comment on PR
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: body
+              });
+            }
+      
+      - name: Fail if tests failed
+        if: steps.e2e-tests.outcome == 'failure'
+        run: exit 1

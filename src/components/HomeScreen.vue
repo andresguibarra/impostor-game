@@ -172,7 +172,7 @@ function generateName() {
 <template>
   <div class="w-full max-w-lg dark-impostor-bg">
     <!-- Configuration warning banner -->
-    <div v-if="!isSupabaseConfigured" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
+    <div v-if="!isSupabaseConfigured" data-automation-id="config-warning" class="mb-4 max-w-md w-full bg-yellow-100/95 backdrop-blur-md border-l-4 border-yellow-600 text-yellow-900 p-4 rounded-2xl shadow-lg slide-in-up">
       <div class="flex items-start">
         <div class="flex-shrink-0">
           <Settings :size="20" class="text-yellow-600" />
@@ -195,7 +195,7 @@ function generateName() {
           <img src="../assets/anon.png" alt="Impostor Silhouette" class="impostor-image" />
         </div>
 
-        <h1 class="text-5xl md:text-6xl font-black mb-2 impostor-title tracking-tight">
+        <h1 data-automation-id="app-title" class="text-5xl md:text-6xl font-black mb-2 impostor-title tracking-tight">
           IMPOSTOR
         </h1>
         <p class="text-2xl font-bold mb-4 text-cyan-400">
@@ -226,6 +226,7 @@ function generateName() {
             data-form-type="other"
             inputmode="text"
             name="no-autofill"
+            data-automation-id="player-name-input"
           />
           <button
             @click="generateName"
@@ -239,7 +240,7 @@ function generateName() {
       </div>
       
       <!-- Error message -->
-      <div v-if="error" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg flex items-center gap-2">
+      <div v-if="error" data-automation-id="error-message" class="mb-5 p-4 bg-red-900/40 backdrop-blur-sm text-red-300 rounded-2xl text-sm font-semibold border-2 border-red-500/50 slide-in-bounce shadow-lg flex items-center gap-2">
         <AlertTriangle :size="20" />
         {{ error }}
       </div>
@@ -251,6 +252,7 @@ function generateName() {
           :disabled="loading"
           @click="createSession"
           class="w-full"
+          data-automation-id="new-game-button"
         >
           <Gamepad2 :size="24" class="mr-3" />
           {{ loading ? 'Creando...' : 'NUEVA PARTIDA' }}
@@ -260,6 +262,7 @@ function generateName() {
           variant="secondary"
           @click="toggleJoinMode"
           class="w-full"
+          data-automation-id="join-game-button"
         >
           <Rocket :size="24" class="mr-3" />
           UNIRSE A PARTIDA
@@ -283,6 +286,7 @@ function generateName() {
             style="background: rgba(20, 20, 40, 0.8); border: 2px solid rgba(0, 188, 212, 0.5);"
             maxlength="3"
             @keyup.enter="joinSession"
+            data-automation-id="join-code-input"
           />
         </div>
         
@@ -291,6 +295,7 @@ function generateName() {
           :disabled="loading || !joinCode.trim()"
           @click="joinSession"
           class="w-full"
+          data-automation-id="submit-join-button"
         >
           <Check :size="24" class="mr-3" />
           {{ loading ? 'Uniéndose...' : 'UNIRSE' }}
@@ -300,6 +305,7 @@ function generateName() {
           variant="back"
           @click="toggleJoinMode"
           class="w-full"
+          data-automation-id="back-button"
         >
           <ArrowLeft :size="20" class="mr-2" />
           VOLVER
