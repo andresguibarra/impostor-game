@@ -12,7 +12,7 @@
     "preview:dev": "vite preview --mode dev",
     "deploy": "yarn build && firebase deploy",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
     "db:migrate": "node scripts/migrate.js"
   },
   "dependencies": {
