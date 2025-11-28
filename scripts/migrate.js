@@ -11,6 +11,7 @@
  *                  Format: postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
  */
 
+import 'dotenv/config'
 import postgres from 'postgres'
 import fs from 'fs'
 import path from 'path'
