@@ -145,18 +145,20 @@ router.beforeEach(async (to, _from, next) => {
 // After navigation, update robots meta tag based on route meta
 router.afterEach((to) => {
   // Handle robots meta tag for SEO
-  let robotsTag = document.querySelector('meta[name="robots"]')
+  const robotsTag = document.querySelector('meta[name="robots"]')
   
   if (to.meta.robots) {
     if (!robotsTag) {
-      robotsTag = document.createElement('meta')
-      robotsTag.setAttribute('name', 'robots')
-      document.head.appendChild(robotsTag)
+      const newTag = document.createElement('meta')
+      newTag.setAttribute('name', 'robots')
+      newTag.setAttribute('content', to.meta.robots as string)
+      document.head.appendChild(newTag)
+    } else {
+      robotsTag.setAttribute('content', to.meta.robots as string)
     }
-    robotsTag.setAttribute('content', to.meta.robots as string)
-  } else if (robotsTag) {
+  } else if (robotsTag && robotsTag.parentNode) {
     // Remove the robots tag if route doesn't specify it
-    robotsTag.remove()
+    robotsTag.parentNode.removeChild(robotsTag)
   }
 })
 

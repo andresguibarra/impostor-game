@@ -9,6 +9,13 @@ import { useRouter } from 'vue-router'
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler)
 
+// Constants
+const MAX_CHART_DAYS = 7
+const MAX_ROUNDS_CHART_ENTRIES = 10
+const WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000
+const MONTH_IN_MS = 30 * 24 * 60 * 60 * 1000
+const PG_UNDEFINED_TABLE_ERROR = '42P01'
+
 interface RoundHistory {
   id: string
   session_id: string
@@ -57,8 +64,8 @@ async function loadSessions() {
       .select('*')
       .order('round_number', { ascending: true })
 
-    if (roundsError && roundsError.code !== '42P01') {
-      // 42P01 means table doesn't exist yet, which is fine
+    if (roundsError && roundsError.code !== PG_UNDEFINED_TABLE_ERROR) {
+      // PG_UNDEFINED_TABLE_ERROR means table doesn't exist yet, which is fine
       console.warn('Round history table may not exist yet:', roundsError)
     }
 
@@ -95,10 +102,10 @@ const filteredSessions = computed(() => {
         case 'today':
           return createdAt.toDateString() === now.toDateString()
         case 'week':
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          const weekAgo = new Date(now.getTime() - WEEK_IN_MS)
           return createdAt >= weekAgo
         case 'month':
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          const monthAgo = new Date(now.getTime() - MONTH_IN_MS)
           return createdAt >= monthAgo
         default:
           return true
@@ -152,7 +159,7 @@ const sessionsByDateData = computed(() => {
     dateMap.set(date, (dateMap.get(date) || 0) + 1)
   })
   
-  const entries = Array.from(dateMap.entries()).slice(-7).reverse()
+  const entries = Array.from(dateMap.entries()).slice(-MAX_CHART_DAYS).reverse()
   
   return {
     labels: entries.map(e => e[0]),
@@ -206,7 +213,7 @@ const roundsPerSessionData = computed(() => {
     }
   })
   
-  const entries = Array.from(roundsMap.entries()).sort((a, b) => a[0] - b[0]).slice(0, 10)
+  const entries = Array.from(roundsMap.entries()).sort((a, b) => a[0] - b[0]).slice(0, MAX_ROUNDS_CHART_ENTRIES)
   
   return {
     labels: entries.map(e => `${e[0]} rondas`),
