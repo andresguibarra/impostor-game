@@ -341,7 +341,10 @@ async function loadGameState() {
   }
 
   // Detect if it's a new round by comparing round numbers
+  // Also trigger countdown when this is the first load and game has already started (first round)
   const isNewRound = session.value && data.round_number > session.value.round_number
+  // First load is either when session is null OR when the previous session had no word (first round just started)
+  const isFirstLoad = data.current_word && data.impostors && (!session.value || !session.value.current_word)
 
   session.value = data
 
@@ -351,8 +354,8 @@ async function loadGameState() {
     isImpostor.value = impostorIds.includes(playerId.value)
     currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
 
-    // Hide word and show countdown if it's a new round
-    if (isNewRound) {
+    // Hide word and show countdown if it's a new round or first load with game started
+    if (isNewRound || isFirstLoad) {
       wordRevealed.value = false
       await startCountdown()
     }
