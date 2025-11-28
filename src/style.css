@@ -5,6 +5,21 @@
   touch-action: manipulation;
 }
 
+/* Add cursor pointer to all clickable elements */
+button,
+[role="button"],
+a,
+select,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+label[for],
+.cursor-pointer {
+  cursor: pointer;
+}
+
 /* Animated Background Gradient - matching reference exactly */
 @keyframes gradient-shift {
   0% {

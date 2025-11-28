@@ -11,46 +11,38 @@
    - Region: (choose closest to your users)
 5. Click "Create new project"
 
-## Step 2: Create Database Tables
+## Step 2: Run Database Migrations
 
-Once your project is ready, go to the SQL Editor and run this SQL:
+This project uses an automated migration system. Migrations are SQL files located in `supabase/migrations/` that are run automatically on each deploy to dev or master branches.
 
-```sql
--- Create sessions table
-CREATE TABLE sessions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  code TEXT UNIQUE NOT NULL,
-  host_id TEXT NOT NULL,
-  impostor_count INTEGER DEFAULT 1,
-  current_word TEXT,
-  impostors JSONB,
-  round_number INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+### Running migrations locally
 
--- Create players table
-CREATE TABLE players (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  session_id TEXT NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
-  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+```bash
+# Set your database URL (from Supabase Dashboard → Settings → Database → Connection string → URI)
+export DATABASE_URL="postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres"
 
--- Enable realtime for both tables
-ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
-ALTER PUBLICATION supabase_realtime ADD TABLE players;
-
--- Enable row level security
-ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE players ENABLE ROW LEVEL SECURITY;
-
--- Create policies for anonymous access
-CREATE POLICY "Allow all operations on sessions" ON sessions
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY "Allow all operations on players" ON players
-  FOR ALL USING (true) WITH CHECK (true);
+# Run migrations
+yarn db:migrate
 ```
+
+### Running migrations manually (first time setup)
+
+If you prefer to run the initial setup manually, go to the SQL Editor in your Supabase dashboard and run the contents of `supabase/migrations/001_init.sql`.
+
+### Creating new migrations
+
+1. Create a new SQL file in `supabase/migrations/` with the next sequential number:
+   - Example: `002_add_new_feature.sql`
+2. Write idempotent SQL (use `IF NOT EXISTS`, `IF EXISTS`, etc.)
+3. Commit and push to dev or master branch
+4. The migration will run automatically during deployment
+
+### Migration tracking
+
+The system uses a `_migrations` table to track which migrations have been applied. This ensures:
+- Migrations are idempotent (safe to run multiple times)
+- Each migration only runs once
+- Migrations run in order
 
 ## Step 3: Get Your Project Credentials
 
@@ -103,10 +95,11 @@ Open http://localhost:5173/impostor-game/ and try:
 1. Go to your GitHub repository
 2. Navigate to Settings → Secrets and variables → Actions
 3. Add the following secrets for each environment that deploys via GitHub Actions (using the **same names** in cada environment):
-  - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_ANON_KEY`
-  - `FIREBASE_SERVICE_ACCOUNT` (si también desplegás con Firebase Hosting)
-  Configurá el environment `prod` con los valores de producción y el environment `dev` con los valores de sandbox.
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `DATABASE_URL` - PostgreSQL connection string for migrations (found in Supabase Dashboard → Settings → Database → Connection string → URI)
+   - `FIREBASE_SERVICE_ACCOUNT` (si también desplegás con Firebase Hosting)
+   Configurá el environment `prod` con los valores de producción y el environment `dev` con los valores de sandbox.
 
 ### Enable GitHub Pages
 
