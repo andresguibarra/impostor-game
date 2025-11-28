@@ -344,7 +344,8 @@ async function loadGameState() {
   // Also trigger countdown when this is the first load and game has already started (first round)
   const isNewRound = session.value && data.round_number > session.value.round_number
   // First load is either when session is null OR when the previous session had no word (first round just started)
-  const isFirstLoad = data.current_word && data.impostors && (!session.value || !session.value.current_word)
+  const hasNoPreviousWord = !session.value?.current_word
+  const isFirstLoad = data.current_word && data.impostors && hasNoPreviousWord
 
   session.value = data
 
