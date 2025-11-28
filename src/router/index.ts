@@ -3,6 +3,7 @@ import HomeScreen from '../components/HomeScreen.vue'
 import HostLobby from '../components/HostLobby.vue'
 import PlayerLobby from '../components/PlayerLobby.vue'
 import GameScreen from '../components/GameScreen.vue'
+import StatsPage from '../components/StatsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,6 +12,15 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeScreen
+    },
+    {
+      // Stats page - not indexed
+      path: '/stats',
+      name: 'stats',
+      component: StatsPage,
+      meta: {
+        robots: 'noindex, nofollow'
+      }
     },
     {
       // Shareable lobby URL - shows HostLobby for hosts, redirects others to join
@@ -130,6 +140,26 @@ router.beforeEach(async (to, _from, next) => {
   }
   
   next()
+})
+
+// After navigation, update robots meta tag based on route meta
+router.afterEach((to) => {
+  // Handle robots meta tag for SEO
+  const robotsTag = document.querySelector('meta[name="robots"]')
+  
+  if (to.meta.robots) {
+    if (!robotsTag) {
+      const newTag = document.createElement('meta')
+      newTag.setAttribute('name', 'robots')
+      newTag.setAttribute('content', to.meta.robots as string)
+      document.head.appendChild(newTag)
+    } else {
+      robotsTag.setAttribute('content', to.meta.robots as string)
+    }
+  } else if (robotsTag && robotsTag.parentNode) {
+    // Remove the robots tag if route doesn't specify it
+    robotsTag.parentNode.removeChild(robotsTag)
+  }
 })
 
 export default router

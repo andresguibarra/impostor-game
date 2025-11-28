@@ -25,7 +25,9 @@ CREATE TABLE sessions (
   current_word TEXT,
   impostors JSONB,
   round_number INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  first_player_id TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  finished_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Create players table
@@ -36,19 +38,61 @@ CREATE TABLE players (
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable realtime for both tables
+-- Create round_history table for statistics
+CREATE TABLE round_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
+  round_number INTEGER NOT NULL,
+  word TEXT NOT NULL,
+  impostor_ids JSONB NOT NULL,
+  first_player_id TEXT,
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable realtime for tables
 ALTER PUBLICATION supabase_realtime ADD TABLE sessions;
 ALTER PUBLICATION supabase_realtime ADD TABLE players;
 
 -- Enable row level security
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
+ALTER TABLE round_history ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for anonymous access
 CREATE POLICY "Allow all operations on sessions" ON sessions
   FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY "Allow all operations on players" ON players
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow all operations on round_history" ON round_history
+  FOR ALL USING (true) WITH CHECK (true);
+```
+
+### Migration for existing databases
+
+If you already have the database set up and need to add the round_history table:
+
+```sql
+-- Add round_history table
+CREATE TABLE IF NOT EXISTS round_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES sessions(code) ON DELETE CASCADE,
+  round_number INTEGER NOT NULL,
+  word TEXT NOT NULL,
+  impostor_ids JSONB NOT NULL,
+  first_player_id TEXT,
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add finished_at column to sessions if it doesn't exist
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS finished_at TIMESTAMP WITH TIME ZONE;
+
+-- Enable row level security for round_history
+ALTER TABLE round_history ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for round_history
+CREATE POLICY "Allow all operations on round_history" ON round_history
   FOR ALL USING (true) WITH CHECK (true);
 ```
 
