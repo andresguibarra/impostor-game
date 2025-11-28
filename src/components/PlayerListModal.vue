@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { X, Users } from 'lucide-vue-next'
+import { onUnmounted, watch } from 'vue'
 import type { Player } from '../lib/supabase'
 import PlayerList from './PlayerList.vue'
 
-defineProps<{
+const props = defineProps<{
   show: boolean
   players: Player[]
   currentPlayerId: string
@@ -14,6 +15,26 @@ defineProps<{
 const emit = defineEmits<{
   close: []
 }>()
+
+// Handle escape key to close modal
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.show) {
+    emit('close')
+  }
+}
+
+// Add/remove event listener based on modal visibility
+watch(() => props.show, (isVisible) => {
+  if (isVisible) {
+    document.addEventListener('keydown', handleEscape)
+  } else {
+    document.removeEventListener('keydown', handleEscape)
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <template>

@@ -70,3 +70,19 @@ await expect(page.locator('text=IMPOSTOR')).toBeVisible() // ❌
 - Displays: `{content}-display` or just the content name (e.g., `player-count`, `session-code`)
 - Cards/Sections: `{name}-card` or `{name}-section` (e.g., `session-card`, `waiting-message`)
 - Modals: `{name}-modal` (e.g., `countdown-modal`)
+
+## UI/UX Guidelines
+
+### Clickable Elements
+
+All clickable elements must have `cursor: pointer`. This is already handled globally in `src/style.css` for standard elements (buttons, links, selects, etc.), but when adding custom clickable elements:
+
+- Add the `cursor-pointer` class from Tailwind CSS
+- Or ensure the element is a button/link/etc. that gets the global style
+
+### Modals
+
+All modals must:
+
+- Close when pressing the Escape key
+- Close when clicking outside the modal (on the backdrop)
