@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { supabase, isSupabaseConfigured, type Session, type Player } from '../lib/supabase'
 import { BarChart2, Users, Calendar, ChevronRight, X, Filter, TrendingUp, Target, Drama, FileText, Gamepad2, ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler } from 'chart.js'
@@ -45,6 +45,26 @@ const playerCountFilter = ref<'all' | '2-4' | '5-8' | '9+'>('all')
 
 // Dashboard tab
 const activeTab = ref<'sessions' | 'dashboard'>('dashboard')
+
+// Handle escape key to close modal
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && showDetailModal.value) {
+    closeDetail()
+  }
+}
+
+// Add/remove event listener based on modal visibility
+watch(showDetailModal, (isVisible) => {
+  if (isVisible) {
+    document.addEventListener('keydown', handleEscape)
+  } else {
+    document.removeEventListener('keydown', handleEscape)
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
+})
 
 // Load all sessions with players and rounds
 async function loadSessions() {

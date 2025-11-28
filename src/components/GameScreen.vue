@@ -56,44 +56,9 @@ const isFirstPlayer = computed(() => {
   return session.value?.first_player_id === playerId.value
 })
 
-// Cleanup function to remove player from database
-async function cleanupPlayer() {
-  try {
-    const playerIdToDelete = playerId.value
-    if (playerIdToDelete) {
-      console.log('Cleaning up player:', playerIdToDelete)
-      
-      const { data, error } = await supabase
-        .from('players')
-        .delete()
-        .eq('id', playerIdToDelete)
-        .select()
-
-      if (error) {
-        console.error('Error deleting player:', error)
-      } else {
-        console.log('Player deleted successfully:', data)
-      }
-
-      // If host, delete the session
-      if (isHost.value && sessionCode.value) {
-        console.log('Host deleting session:', sessionCode.value)
-        const { error: sessionError } = await supabase
-          .from('sessions')
-          .delete()
-          .eq('code', sessionCode.value)
-        
-        if (sessionError) {
-          console.error('Error deleting session:', sessionError)
-        } else {
-          console.log('Session deleted successfully')
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Error in cleanup:', err)
-  }
-}
+// Note: We intentionally do NOT delete players when leaving the game screen.
+// Player and session records are preserved for statistics purposes.
+// Players are only deleted in the lobby phase before the game starts.
 
 onMounted(async () => {
   // Check if session exists
@@ -165,12 +130,6 @@ onMounted(async () => {
     .subscribe((status) => {
       console.log('Session subscription status:', status)
     })
-
-  // Listen for page unload to cleanup player
-  window.addEventListener('beforeunload', () => {
-    // Synchronous cleanup attempt
-    cleanupPlayer()
-  })
 })
 
 onUnmounted(() => {
@@ -181,9 +140,6 @@ onUnmounted(() => {
   if (sessionSubscription) {
     sessionSubscription.unsubscribe()
   }
-  
-  // Remove event listener
-  window.removeEventListener('beforeunload', cleanupPlayer)
 })
 
 async function loadPlayers() {
@@ -432,47 +388,11 @@ function toggleWordVisibility() {
 }
 
 async function goBack() {
-  console.log('=== goBack called - starting cleanup ===')
-  console.log('Player ID to delete:', playerId.value)
-  console.log('Session code:', sessionCode.value)
-  console.log('Is host:', isHost.value)
+  // Note: We intentionally do NOT delete player/session records here.
+  // Game data is preserved for statistics purposes.
+  // Simply clear localStorage and redirect to home.
   
-  try {
-    // First, delete the player
-    if (playerId.value) {
-      const { error: deleteError } = await supabase
-        .from('players')
-        .delete()
-        .eq('id', playerId.value)
-      
-      if (deleteError) {
-        console.error('Error deleting player:', deleteError)
-      } else {
-        console.log('Player deleted successfully')
-      }
-      
-      // Small delay to ensure the delete propagates
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
-    
-    // If host, delete the session
-    if (isHost.value && sessionCode.value) {
-      const { error: sessionError } = await supabase
-        .from('sessions')
-        .delete()
-        .eq('code', sessionCode.value)
-      
-      if (sessionError) {
-        console.error('Error deleting session:', sessionError)
-      } else {
-        console.log('Session deleted successfully')
-      }
-    }
-  } catch (err) {
-    console.error('Error in goBack cleanup:', err)
-  }
-  
-  console.log('=== Cleanup completed ===')
+  console.log('=== goBack called - clearing local state ===')
   
   // Clear localStorage
   localStorage.removeItem('gameCode')
