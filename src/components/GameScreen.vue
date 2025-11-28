@@ -397,6 +397,22 @@ async function newRound() {
 
     if (error) throw error
 
+    // Save round history for statistics
+    try {
+      await supabase
+        .from('round_history')
+        .insert({
+          session_id: sessionCode.value,
+          round_number: newRoundNumber,
+          word: round.word,
+          impostor_ids: round.impostorIds,
+          first_player_id: round.firstPlayerId,
+        })
+    } catch (historyErr) {
+      // Don't block the game if history fails to save
+      console.warn('Failed to save round history:', historyErr)
+    }
+
     // Reload game state
     await loadGameState()
   } catch (err) {
