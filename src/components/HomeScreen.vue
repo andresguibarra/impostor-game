@@ -77,7 +77,7 @@ async function createSession() {
     localStorage.setItem('playerName', playerName)
     localStorage.setItem('isHost', 'true')
     
-    router.push(`/host/${code}`)
+    router.push(`/lobby/${code}`)
   } catch (err: any) {
     error.value = err.message || 'Error al crear sesión'
     console.error('Error creating session:', err)
