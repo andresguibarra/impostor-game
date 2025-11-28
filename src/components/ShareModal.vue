@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { X, Send } from 'lucide-vue-next'
+import { onMounted, onUnmounted, watch } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   show: boolean
   sessionCode: string
   qrCode: string
@@ -11,6 +12,32 @@ const emit = defineEmits<{
   close: []
   share: []
 }>()
+
+// Handle escape key to close modal
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.show) {
+    emit('close')
+  }
+}
+
+// Add/remove event listener based on modal visibility
+watch(() => props.show, (isVisible) => {
+  if (isVisible) {
+    document.addEventListener('keydown', handleEscape)
+  } else {
+    document.removeEventListener('keydown', handleEscape)
+  }
+})
+
+onMounted(() => {
+  if (props.show) {
+    document.addEventListener('keydown', handleEscape)
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <template>
