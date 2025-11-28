@@ -11,6 +11,8 @@
     "preview": "vite preview --mode prod",
     "preview:dev": "vite preview --mode dev",
     "deploy": "yarn build && firebase deploy",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
     "db:migrate": "node scripts/migrate.js"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "^24.6.0",
     "@types/qrcode": "^1.5.6",

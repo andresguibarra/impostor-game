@@ -332,29 +332,29 @@ async function updateImpostorCount(): Promise<boolean> {
       <div class="text-center mb-6">
         <div class="flex mb-4 justify-center items-center gap-3">
           <Gamepad2 :size="32" class="text-orange-500" />
-          <h2 class="text-3xl font-black impostor-title">
+          <h2 data-automation-id="host-lobby-title" class="text-3xl font-black impostor-title">
             Creando Partida
           </h2>
         </div>
         
         <!-- Session Code and Players Cards Side by Side -->
         <div class="flex justify-between items-stretch mb-3 gap-3">
-          <div @click="openShareModal"
+          <div @click="openShareModal" data-automation-id="session-card"
             class="flex-1 bg-gradient-to-br from-purple-600/90 to-fuchsia-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
             <span class="text-xs font-bold text-white/80 flex items-center gap-1">
               <MapPin :size="14" /> SESIÓN
             </span>
-            <p class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
+            <p data-automation-id="session-code" class="text-lg font-black text-white tracking-wider">{{ sessionCode }}</p>
             <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
               <MousePointerClick :size="12" /> Compartir
             </p>
           </div>
-          <div @click="openPlayerListModal"
+          <div @click="openPlayerListModal" data-automation-id="players-card"
             class="flex-1 bg-gradient-to-br from-cyan-600/90 to-blue-600/90 backdrop-blur-md rounded-xl p-3 border-2 border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer hover:scale-105 transition-transform active:scale-95 flex flex-col justify-center items-center text-center">
             <span class="text-xs font-bold text-white/80 flex items-center gap-1">
               <Users :size="14" /> JUGADORES
             </span>
-            <p class="text-lg font-black text-white">{{ players.length }}</p>
+            <p data-automation-id="player-count" class="text-lg font-black text-white">{{ players.length }}</p>
             <p class="text-xs text-white/60 mt-1 flex items-center gap-1">
               <MousePointerClick :size="12" /> Ver lista
             </p>
@@ -384,7 +384,7 @@ async function updateImpostorCount(): Promise<boolean> {
       </div>
 
       <!-- Warning message if not enough players -->
-      <div v-if="players.length < 2" class="mb-6">
+      <div v-if="players.length < 2" class="mb-6" data-automation-id="min-players-warning">
         <p class="text-sm text-amber-400 font-black flex justify-center items-center bg-slate-800/60 backdrop-blur-md rounded-xl p-4 border-2 border-dashed border-amber-500/50 gap-2">
           <AlertTriangle :size="20" />
           Necesitás al menos 2 jugadores
@@ -394,13 +394,13 @@ async function updateImpostorCount(): Promise<boolean> {
       <!-- Actions -->
       <div class="space-y-3">
         <NeonButton variant="success" :disabled="loading || players.length < 2" @click="startGame"
-          class="w-full">
+          class="w-full" data-automation-id="start-game-button">
           <Rocket v-if="!loading" :size="20" class="inline mr-2" />
           <Loader2 v-else :size="20" class="inline mr-2 animate-spin" />
           {{ loading ? 'INICIANDO...' : '¡INICIAR JUEGO!' }}
         </NeonButton>
 
-        <NeonButton variant="back" @click="goBack" class="w-full">
+        <NeonButton variant="back" @click="goBack" class="w-full" data-automation-id="exit-lobby-button">
           <ArrowLeft :size="20" class="inline mr-2" />
           SALIR
         </NeonButton>
