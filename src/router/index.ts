@@ -82,12 +82,21 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
   
-  // If accessing a game route without saved session, clear localStorage and go home
+  // If accessing a game route without saved session, clear localStorage and handle appropriately
   if ((to.name === 'host' || to.name === 'player' || to.name === 'game') && !savedGameCode) {
     localStorage.removeItem('gameCode')
     localStorage.removeItem('playerId')
     localStorage.removeItem('playerName')
     localStorage.removeItem('isHost')
+    
+    // If accessing host or player route with a game code, redirect to home with join parameter
+    // This makes the host URL shareable - others can join by visiting the host's URL
+    const gameCodeFromUrl = to.params.gameCode as string | undefined
+    if ((to.name === 'host' || to.name === 'player') && gameCodeFromUrl) {
+      next({ path: '/', query: { join: gameCodeFromUrl } })
+      return
+    }
+    
     next('/')
     return
   }
