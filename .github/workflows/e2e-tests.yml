@@ -90,23 +90,31 @@ jobs:
               return;
             }
             
-            // Create comment body
-            let body = '## ❌ E2E Tests Failed\n\n';
-            body += 'The following screenshots were captured during test failures:\n\n';
-            body += `📦 **${screenshots.length} screenshot(s)** have been uploaded as artifacts.\n\n`;
-            body += 'To view them:\n';
-            body += '1. Go to the [Actions tab](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')\n';
-            body += '2. Download the `test-screenshots` artifact\n\n';
-            body += '### Failed test screenshots:\n';
+            // Get artifact URL
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             
+            // Create comment body with embedded images (using workflow artifact)
+            let body = '## ❌ E2E Tests Failed\n\n';
+            body += `📦 **${screenshots.length} screenshot(s)** captured during test failures.\n\n`;
+            body += `🔗 **[View full test results and download screenshots](${artifactUrl})**\n\n`;
+            body += '### Screenshot previews:\n\n';
+            body += '_Note: Download the `test-screenshots` artifact from the Actions run to view full-resolution images._\n\n';
+            
+            // List screenshot file names with their test context
             for (const screenshot of screenshots.slice(0, 10)) {
               const relativePath = screenshot.replace(testResultsDir + '/', '');
-              body += `- \`${relativePath}\`\n`;
+              // Extract test name from path
+              const testName = relativePath.split('/')[0] || relativePath;
+              body += `📸 **${testName}**\n`;
+              body += `   - File: \`${relativePath}\`\n\n`;
             }
             
             if (screenshots.length > 10) {
-              body += `\n_...and ${screenshots.length - 10} more screenshot(s)_\n`;
+              body += `\n_...and ${screenshots.length - 10} more screenshot(s) in the artifact_\n`;
             }
+            
+            body += '\n---\n';
+            body += `_Workflow run: [#${context.runId}](${artifactUrl})_`;
             
             // Post comment on PR
             if (context.payload.pull_request) {
