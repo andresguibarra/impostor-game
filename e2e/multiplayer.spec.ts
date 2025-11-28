@@ -1,4 +1,4 @@
-import { test, expect, type BrowserContext, type Page } from '@playwright/test'
+import { test, expect, type BrowserContext, type Page, type Browser } from '@playwright/test'
 
 /**
  * Integration tests for the Impostor Game multiplayer functionality
@@ -9,14 +9,8 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  */
 
 // Helper to create a new browser context (simulates a new player/browser)
-async function createPlayerContext(browser: any): Promise<BrowserContext> {
+async function createPlayerContext(browser: Browser): Promise<BrowserContext> {
   return browser.newContext()
-}
-
-// Helper to wait for element and get its text
-async function getElementText(page: Page, selector: string): Promise<string> {
-  const element = await page.waitForSelector(selector, { timeout: 10000 })
-  return element?.textContent() || ''
 }
 
 // Helper to check if Supabase is configured
@@ -29,26 +23,31 @@ async function isSupabaseConfigured(page: Page): Promise<boolean> {
 
 // Helper to wait for successful session creation (no error visible)
 async function waitForSessionCreated(page: Page, timeout = 15000): Promise<boolean> {
-  const startTime = Date.now()
-  
-  while (Date.now() - startTime < timeout) {
-    // Check if we navigated to lobby
+  try {
+    // Use Promise.race to wait for either successful navigation or an error
+    const result = await Promise.race([
+      // Success case: URL contains /lobby/
+      page.waitForURL(/\/lobby\/\d+/, { timeout }).then(() => 'success'),
+      // Error case: Error message appears
+      page.locator('text=Error al crear sesión').waitFor({ state: 'visible', timeout }).then(() => 'error'),
+      // Error case: Fetch error appears
+      page.locator('text=Failed to fetch').waitFor({ state: 'visible', timeout }).then(() => 'error')
+    ])
+    
+    return result === 'success'
+  } catch {
+    // Timeout or other error - check current state
     if (page.url().includes('/lobby/')) {
       return true
     }
-    
-    // Check for error
-    const errorVisible = await page.locator('text=Error al crear sesión').isVisible({ timeout: 500 }).catch(() => false)
-    const fetchError = await page.locator('text=Failed to fetch').isVisible({ timeout: 500 }).catch(() => false)
-    
-    if (errorVisible || fetchError) {
-      return false
-    }
-    
-    await page.waitForTimeout(500)
+    return false
   }
-  
-  return false
+}
+
+// Helper to extract game code from URL with validation
+function extractGameCodeFromUrl(url: string): string | null {
+  const match = url.match(/\/lobby\/(\d+)/)
+  return match ? match[1] : null
 }
 
 test.describe('Multiplayer Game Flow', () => {
@@ -102,11 +101,12 @@ test.describe('Multiplayer Game Flow', () => {
       return
     }
     
-    // Extract game code from URL
-    const url = hostPage.url()
-    const match = url.match(/\/lobby\/(\d+)/)
-    expect(match).toBeTruthy()
-    gameCode = match![1]
+    // Extract game code from URL with validation
+    const extractedCode = extractGameCodeFromUrl(hostPage.url())
+    if (!extractedCode) {
+      throw new Error('Failed to extract game code from URL')
+    }
+    gameCode = extractedCode
     
     // Verify we're in the host lobby
     await expect(hostPage.locator('text=Creando Partida')).toBeVisible()
@@ -380,10 +380,11 @@ test.describe('Session Code Join Flow', () => {
         return
       }
       
-      // Extract game code
-      const url = hostPage.url()
-      const match = url.match(/\/lobby\/(\d+)/)
-      const gameCode = match![1]
+      // Extract game code with validation
+      const gameCode = extractGameCodeFromUrl(hostPage.url())
+      if (!gameCode) {
+        throw new Error('Failed to extract game code from URL')
+      }
 
       // Player goes to home and manually enters the code
       await playerPage.goto('/')
