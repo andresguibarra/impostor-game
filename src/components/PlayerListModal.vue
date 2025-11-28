@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X, Users } from 'lucide-vue-next'
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
 import type { Player } from '../lib/supabase'
 import PlayerList from './PlayerList.vue'
 
@@ -29,12 +29,6 @@ watch(() => props.show, (isVisible) => {
     document.addEventListener('keydown', handleEscape)
   } else {
     document.removeEventListener('keydown', handleEscape)
-  }
-})
-
-onMounted(() => {
-  if (props.show) {
-    document.addEventListener('keydown', handleEscape)
   }
 })
 

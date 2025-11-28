@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { X, Send } from 'lucide-vue-next'
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
 
 const props = defineProps<{
   show: boolean
@@ -26,12 +26,6 @@ watch(() => props.show, (isVisible) => {
     document.addEventListener('keydown', handleEscape)
   } else {
     document.removeEventListener('keydown', handleEscape)
-  }
-})
-
-onMounted(() => {
-  if (props.show) {
-    document.addEventListener('keydown', handleEscape)
   }
 })
 
