@@ -158,6 +158,7 @@ onMounted(async () => {
         localStorage.removeItem('playerId')
         localStorage.removeItem('playerName')
         localStorage.removeItem('isHost')
+        localStorage.removeItem(`lastSeenRound_${sessionCode.value}`)
         router.push('/')
       }
     )
@@ -325,6 +326,7 @@ async function loadGameState() {
       localStorage.removeItem('playerId')
       localStorage.removeItem('playerName')
       localStorage.removeItem('isHost')
+      localStorage.removeItem(`lastSeenRound_${sessionCode.value}`)
       router.push('/')
       return
     }
@@ -336,16 +338,18 @@ async function loadGameState() {
     localStorage.removeItem('playerId')
     localStorage.removeItem('playerName')
     localStorage.removeItem('isHost')
+    localStorage.removeItem(`lastSeenRound_${sessionCode.value}`)
     router.push('/')
     return
   }
 
-  // Detect if it's a new round by comparing round numbers
-  // Also trigger countdown when this is the first load and game has already started (first round)
-  const isNewRound = session.value && data.round_number > session.value.round_number
-  // First load is either when session is null OR when the previous session had no word (first round just started)
-  const hasNoPreviousWord = !session.value?.current_word
-  const isFirstLoad = data.current_word && data.impostors && hasNoPreviousWord
+  // Get the last seen round number from localStorage
+  const lastSeenRoundKey = `lastSeenRound_${sessionCode.value}`
+  const lastSeenRound = parseInt(localStorage.getItem(lastSeenRoundKey) || '0', 10)
+
+  // Detect if it's a new round by comparing with the last seen round number
+  // This works across page refreshes because we track in localStorage
+  const isNewRound = data.round_number > lastSeenRound && data.current_word && data.impostors
 
   session.value = data
 
@@ -355,10 +359,12 @@ async function loadGameState() {
     isImpostor.value = impostorIds.includes(playerId.value)
     currentWord.value = getWordForPlayer(playerId.value, data.current_word, impostorIds)
 
-    // Hide word and show countdown if it's a new round or first load with game started
-    if (isNewRound || isFirstLoad) {
+    // Hide word and show countdown only if it's a genuinely new round
+    if (isNewRound) {
       wordRevealed.value = false
       await startCountdown()
+      // Update the last seen round number in localStorage
+      localStorage.setItem(lastSeenRoundKey, data.round_number.toString())
     }
   }
 }
@@ -457,6 +463,7 @@ async function goBack() {
   localStorage.removeItem('playerId')
   localStorage.removeItem('playerName')
   localStorage.removeItem('isHost')
+  localStorage.removeItem(`lastSeenRound_${sessionCode.value}`)
   
   router.push('/')
 }
