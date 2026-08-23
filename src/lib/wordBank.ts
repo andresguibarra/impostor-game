@@ -10,10 +10,11 @@ export const wordBank = [
   "Bariloche",
   "Tigre",
   "La Plata",
+  "Obelisco",
+  "Glaciar Perito Moreno",
 
   // Gastronomía
   "Asado",
-  "Mate",
   "Empanada",
   "Chimichurri",
   "Choripán",
@@ -29,14 +30,16 @@ export const wordBank = [
   "Helado",
   "Cerveza",
   "Malbec",
+  "Pancho",
+  "Churros",
 
   // Cultura y Tradiciones
   "Gaucho",
   "Poncho",
   "Boina",
-  "Zamba",
   "Chacarera",
   "Tango",
+  "Cuarteto",
   "Milonga",
   "Guitarra",
   "Bombo",
@@ -82,6 +85,7 @@ export const wordBank = [
   "Susana Giménez",
   "Tini",
   "Ricardo Darín",
+  "Mafalda",
 
   // Deportes y Juegos
   "Truco",
@@ -105,18 +109,14 @@ export const wordBank = [
   "Parrilla",
   "Heladera",
   "Ventilador",
-  "Mate",
-  "Bombilla",
+  "Sifón",
 
   // Expresiones y Costumbres
   "Fiesta",
   "Amigo",
   "Siesta",
-  "Sobremesa",
   "Birra",
   "Picada",
-  "Chamuyo",
-  "Che",
   "Boliche",
   "Barrio",
   "Merienda",
@@ -125,9 +125,7 @@ export const wordBank = [
   // Comidas Regionales
   "Humita",
   "Tamales",
-  "Carbonada",
   "Puchero",
-  "Locro",
   "Choclo",
   "Ñoquis",
   "Pastelitos",
@@ -136,12 +134,8 @@ export const wordBank = [
 
   // Bebidas
   "Vino",
-  "Fernet",
-  "Cerveza",
-  "Coca",
   "Agua",
   "Café",
-  "Té",
   "Jugo",
 
   // Trabajo y oficios
@@ -171,5 +165,5 @@ export const wordBank = [
 
 export function getRandomWord(): string {
   const index = Math.floor(Math.random() * wordBank.length)
-  return wordBank[index] ?? 'Mate'
+  return wordBank[index] ?? 'Asado'
 }
