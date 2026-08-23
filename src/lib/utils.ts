@@ -15,29 +15,46 @@ const names = [
 const suffixes = [
   'Bailarín', 'Copero', 'Tanguero', 'Asador', 'Hincha', 'Piola',
   'Criollo', 'Porteño', 'Cordobés', 'Salteño', 'Tucumano',
-  'Chamigo', 'Pariente', 'Vecino', 'Compadre', 'Amigo'
+  'Chamigo', 'Pariente', 'Vecino', 'Compadre', 'Amigo', 'En Pausa',
+  'A Pedal', 'De Cartón', 'Sin Pila', 'Fantasma', 'Manija', 'ATR',
+  'Termo', 'Mufa', 'Fisura', 'Plaga'
+]
+
+const specialNames = [
+  "El Viejo Zorro",
+  "El Mateo 13:9",
+  "TV de los 90",
+  "El Escombro"
 ]
 
 export function generateFunnyName(): string {
+  const totalOptions = names.length + specialNames.length
+  const randomIndex = Math.floor(Math.random() * totalOptions)
+
+  // Si toca una de las excepciones, la devolvemos tal cual
+  if (randomIndex >= names.length) {
+    return specialNames[randomIndex - names.length] ?? "El Escombro"
+  }
+
   const usePrefix = Math.random() > 0.5
   const useSuffix = Math.random() > 0.5
-  
-  let name = names[Math.floor(Math.random() * names.length)] ?? 'Che'
-  
+
+  let name = names[randomIndex] ?? 'Che'
+
   if (usePrefix) {
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
     if (prefix) {
       name = `${prefix} ${name}`
     }
   }
-  
+
   if (useSuffix) {
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
     if (suffix) {
       name = `${name} ${suffix}`
     }
   }
-  
+
   return name
 }
 
