@@ -23,6 +23,18 @@ export function startNewRound(players: Player[], impostorCount: number): GameRou
   }
 }
 
+export function startBabyRound(players: Player[]): GameRound {
+  const word = "¡Andrés y Daniela van a tener un bebé! 👶"
+  const impostorIds: string[] = []
+  const firstPlayerId = selectFirstPlayer(players, impostorIds)
+  
+  return {
+    word,
+    impostorIds,
+    firstPlayerId,
+  }
+}
+
 export function selectFirstPlayer(players: Player[], impostorIds: string[]): string {
   if (players.length === 0) return ''
   
