@@ -1,175 +1,178 @@
-export const wordBank = [
-  // Lugares y Geografía
-  "Buenos Aires",
-  "Córdoba",
-  "Rosario",
-  "Mar del Plata",
-  "Patagonia",
-  "Iguazú",
-  "Mendoza",
-  "Bariloche",
-  "Tigre",
-  "La Plata",
+export const categorizedWords = {
+  "Lugares y Geografía": [
+    "Buenos Aires",
+    "Córdoba",
+    "Rosario",
+    "Mar del Plata",
+    "Patagonia",
+    "Iguazú",
+    "Mendoza",
+    "Bariloche",
+    "Tigre",
+    "La Plata",
+    "Obelisco",
+    "Glaciar Perito Moreno"
+  ],
+  "Gastronomía": [
+    "Asado",
+    "Empanada",
+    "Chimichurri",
+    "Choripán",
+    "Dulce de leche",
+    "Alfajor",
+    "Milanesa",
+    "Provoleta",
+    "Facturas",
+    "Medialunas",
+    "Pizza",
+    "Helado",
+    "Malbec",
+    "Pancho",
+    "Churros"
+  ],
+  "Cultura y Tradiciones": [
+    "Gaucho",
+    "Poncho",
+    "Boina",
+    "Chacarera",
+    "Tango",
+    "Cuarteto",
+    "Milonga",
+    "Guitarra",
+    "Bombo",
+    "Bandoneón",
+    "Peña",
+    "Carnaval",
+    "Mateada",
+    "Fogón"
+  ],
+  "Animales": [
+    "Carpincho",
+    "Hornero",
+    "Puma",
+    "Yacaré",
+    "Cóndor",
+    "Pingüino",
+    "Ballena",
+    "Lobo marino",
+    "Caballo",
+    "Perro"
+  ],
+  "Plantas y Naturaleza": [
+    "Ceibo",
+    "Ombú",
+    "Yerba",
+    "Cactus",
+    "Cardón",
+    "Campo",
+    "Río",
+    "Playa",
+    "Montaña",
+    "Lago"
+  ],
+  "Personajes y Cultura Popular": [
+    "Maradona",
+    "Messi",
+    "Evita",
+    "Gardel",
+    "Borges",
+    "Cortázar",
+    "Charly García",
+    "Fito Páez",
+    "Susana Giménez",
+    "Tini",
+    "Ricardo Darín",
+    "Mafalda"
+  ],
+  "Deportes y Juegos": [
+    "Truco",
+    "Pádel",
+    "Fútbol",
+    "Bochas",
+    "Polo",
+    "Tenis",
+    "Ping pong",
+    "Metegol",
+    "Karting"
+  ],
+  "Objetos y Vida Cotidiana": [
+    "Birome",
+    "Celular",
+    "Colectivo",
+    "Subte",
+    "Moto",
+    "Remera",
+    "Ojota",
+    "Parrilla",
+    "Heladera",
+    "Ventilador",
+    "Sifón"
+  ],
+  "Expresiones y Costumbres": [
+    "Fiesta",
+    "Amigo",
+    "Siesta",
+    "Birra",
+    "Picada",
+    "Boliche",
+    "Barrio",
+    "Merienda",
+    "Vacaciones"
+  ],
+  "Comidas Regionales": [
+    "Humita",
+    "Tamales",
+    "Puchero",
+    "Choclo",
+    "Ñoquis",
+    "Pastelitos",
+    "Panqueque",
+    "Tarta"
+  ],
+  "Bebidas": [
+    "Vino",
+    "Agua",
+    "Café",
+    "Jugo"
+  ],
+  "Trabajo y Oficios": [
+    "Panadero",
+    "Carpintero",
+    "Docente",
+    "Mecánico",
+    "Electricista",
+    "Repartidor",
+    "Mozo",
+    "Carnicero",
+    "Verdulero",
+    "Taxista"
+  ],
+  "Arquitectura y Lugares": [
+    "Casa",
+    "Quincho",
+    "Galería",
+    "Patio",
+    "Plaza",
+    "Balcón",
+    "Edificio",
+    "Kiosco",
+    "Escuela",
+    "Cancha"
+  ]
+};
 
-  // Gastronomía
-  "Asado",
-  "Mate",
-  "Empanada",
-  "Chimichurri",
-  "Choripán",
-  "Dulce de leche",
-  "Alfajor",
-  "Locro",
-  "Milanesa",
-  "Provoleta",
-  "Facturas",
-  "Medialunas",
-  "Fernet",
-  "Pizza",
-  "Helado",
-  "Cerveza",
-  "Malbec",
-
-  // Cultura y Tradiciones
-  "Gaucho",
-  "Poncho",
-  "Boina",
-  "Zamba",
-  "Chacarera",
-  "Tango",
-  "Milonga",
-  "Guitarra",
-  "Bombo",
-  "Bandoneón",
-  "Peña",
-  "Carnaval",
-  "Mateada",
-  "Fogón",
-
-  // Animales
-  "Carpincho",
-  "Hornero",
-  "Puma",
-  "Yacaré",
-  "Cóndor",
-  "Pingüino",
-  "Ballena",
-  "Lobo marino",
-  "Caballo",
-  "Perro",
-
-  // Plantas y Naturaleza
-  "Ceibo",
-  "Ombú",
-  "Yerba",
-  "Cactus",
-  "Cardón",
-  "Campo",
-  "Río",
-  "Playa",
-  "Montaña",
-  "Lago",
-
-  // Personajes y Cultura Popular
-  "Maradona",
-  "Messi",
-  "Evita",
-  "Gardel",
-  "Borges",
-  "Cortázar",
-  "Charly García",
-  "Fito Páez",
-  "Susana Giménez",
-  "Tini",
-  "Ricardo Darín",
-
-  // Deportes y Juegos
-  "Truco",
-  "Pádel",
-  "Fútbol",
-  "Bochas",
-  "Polo",
-  "Tenis",
-  "Ping pong",
-  "Metegol",
-  "Karting",
-
-  // Objetos y Vida Cotidiana
-  "Birome",
-  "Celular",
-  "Colectivo",
-  "Subte",
-  "Moto",
-  "Remera",
-  "Ojota",
-  "Parrilla",
-  "Heladera",
-  "Ventilador",
-  "Mate",
-  "Bombilla",
-
-  // Expresiones y Costumbres
-  "Fiesta",
-  "Amigo",
-  "Siesta",
-  "Sobremesa",
-  "Birra",
-  "Picada",
-  "Chamuyo",
-  "Che",
-  "Boliche",
-  "Barrio",
-  "Merienda",
-  "Vacaciones",
-
-  // Comidas Regionales
-  "Humita",
-  "Tamales",
-  "Carbonada",
-  "Puchero",
-  "Locro",
-  "Choclo",
-  "Ñoquis",
-  "Pastelitos",
-  "Panqueque",
-  "Tarta",
-
-  // Bebidas
-  "Vino",
-  "Fernet",
-  "Cerveza",
-  "Coca",
-  "Agua",
-  "Café",
-  "Té",
-  "Jugo",
-
-  // Trabajo y oficios
-  "Panadero",
-  "Carpintero",
-  "Docente",
-  "Mecánico",
-  "Electricista",
-  "Repartidor",
-  "Mozo",
-  "Carnicero",
-  "Verdulero",
-  "Taxista",
-
-  // Arquitectura y Lugares
-  "Casa",
-  "Quincho",
-  "Galería",
-  "Patio",
-  "Plaza",
-  "Balcón",
-  "Edificio",
-  "Kiosco",
-  "Escuela",
-  "Cancha",
-]
+export const wordBank = Object.values(categorizedWords).flat();
 
 export function getRandomWord(): string {
   const index = Math.floor(Math.random() * wordBank.length)
-  return wordBank[index] ?? 'Mate'
+  return wordBank[index] ?? 'Asado'
+}
+
+export function getCategoryForWord(targetWord: string): string {
+  for (const [category, words] of Object.entries(categorizedWords)) {
+    if (words.includes(targetWord)) {
+      return category;
+    }
+  }
+  return "General";
 }
