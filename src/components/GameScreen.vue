@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
 import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
+import { getCategoryForWord } from '../lib/wordBank'
 import { UI_STRINGS } from '../lib/constants'
 import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users, Play } from 'lucide-vue-next'
 import ShareModal from './ShareModal.vue'
@@ -500,11 +501,17 @@ async function goBack() {
                 <FileText v-else :size="48" class="animate-pulse" />
               </div>
               <p data-automation-id="word-label" class="text-base font-bold mb-2 opacity-90">
-                {{ isImpostor ? '' : 'TU PALABRA:' }}
+                {{ isImpostor ? 'TU ROL:' : 'TU PALABRA:' }}
               </p>
               <p data-automation-id="word-content" class="text-4xl md:text-5xl font-black tracking-wide [text-shadow:0_0_20px_rgba(255,255,255,0.5)]">
                 {{ currentWord }}
               </p>
+              
+              <div v-if="isImpostor" class="mt-6 bg-black/40 rounded-xl p-4 border-2 border-orange-400/50 shadow-inner">
+                <p class="text-xs text-orange-200 font-bold mb-1 opacity-80 uppercase tracking-widest">Pista de Categoría</p>
+                <p class="text-2xl font-black text-white [text-shadow:0_0_10px_rgba(255,255,255,0.3)]">{{ getCategoryForWord(session?.current_word || '') }}</p>
+              </div>
+
               <div class="mt-6 pt-4 border-t-2 border-white/20">
                 <p class="text-xs font-semibold text-white/70 flex items-center justify-center gap-1">
                   <MousePointerClick :size="16" />
