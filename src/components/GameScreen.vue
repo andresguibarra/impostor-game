@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase, type Player, type Session } from '../lib/supabase'
-import { startNewRound, getWordForPlayer } from '../lib/gameLogic'
+import { startNewRound, startBabyRound, getWordForPlayer } from '../lib/gameLogic'
 import { getCategoryForWord } from '../lib/wordBank'
 import { UI_STRINGS } from '../lib/constants'
 import { MapPin, Gamepad2, MousePointerClick, Loader2, Eye, RefreshCw, ArrowLeft, Sparkles, Drama, FileText, Search, MessageCircle, Users, Play } from 'lucide-vue-next'
@@ -15,6 +15,12 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const route = useRoute()
+
+// Check for baby announcement query param
+const isBabyMode = computed(() => {
+  return route.query.bebe === '1' || localStorage.getItem('babyMode') === '1'
+})
 
 const players = ref<Player[]>([])
 const session = ref<Session | null>(null)
@@ -66,6 +72,11 @@ onMounted(async () => {
   if (!sessionCode.value) {
     router.push('/')
     return
+  }
+
+  // Save baby mode to localStorage if present in query so it persists across refreshes
+  if (route.query.bebe === '1') {
+    localStorage.setItem('babyMode', '1')
   }
 
   // Check if player still exists in database (might have been removed on refresh)
@@ -380,6 +391,39 @@ async function newRound() {
   }
 }
 
+async function startBabyAnnouncement() {
+  if (!canStartNewRound.value) return
+
+  loading.value = true
+  wordRevealed.value = false
+
+  try {
+    const round = startBabyRound(players.value)
+
+    const currentRoundNumber = session.value?.round_number || 0
+    const newRoundNumber = isFirstRound.value ? 1 : currentRoundNumber + 1
+
+    const { error } = await supabase
+      .from('sessions')
+      .update({
+        current_word: round.word,
+        impostors: round.impostorIds,
+        round_number: newRoundNumber,
+        first_player_id: round.firstPlayerId,
+      })
+      .eq('code', sessionCode.value)
+
+    if (error) throw error
+
+    await loadGameState()
+  } catch (err) {
+    console.error('Error starting baby round:', err)
+    alert(UI_STRINGS.ERRORS.NEW_ROUND)
+  } finally {
+    loading.value = false
+  }
+}
+
 function revealWord() {
   wordRevealed.value = true
 }
@@ -401,6 +445,7 @@ async function goBack() {
   localStorage.removeItem('playerName')
   localStorage.removeItem('isHost')
   localStorage.removeItem(`lastSeenRound_${sessionCode.value}`)
+  localStorage.removeItem('babyMode')
   
   router.push('/')
 }
@@ -553,6 +598,13 @@ async function goBack() {
 
       <!-- Actions with vibrant buttons -->
       <div class="space-y-3">
+        <!-- Secret Baby Announcement Button -->
+        <NeonButton v-if="isHost && isBabyMode" @click="startBabyAnnouncement" :disabled="!canStartNewRound" variant="primary" class="w-full bg-gradient-to-r from-pink-500 to-blue-500 border-pink-400">
+          <Loader2 v-if="loading" :size="24" class="animate-spin mr-2" />
+          <Sparkles v-else :size="24" class="mr-2" />
+          Iniciar ronda de anunciar bebé
+        </NeonButton>
+
         <NeonButton v-if="isHost" @click="newRound" :disabled="!canStartNewRound" variant="success" class="w-full" data-automation-id="new-round-button">
           <Loader2 v-if="loading" :size="24" class="animate-spin mr-2" />
           <RefreshCw v-else :size="24" class="mr-2" />
